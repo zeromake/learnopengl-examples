@@ -24,8 +24,19 @@ add_rules("sokol_shader")
 
 add_requires("stb", "sokol", "handmade_math")
 
-add_defines("SOKOL_D3D11")
+if is_plat("windows") then
+    add_cxflags("/utf-8")
+elseif is_plat("mingw") then
+    add_ldflags("-static")
+end
 
+if is_plat("windows", "mingw") then
+    add_defines("SOKOL_D3D11")
+elseif is_plat("macosx") then
+    add_defines("SOKOL_METAL")
+else
+	add_defines("SOKOL_GLCORE33")
+end
 
 local function split(input, delimiter)
     if (delimiter == "") then return false end
