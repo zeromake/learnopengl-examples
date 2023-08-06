@@ -72,12 +72,12 @@ static void init(void) {
 
     state.bind.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(vertices),
-        .content = vertices,
+        .data = SG_RANGE(vertices),
         .label = "vertices-cube"
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(simple_shader_desc());
+    sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
 
     /* create a pipeline object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
@@ -102,7 +102,7 @@ static void init(void) {
 
     /* a pass action to clear framebuffer */
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action=SG_ACTION_CLEAR, .val={0.1f, 0.1f, 0.1f, 1.0f} }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
     sg_image img_id_front = sg_alloc_image();
@@ -184,7 +184,8 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .event_cb = event,
         .width = 800,
         .height = 600,
-        .gl_force_gles2 = true,
+        .high_dpi = true,
+        
         .window_title = "Front Facing (LearnOpenGL)",
     };
 }

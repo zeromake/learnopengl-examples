@@ -87,7 +87,9 @@ in INTERFACE {
 
 out vec4 frag_color;
 
-uniform samplerCube depth_map;
+uniform textureCube _depth_map;
+uniform sampler depth_map_smp;
+#define depth_map samplerCube(_depth_map, depth_map_smp)
 
 uniform fs_params_shadows {
     vec3 light_pos;

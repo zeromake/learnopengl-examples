@@ -1,22 +1,22 @@
 @ctype mat4 hmm_mat4
 
 @block data
-float getVal(uint index, sampler2D texture) {
+float getVal(uint index, texture2D tex, sampler smp) {
     float x = index % 1024;
     float y = index / 1024;
-    return texelFetch(texture, ivec2(x, y), 0).r;
+    return texelFetch(sampler2D(tex, smp), ivec2(x, y), 0).r;
 }
 
-vec2 getVec2(uint index, sampler2D texture) {
-    float x = getVal(index, texture);
-    float y = getVal(index + 1, texture);
+vec2 getVec2(uint index, texture2D tex, sampler smp) {
+    float x = getVal(index, tex, smp);
+    float y = getVal(index + 1, tex, smp);
     return vec2(x, y);
 }
 
-vec3 getVec3(uint index, sampler2D texture) {
-    float x = getVal(index, texture);
-    float y = getVal(index + 1, texture);
-    float z = getVal(index + 2, texture);
+vec3 getVec3(uint index, texture2D tex, sampler smp) {
+    float x = getVal(index, tex, smp);
+    float y = getVal(index + 1, tex, smp);
+    float z = getVal(index + 2, tex, smp);
     return vec3(x, y, z);
 }
 @end
@@ -32,12 +32,14 @@ uniform vs_params {
     mat4 projection;
 };
 
-uniform sampler2D vertex_texture;
+uniform texture2D _vertex_texture;
+uniform sampler vertex_texture_smp;
+#define vertex_texture sampler2D(_vertex_texture, vertex_texture_smp)
 
 void main() {
-    uint index = gl_VertexID * 5;
-    vec4 pos = vec4(getVec3(index, vertex_texture), 1.0);
-    tex_coords = getVec2(index + 3, vertex_texture);
+    uint index = gl_VertexIndex * 5;
+    vec4 pos = vec4(getVec3(index, _vertex_texture, vertex_texture_smp), 1.0);
+    tex_coords = getVec2(index + 3, _vertex_texture, vertex_texture_smp);
     gl_Position = projection * view * model * pos;
     
 }
@@ -47,7 +49,9 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-uniform sampler2D diffuse_texture;
+uniform texture2D _diffuse_texture;
+uniform sampler diffuse_texture_smp;
+#define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
     frag_color = texture(diffuse_texture, tex_coords);
@@ -64,7 +68,9 @@ uniform vs_params {
     mat4 projection;
 };
 
-uniform sampler2D vertex_texture;
+uniform texture2D _vertex_texture;
+uniform sampler vertex_texture_smp;
+#define vertex_texture sampler2D(_vertex_texture, vertex_texture_smp)
 
 const float MAGNITUDE = 0.2;
 
@@ -75,16 +81,16 @@ vec3 getNormal(vec3 p0, vec3 p1, vec3 p2) {
 }
 
 void main() {
-    uint index = gl_VertexID >> 1;      // divide by 2
+    uint index = gl_VertexIndex >> 1;      // divide by 2
     index = index * 15;
 
-    vec3 p0 = getVec3(index, vertex_texture);
-    vec3 p1 = getVec3(index + 5, vertex_texture);
-    vec3 p2 = getVec3(index + 10, vertex_texture);
+    vec3 p0 = getVec3(index, _vertex_texture, vertex_texture_smp);
+    vec3 p1 = getVec3(index + 5, _vertex_texture, vertex_texture_smp);
+    vec3 p2 = getVec3(index + 10, _vertex_texture, vertex_texture_smp);
 
     vec3 mid = (p0 + p1 + p2) / 3.0;
     vec3 normal = getNormal(p0, p1, p2);
-    vec3 direction = (gl_VertexID % 2) * normal; 
+    vec3 direction = (gl_VertexIndex % 2) * normal; 
 
     vec4 pos = vec4(mid + direction * MAGNITUDE, 1.0);
     gl_Position = projection * view * model * pos;

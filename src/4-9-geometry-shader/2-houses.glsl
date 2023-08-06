@@ -4,14 +4,18 @@
 in float a_dummy;       // add a dummy vertex attribute otherwise sokol complains
 out vec4 color;
 
-uniform sampler2D position_texture;
-uniform sampler2D color_texture;
+uniform texture2D _position_texture;
+uniform sampler position_texture_smp;
+#define position_texture sampler2D(_position_texture, position_texture_smp)
+uniform texture2D _color_texture;
+uniform sampler color_texture_smp;
+#define color_texture sampler2D(_color_texture, color_texture_smp)
 
 void main() {
-    uint pos_index = gl_VertexID / 9;
+    uint pos_index = gl_VertexIndex / 9;
     vec4 pos = texelFetch(position_texture, ivec2(pos_index, 0), 0);
 
-    uint index = gl_VertexID % 9;
+    uint index = gl_VertexIndex % 9;
     vec2 offset = index == 0 ? vec2(-0.2, 0.2) : vec2(0.0, 0.0);
     offset = index == 1 ? vec2(0.2, -0.2) : offset;
     offset = index == 2 ? vec2(-0.2, -0.2) : offset;

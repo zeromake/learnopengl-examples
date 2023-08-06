@@ -24,8 +24,12 @@ in vec2 TexCoords;
 
 out vec4 FragColor;
 
-uniform sampler2D front_texture;
-uniform sampler2D back_texture;
+uniform texture2D _front_texture;
+uniform sampler front_texture_smp;
+#define front_texture sampler2D(_front_texture, front_texture_smp)
+uniform texture2D _back_texture;
+uniform sampler back_texture_smp;
+#define back_texture sampler2D(_back_texture, back_texture_smp)
 
 void main() {
     if(gl_FrontFacing)

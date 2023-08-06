@@ -3,7 +3,7 @@
 
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "../libs/hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "../libs/fast_obj/lopgl_fast_obj.h"
 
 /*
@@ -18,8 +18,8 @@
 */
 
 typedef struct lopgl_orbital_cam_desc {
-    hmm_vec3 target; 
-    hmm_vec3 up;
+    HMM_Vec3 target; 
+    HMM_Vec3 up;
     float pitch;
     float heading;
     float distance;
@@ -34,8 +34,8 @@ typedef struct lopgl_orbital_cam_desc {
 } lopgl_orbital_cam_desc_t;
 
 typedef struct lopgl_fp_cam_desc {
-    hmm_vec3 position;
-    hmm_vec3 world_up;
+    HMM_Vec3 position;
+    HMM_Vec3 world_up;
     float yaw;
     float pitch;
     float zoom;
@@ -116,13 +116,13 @@ void lopgl_set_orbital_cam(lopgl_orbital_cam_desc_t* desc);
 
 void lopgl_set_fp_cam(lopgl_fp_cam_desc_t* desc);
 
-hmm_mat4 lopgl_view_matrix();
+HMM_Mat4 lopgl_view_matrix();
 
 float lopgl_fov();
 
-hmm_vec3 lopgl_camera_position();
+HMM_Vec3 lopgl_camera_position();
 
-hmm_vec3 lopgl_camera_direction();
+HMM_Vec3 lopgl_camera_direction();
 
 void lopgl_handle_input(const sapp_event* e);
 
@@ -143,7 +143,7 @@ void lopgl_load_obj(const lopgl_obj_request_t* request);
 #include "sokol_time.h"
 
 #define SOKOL_DEBUGTEXT_IMPL
-#include "sokol_debugtext.h"
+#include "util/sokol_debugtext.h"
 #undef SOKOL_DEBUGTEXT_IMPL
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -151,7 +151,7 @@ void lopgl_load_obj(const lopgl_obj_request_t* request);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
-#include "../libs/stb/stb_image.h"
+#include "stb_image.h"
 #if defined(__clang__)
 #pragma clang diagnostic pop
 #endif
@@ -160,7 +160,7 @@ void lopgl_load_obj(const lopgl_obj_request_t* request);
 
 #define HANDMADE_MATH_IMPLEMENTATION
 #define HANDMADE_MATH_NO_SSE
-#include "../libs/hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #undef HANDMADE_MATH_IMPLEMENTATION
 
 #define FAST_OBJ_IMPLEMENTATION
@@ -173,9 +173,9 @@ void lopgl_load_obj(const lopgl_obj_request_t* request);
 
 struct orbital_cam {
     // camera config
-    hmm_vec3 target;
-    hmm_vec3 up;
-    hmm_vec2 polar;
+    HMM_Vec3 target;
+    HMM_Vec3 up;
+    HMM_Vec2 polar;
     float distance;
     // camera limits
     float min_pitch;
@@ -187,20 +187,20 @@ struct orbital_cam {
 	float zoom_speed;
     bool enable_rotate;
     // internal state
-    hmm_vec3 position;
+    HMM_Vec3 position;
 };
 
 static void update_orbital_cam_vectors(struct orbital_cam* camera);
-hmm_mat4 view_matrix_orbital(struct orbital_cam* camera);
-void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, hmm_vec2 mouse_offset);
+HMM_Mat4 view_matrix_orbital(struct orbital_cam* camera);
+void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, HMM_Vec2 mouse_offset);
 const char* help_orbital();
 
 /*=== FP CAM =======================================================*/
 
 struct fp_cam {
     // camera attributes
-    hmm_vec3 position;
-    hmm_vec3 world_up;
+    HMM_Vec3 position;
+    HMM_Vec3 world_up;
     float yaw;
     float pitch;
     float zoom;
@@ -220,15 +220,15 @@ struct fp_cam {
     bool move_left;
     bool move_right;
     // internal state
-    hmm_vec3 front;
-    hmm_vec3 up;
-    hmm_vec3 right;
+    HMM_Vec3 front;
+    HMM_Vec3 up;
+    HMM_Vec3 right;
 };
 
 static void update_fp_cam_vectors(struct fp_cam* camera);
 // Returns the view matrix calculated using Euler Angles and the LookAt Matrix
-hmm_mat4 view_matrix_fp(struct fp_cam* camera);
-void handle_input_fp(struct fp_cam* camera, const sapp_event* e, hmm_vec2 mouse_offset);
+HMM_Mat4 view_matrix_fp(struct fp_cam* camera);
+void handle_input_fp(struct fp_cam* camera, const sapp_event* e, HMM_Vec2 mouse_offset);
 void update_fp_camera(struct fp_cam* camera, float delta_time);
 const char* help_fp();
 
@@ -251,8 +251,8 @@ typedef struct {
     bool show_help;
     bool hide_ui;
     bool first_mouse;
-    hmm_vec2 last_mouse;
-    hmm_vec2 last_touch[SAPP_MAX_TOUCHPOINTS];
+    HMM_Vec2 last_mouse;
+    HMM_Vec2 last_touch[SAPP_MAX_TOUCHPOINTS];
     uint64_t time_stamp;
     uint64_t frame_time;
     _cubemap_request_t cubemap_req;
@@ -287,8 +287,8 @@ void lopgl_setup() {
     // stbi_set_flip_vertically_on_load(true);  
 
     lopgl_set_orbital_cam(&(lopgl_orbital_cam_desc_t) {
-        .target = HMM_Vec3(0.0f, 0.0f,  0.0f),
-        .up = HMM_Vec3(0.0f, 1.0f,  0.0f),
+        .target = HMM_V3(0.0f, 0.0f,  0.0f),
+        .up = HMM_V3(0.0f, 1.0f,  0.0f),
         .pitch = 0.f,
         .heading = 0.f,
         .distance = 6.f,
@@ -301,8 +301,8 @@ void lopgl_setup() {
     });
 
     lopgl_set_fp_cam(&(lopgl_fp_cam_desc_t) {
-        .position = HMM_Vec3(0.0f, 0.0f,  6.0f),
-        .world_up = HMM_Vec3(0.0f, 1.0f,  0.0f),
+        .position = HMM_V3(0.0f, 0.0f,  6.0f),
+        .world_up = HMM_V3(0.0f, 1.0f,  0.0f),
         .yaw = -90.f,
         .pitch = 0.f,
         .zoom = 45.f,
@@ -372,7 +372,7 @@ void lopgl_set_orbital_cam(lopgl_orbital_cam_desc_t* desc) {
     // camera attributes
     _lopgl.orbital_cam.target = desc->target;
     _lopgl.orbital_cam.up = desc->up;
-    _lopgl.orbital_cam.polar = HMM_Vec2(desc->pitch, desc->heading);
+    _lopgl.orbital_cam.polar = HMM_V2(desc->pitch, desc->heading);
     _lopgl.orbital_cam.distance = desc->distance;
     // limits
     _lopgl.orbital_cam.min_pitch = desc->min_pitch;
@@ -414,7 +414,7 @@ void lopgl_set_fp_cam(lopgl_fp_cam_desc_t* desc) {
     update_fp_cam_vectors(&_lopgl.fp_cam);
 }
 
-hmm_mat4 lopgl_view_matrix() {
+HMM_Mat4 lopgl_view_matrix() {
     if (_lopgl.fp_enabled) {
         return view_matrix_fp(&_lopgl.fp_cam);
     }
@@ -427,7 +427,7 @@ float lopgl_fov() {
     return 45.0f;
 }
 
-hmm_vec3 lopgl_camera_position() {
+HMM_Vec3 lopgl_camera_position() {
     if (_lopgl.fp_enabled) {
         return _lopgl.fp_cam.position;
     }
@@ -436,12 +436,12 @@ hmm_vec3 lopgl_camera_position() {
     }
 }
 
-hmm_vec3 lopgl_camera_direction() {
+HMM_Vec3 lopgl_camera_direction() {
     if (_lopgl.fp_enabled) {
         return _lopgl.fp_cam.front;
     }
     else {
-        return HMM_NormalizeVec3(HMM_SubtractVec3(_lopgl.orbital_cam.target, _lopgl.orbital_cam.position));
+        return HMM_NormV3(HMM_SubV3(_lopgl.orbital_cam.target, _lopgl.orbital_cam.position));
     }
 }
 
@@ -461,7 +461,7 @@ void lopgl_handle_input(const sapp_event* e) {
         }
     }
 
-    hmm_vec2 mouse_offset = HMM_Vec2(0.0f, 0.0f);
+    HMM_Vec2 mouse_offset = HMM_V2(0.0f, 0.0f);
 
     if (e->type == SAPP_EVENTTYPE_MOUSE_MOVE) {
         if (!_lopgl.first_mouse) {
@@ -524,7 +524,7 @@ void lopgl_render_help() {
 
 void lopgl_render_gles2_fallback(void) {
     const sg_pass_action pass_action = {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } },
+        .colors[0] = { .load_action = SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } },
     };
     sg_begin_default_pass(&pass_action, sapp_width(), sapp_height());
     
@@ -560,8 +560,8 @@ static void image_fetch_callback(const sfetch_response_t* response) {
         int img_width, img_height, num_channels;
         const int desired_channels = 4;
         stbi_uc* pixels = stbi_load_from_memory(
-            response->buffer_ptr,
-            (int)response->fetched_size,
+            response->data.ptr,
+            (int)response->data.size,
             &img_width, &img_height,
             &num_channels, desired_channels);
         if (pixels) {
@@ -571,11 +571,11 @@ static void image_fetch_callback(const sfetch_response_t* response) {
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */
                 .pixel_format = SG_PIXELFORMAT_RGBA8,
-                .wrap_u = req_data.wrap_u,
-                .wrap_v = req_data.wrap_v,
-                .min_filter = SG_FILTER_LINEAR,
-                .mag_filter = SG_FILTER_LINEAR,
-                .content.subimage[0][0] = {
+                // .wrap_u = req_data.wrap_u,
+                // .wrap_v = req_data.wrap_v,
+                // .min_filter = SG_FILTER_LINEAR,
+                // .mag_filter = SG_FILTER_LINEAR,
+                .data.subimage[0][0] = {
                     .ptr = pixels,
                     .size = img_width * img_height * desired_channels,
                 }
@@ -601,7 +601,7 @@ static void mtl_fetch_callback(const sfetch_response_t* response) {
     lopgl_obj_request_data req_data = *(lopgl_obj_request_data*)response->user_data;
 
     if (response->fetched) {
-        fast_obj_mtllib_read(req_data.mesh, response->buffer_ptr, response->fetched_size);
+        fast_obj_mtllib_read(req_data.mesh, response->data.ptr, response->data.size);
         req_data.callback(&(lopgl_obj_response_t){
             .mesh = req_data.mesh,
             .user_data_ptr = req_data.user_data_ptr
@@ -621,16 +621,14 @@ static void obj_fetch_callback(const sfetch_response_t* response) {
         /* the file data has been fetched, since we provided a big-enough
            buffer we can be sure that all data has been loaded here
         */
-        req_data.mesh = fast_obj_read(response->buffer_ptr, response->fetched_size);
+        req_data.mesh = fast_obj_read(response->data.ptr, response->data.size);
 
         for (unsigned int i = 0; i < req_data.mesh->mtllib_count; ++i) {
             sfetch_send(&(sfetch_request_t){
                 .path = req_data.mesh->mtllibs[i],
                 .callback = mtl_fetch_callback,
-                .buffer_ptr = req_data.buffer_ptr,
-                .buffer_size = req_data.buffer_size,
-                .user_data_ptr = &req_data,
-                .user_data_size = sizeof(req_data)
+                .buffer = &(sg_range){&req_data.buffer_ptr, req_data.buffer_size},
+                .user_data = &SG_RANGE(req_data),
             });
         }
     }
@@ -650,10 +648,8 @@ void lopgl_load_image(const lopgl_image_request_t* request) {
     sfetch_send(&(sfetch_request_t){
         .path = request->path,
         .callback = image_fetch_callback,
-        .buffer_ptr = request->buffer_ptr,
-        .buffer_size = request->buffer_size,
-        .user_data_ptr = &req_data,
-        .user_data_size = sizeof(req_data)
+        .buffer = &(sg_range){&request->buffer_ptr, request->buffer_size},
+        .user_data = &SG_RANGE(req_data),
     });
 }
 
@@ -670,10 +666,8 @@ void lopgl_load_obj(const lopgl_obj_request_t* request) {
     sfetch_send(&(sfetch_request_t){
         .path = request->path,
         .callback = obj_fetch_callback,
-        .buffer_ptr = request->buffer_ptr,
-        .buffer_size = request->buffer_size,
-        .user_data_ptr = &req_data,
-        .user_data_size = sizeof(req_data)
+        .buffer = &(sg_range){&request->buffer_ptr, request->buffer_size},
+        .user_data = &SG_RANGE(req_data),
     });
 }
 
@@ -688,7 +682,7 @@ static bool load_cubemap(_cubemap_request_t* request) {
     const int desired_channels = 4;
     int img_widths[6], img_heights[6];
     stbi_uc* pixels_ptrs[6];
-    sg_image_content img_content;
+    sg_image_data img_content;
 
     for (int i = 0; i < 6; ++i) {
         int num_channel;
@@ -719,12 +713,12 @@ static bool load_cubemap(_cubemap_request_t* request) {
             .height = img_heights[0],
             /* set pixel_format to RGBA8 for WebGL */
             .pixel_format = SG_PIXELFORMAT_RGBA8,
-            .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
-            .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
-            .wrap_w = SG_WRAP_CLAMP_TO_EDGE,
-            .min_filter = SG_FILTER_LINEAR,
-            .mag_filter = SG_FILTER_LINEAR,
-            .content = img_content
+            // .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
+            // .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
+            // .wrap_w = SG_WRAP_CLAMP_TO_EDGE,
+            // .min_filter = SG_FILTER_LINEAR,
+            // .mag_filter = SG_FILTER_LINEAR,
+            .data = img_content
         });
     }
 
@@ -740,7 +734,7 @@ static void cubemap_fetch_callback(const sfetch_response_t* response) {
     _cubemap_request_t* request = req_inst.request;
 
     if (response->fetched) {
-        request->fetched_sizes[req_inst.index] = response->fetched_size;
+        request->fetched_sizes[req_inst.index] = response->data.size;
         ++request->finished_requests;
     }
     else if (response->failed) {
@@ -785,10 +779,8 @@ void lopgl_load_cubemap(lopgl_cubemap_request_t* request) {
         sfetch_send(&(sfetch_request_t){
             .path = cubemap[i],
             .callback = cubemap_fetch_callback,
-            .buffer_ptr = request->buffer_ptr + (i * request->buffer_offset),
-            .buffer_size = request->buffer_offset,
-            .user_data_ptr = &req_instance,
-            .user_data_size = sizeof(req_instance)
+            .buffer = &(sg_range){request->buffer_ptr + (i * request->buffer_offset), request->buffer_offset},
+            .user_data = &SG_RANGE(req_instance),
         });
     }
 }
@@ -800,18 +792,18 @@ static void update_orbital_cam_vectors(struct orbital_cam* camera) {
     float sin_p = sinf(HMM_ToRadians(camera->polar.X));
     float cos_h = cosf(HMM_ToRadians(camera->polar.Y));
     float sin_h = sinf(HMM_ToRadians(camera->polar.Y));
-    camera->position = HMM_Vec3(
+    camera->position = HMM_V3(
         camera->distance * cos_p * sin_h,
         camera->distance * -sin_p,
         camera->distance * cos_p * cos_h
     );
 }
 
-hmm_mat4 view_matrix_orbital(struct orbital_cam* camera) {
-    return HMM_LookAt(camera->position, camera->target, camera->up);
+HMM_Mat4 view_matrix_orbital(struct orbital_cam* camera) {
+    return HMM_LookAt_RH(camera->position, camera->target, camera->up);
 }
 
-static void move_orbital_camera(struct orbital_cam* camera, hmm_vec2 mouse_offset) {
+static void move_orbital_camera(struct orbital_cam* camera, HMM_Vec2 mouse_offset) {
     camera->polar.Y -= mouse_offset.X * camera->rotate_speed;
 	const float pitch = camera->polar.X + mouse_offset.Y * camera->rotate_speed;
 	camera->polar.X = HMM_Clamp(camera->min_pitch, pitch, camera->max_pitch);
@@ -822,7 +814,7 @@ static void zoom_orbital_camera(struct orbital_cam* camera, float val) {
 	camera->distance = HMM_Clamp(new_dist, camera->min_dist, camera->max_dist);
 }
 
-void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, hmm_vec2 mouse_offset) {
+void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, HMM_Vec2 mouse_offset) {
 
     if (e->type == SAPP_EVENTTYPE_MOUSE_DOWN) {
 		if (e->mouse_button == SAPP_MOUSEBUTTON_LEFT) {
@@ -852,9 +844,9 @@ void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, hmm_v
     else if (e->type == SAPP_EVENTTYPE_TOUCHES_MOVED) {
         if (e->num_touches == 1) {
             const sapp_touchpoint* touch = &e->touches[0];
-            hmm_vec2* last_touch = &_lopgl.last_touch[touch->identifier];
+            HMM_Vec2* last_touch = &_lopgl.last_touch[touch->identifier];
 
-            hmm_vec2 mouse_offset = HMM_Vec2(0.0f, 0.0f);
+            HMM_Vec2 mouse_offset = HMM_V2(0.0f, 0.0f);
 
             mouse_offset.X = touch->pos_x - last_touch->X;
             mouse_offset.Y = last_touch->Y - touch->pos_y;
@@ -869,11 +861,11 @@ void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, hmm_v
             const sapp_touchpoint* touch0 = &e->touches[0];
             const sapp_touchpoint* touch1 = &e->touches[1];
 
-            const hmm_vec2 v0 = HMM_Vec2(touch0->pos_x, touch0->pos_y);
-            const hmm_vec2 v1 = HMM_Vec2(touch1->pos_x, touch1->pos_y);
+            const HMM_Vec2 v0 = HMM_V2(touch0->pos_x, touch0->pos_y);
+            const HMM_Vec2 v1 = HMM_V2(touch1->pos_x, touch1->pos_y);
 
-            const hmm_vec2* prev_v0 = &_lopgl.last_touch[touch0->identifier];
-            const hmm_vec2* prev_v1 = &_lopgl.last_touch[touch1->identifier];
+            const HMM_Vec2* prev_v0 = &_lopgl.last_touch[touch0->identifier];
+            const HMM_Vec2* prev_v1 = &_lopgl.last_touch[touch1->identifier];
 
             const float length0 = HMM_LengthVec2(HMM_SubtractVec2(v1, v0));
             const float length1 = HMM_LengthVec2(HMM_SubtractVec2(*prev_v1, *prev_v0));
@@ -913,43 +905,43 @@ enum camera_movement {
 
 static void update_fp_cam_vectors(struct fp_cam* camera) {
     // Calculate the new Front vector
-    hmm_vec3 front;
+    HMM_Vec3 front;
     front.X = cosf(HMM_ToRadians(camera->yaw)) * cosf(HMM_ToRadians(camera->pitch));
     front.Y = sinf(HMM_ToRadians(camera->pitch));
     front.Z = sinf(HMM_ToRadians(camera->yaw)) * cosf(HMM_ToRadians(camera->pitch));
-    camera->front = HMM_NormalizeVec3(front);
+    camera->front = HMM_NormV3(front);
     // Also re-calculate the Right and Up vector
     // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-    camera->right = HMM_NormalizeVec3(HMM_Cross(camera->front, camera->world_up));  
-    camera->up    = HMM_NormalizeVec3(HMM_Cross(camera->right, camera->front));
+    camera->right = HMM_NormV3(HMM_Cross(camera->front, camera->world_up));  
+    camera->up    = HMM_NormV3(HMM_Cross(camera->right, camera->front));
 }
 
-hmm_mat4 view_matrix_fp(struct fp_cam* camera) {
-    hmm_vec3 target = HMM_AddVec3(camera->position, camera->front);
-    return HMM_LookAt(camera->position, target, camera->up);
+HMM_Mat4 view_matrix_fp(struct fp_cam* camera) {
+    HMM_Vec3 target = HMM_AddV3(camera->position, camera->front);
+    return HMM_LookAt_RH(camera->position, target, camera->up);
 }
 
 void update_fp_camera(struct fp_cam* camera, float delta_time) {
     float velocity = camera->movement_speed * delta_time;
     if (camera->move_forward) {
-        hmm_vec3 offset = HMM_MultiplyVec3f(camera->front, velocity);
-        camera->position = HMM_AddVec3(camera->position, offset);
+        HMM_Vec3 offset = HMM_MulV3F(camera->front, velocity);
+        camera->position = HMM_AddV3(camera->position, offset);
     }
     if (camera->move_backward) {
-        hmm_vec3 offset = HMM_MultiplyVec3f(camera->front, velocity);
-        camera->position = HMM_SubtractVec3(camera->position, offset);
+        HMM_Vec3 offset = HMM_MulV3F(camera->front, velocity);
+        camera->position = HMM_SubV3(camera->position, offset);
     }
     if (camera->move_left) {
-        hmm_vec3 offset = HMM_MultiplyVec3f(camera->right, velocity);
-        camera->position = HMM_SubtractVec3(camera->position, offset);
+        HMM_Vec3 offset = HMM_MulV3F(camera->right, velocity);
+        camera->position = HMM_SubV3(camera->position, offset);
     }
     if (camera->move_right) {
-        hmm_vec3 offset = HMM_MultiplyVec3f(camera->right, velocity);
-        camera->position = HMM_AddVec3(camera->position, offset);
+        HMM_Vec3 offset = HMM_MulV3F(camera->right, velocity);
+        camera->position = HMM_AddV3(camera->position, offset);
     }
 }
 
-static void aim_fp_camera(struct fp_cam* camera, hmm_vec2 mouse_offset) {
+static void aim_fp_camera(struct fp_cam* camera, HMM_Vec2 mouse_offset) {
     camera->yaw   += mouse_offset.X * camera->aim_speed;
     camera->pitch += mouse_offset.Y * camera->aim_speed;
 
@@ -963,7 +955,7 @@ static void zoom_fp_camera(struct fp_cam* camera, float yoffset) {
     camera->zoom = HMM_Clamp(camera->min_zoom, camera->zoom, camera->max_zoom);
 }
 
-void handle_input_fp(struct fp_cam* camera, const sapp_event* e, hmm_vec2 mouse_offset) {
+void handle_input_fp(struct fp_cam* camera, const sapp_event* e, HMM_Vec2 mouse_offset) {
     if (e->type == SAPP_EVENTTYPE_KEY_DOWN) {
         if (e->key_code == SAPP_KEYCODE_W || e->key_code == SAPP_KEYCODE_UP) {
             camera->move_forward = true;

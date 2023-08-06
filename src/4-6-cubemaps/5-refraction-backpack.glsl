@@ -34,7 +34,9 @@ uniform fs_params {
     vec3 camera_pos;
 };
 
-uniform samplerCube skybox_texture;
+uniform textureCube _skybox_texture;
+uniform sampler skybox_texture_smp;
+#define skybox_texture samplerCube(_skybox_texture, skybox_texture_smp)
 
 void main() {
     float ratio = 1.00 / 1.52;
@@ -67,7 +69,9 @@ in vec3 tex_coords;
 
 out vec4 frag_color;
 
-uniform samplerCube skybox_texture;
+uniform textureCube _skybox_texture;
+uniform sampler skybox_texture_smp;
+#define skybox_texture samplerCube(_skybox_texture, skybox_texture_smp)
 
 void main() {
     frag_color = texture(skybox_texture, tex_coords);

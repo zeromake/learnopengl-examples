@@ -24,7 +24,9 @@ in vec2 tex_coords;
 
 out vec4 frag_color;
 
-uniform sampler2D diffuse_texture;
+uniform texture2D _diffuse_texture;
+uniform sampler diffuse_texture_smp;
+#define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
     frag_color = texture(diffuse_texture, tex_coords);

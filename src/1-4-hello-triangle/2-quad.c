@@ -19,7 +19,7 @@ static void init(void) {
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(simple_shader_desc());
+    sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
 
    
     /* a vertex buffer with 4 vertices */
@@ -32,7 +32,7 @@ static void init(void) {
     };
     state.bind.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(vertices),
-        .content = vertices,
+        .data = SG_RANGE(vertices),
         .label = "quad-vertices"
     });
 
@@ -44,7 +44,7 @@ static void init(void) {
     state.bind.index_buffer = sg_make_buffer(&(sg_buffer_desc){
         .type = SG_BUFFERTYPE_INDEXBUFFER,
         .size = sizeof(indices),
-        .content = indices,
+        .data = SG_RANGE(indices),
         .label = "quad-indices"
     });
 
@@ -62,7 +62,7 @@ static void init(void) {
 
     /* a pass action to clear framebuffer */
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action=SG_ACTION_CLEAR, .val={0.2f, 0.3f, 0.3f, 1.0f} }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.2f, 0.3f, 0.3f, 1.0f} }
     };
 }
 
@@ -95,7 +95,7 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .event_cb = event,
         .width = 800,
         .height = 600,
-        .gl_force_gles2 = true,
+        .high_dpi = true,
         .window_title = "Quad - LearnOpenGL",
     };
 }

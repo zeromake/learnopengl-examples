@@ -1,0 +1,14 @@
+[
+    {
+        "match": "uniform sampler(\\w+) (\\w+);",
+        "to": "uniform texture$1 _$2;\nuniform sampler $2_smp;\n#define $2 sampler$1(_$2, $2_smp)"
+    },
+    {
+        "match": "gl_InstanceID",
+        "to": "gl_InstanceIndex"
+    },
+    {
+        "match": "gl_VertexID",
+        "to": "gl_VertexIndex"
+    }
+]

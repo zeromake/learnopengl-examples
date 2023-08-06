@@ -82,8 +82,12 @@ in INTERFACE {
 
 out vec4 frag_color;
 
-uniform sampler2D diffuse_texture;
-uniform sampler2D shadow_map;
+uniform texture2D _diffuse_texture;
+uniform sampler diffuse_texture_smp;
+#define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
+uniform texture2D _shadow_map;
+uniform sampler shadow_map_smp;
+#define shadow_map sampler2D(_shadow_map, shadow_map_smp)
 
 uniform fs_params_shadows {
     vec3 light_pos;

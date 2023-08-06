@@ -49,8 +49,12 @@ uniform fs_light {
     vec3 specular;
 } light;
 
-uniform sampler2D diffuse_texture;
-uniform sampler2D specular_texture;
+uniform texture2D _diffuse_texture;
+uniform sampler diffuse_texture_smp;
+#define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
+uniform texture2D _specular_texture;
+uniform sampler specular_texture_smp;
+#define specular_texture sampler2D(_specular_texture, specular_texture_smp)
 
 void main() {
     // ambient

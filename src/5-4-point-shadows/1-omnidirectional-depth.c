@@ -165,11 +165,11 @@ static void init(void) {
     });
 
     state.depth.pass_action = (sg_pass_action) {
-        .colors[0] = { .action=SG_ACTION_CLEAR, .val={1.f, 1.f, 1.f, 1.0f} }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={1.f, 1.f, 1.f, 1.0f} }
     };
 
     state.shadows.pass_action = (sg_pass_action) {
-        .colors[0] = { .action=SG_ACTION_CLEAR, .val={0.1f, 0.1f, 0.1f, 1.0f} }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 }
 
@@ -318,7 +318,8 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .event_cb = event,
         .width = 800,
         .height = 600,
-        .gl_force_gles2 = true,
+        .high_dpi = true,
+        
         .window_title = "Omnidirectional Depth (LearnOpenGL)",
     };
 }

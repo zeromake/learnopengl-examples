@@ -41,8 +41,12 @@ uniform fs_params {
     float normal_mapping;        // the shader cross compiler does not support bool as uniform
 };
 
-uniform sampler2D diffuse_map;
-uniform sampler2D normal_map;
+uniform texture2D _diffuse_map;
+uniform sampler diffuse_map_smp;
+#define diffuse_map sampler2D(_diffuse_map, diffuse_map_smp)
+uniform texture2D _normal_map;
+uniform sampler normal_map_smp;
+#define normal_map sampler2D(_normal_map, normal_map_smp)
 
 void main() {           
     vec3 color = texture(diffuse_map, inter.tex_coords).rgb;

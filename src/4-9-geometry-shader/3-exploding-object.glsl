@@ -11,7 +11,9 @@ uniform vs_params {
     float time;
 };
 
-uniform sampler2D vertex_texture;
+uniform texture2D _vertex_texture;
+uniform sampler vertex_texture_smp;
+#define vertex_texture sampler2D(_vertex_texture, vertex_texture_smp)
 
 float getVal(uint index) {
     float x = index % 1024;
@@ -48,7 +50,7 @@ vec4 explode(vec4 position, vec3 normal) {
 } 
 
 void main() {
-    uint index = gl_VertexID * 5;
+    uint index = gl_VertexIndex * 5;
     vec4 pos = vec4(getVec3(index), 1.0);
     tex_coords = getVec2(index + 3);
 
@@ -64,7 +66,9 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-uniform sampler2D diffuse_texture;
+uniform texture2D _diffuse_texture;
+uniform sampler diffuse_texture_smp;
+#define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
     frag_color = texture(diffuse_texture, tex_coords);

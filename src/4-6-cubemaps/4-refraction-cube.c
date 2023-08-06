@@ -136,7 +136,7 @@ static void init(void) {
 
     /* create a pipeline object for the cube */
     state.pip_cube = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = sg_make_shader(simple_shader_desc()),
+        .shader = sg_make_shader(simple_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
                 [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
@@ -166,7 +166,7 @@ static void init(void) {
 
     /* a pass action to clear framebuffer */
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action=SG_ACTION_CLEAR, .val={0.1f, 0.1f, 0.1f, 1.0f} }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
     sg_image skybox_img_id = sg_alloc_image();
@@ -245,7 +245,8 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .event_cb = event,
         .width = 800,
         .height = 600,
-        .gl_force_gles2 = true,
+        .high_dpi = true,
+        
         .window_title = "Refraction Cube (LearnOpenGL)",
     };
 }

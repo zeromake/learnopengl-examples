@@ -35,7 +35,7 @@ uniform vs_point_lights {
 } point_lights;
 
 
-mat3 transpose(mat3 mat) {
+mat3 my_transpose(mat3 mat) {
     vec3 i0 = mat[0];
     vec3 i1 = mat[1];
     vec3 i2 = mat[2];
@@ -61,7 +61,7 @@ void main() {
     // then retrieve perpendicular vector B with the cross product of T and N
     vec3 B = cross(N, T);
     
-    mat3 TBN = transpose(mat3(T, B, N));
+    mat3 TBN = my_transpose(mat3(T, B, N));
     // TBN does not perform non-uniform scale, so we don't need inverse transpose for the direction
     inter.tangent_dir_light_direction = TBN * dir_light.direction;
     for(int i = 0; i < NR_POINT_LIGHTS; ++i) {
@@ -106,9 +106,15 @@ uniform fs_point_lights {
     vec4 attenuation[NR_POINT_LIGHTS];
 } point_lights;
 
-uniform sampler2D diffuse_map;
-uniform sampler2D specular_map;
-uniform sampler2D normal_map;
+uniform texture2D _diffuse_map;
+uniform sampler diffuse_map_smp;
+#define diffuse_map sampler2D(_diffuse_map, diffuse_map_smp)
+uniform texture2D _specular_map;
+uniform sampler specular_map_smp;
+#define specular_map sampler2D(_specular_map, specular_map_smp)
+uniform texture2D _normal_map;
+uniform sampler normal_map_smp;
+#define normal_map sampler2D(_normal_map, normal_map_smp)
 
 struct dir_light_t {
     vec3 direction;

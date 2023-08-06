@@ -44,7 +44,9 @@ uniform fs_params {
     float gamma;        // the shader cross compiler does not support bool as uniform
 };
 
-uniform sampler2D floor_texture;
+uniform texture2D _floor_texture;
+uniform sampler floor_texture_smp;
+#define floor_texture sampler2D(_floor_texture, floor_texture_smp)
 
 vec3 blinnPhong(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
     // diffuse

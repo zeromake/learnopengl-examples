@@ -41,7 +41,9 @@ uniform fs_params {
     float blinn;        // the shader cross compiler does not support bool as uniform
 };
 
-uniform sampler2D floor_texture;
+uniform texture2D _floor_texture;
+uniform sampler floor_texture_smp;
+#define floor_texture sampler2D(_floor_texture, floor_texture_smp)
 
 void main() {           
     vec3 color = texture(floor_texture, inter.tex_coords).rgb;
