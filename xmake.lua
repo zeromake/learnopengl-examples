@@ -89,6 +89,7 @@ for _, dir in ipairs(os.filedirs("src/*")) do
 		            add_files("src/resource.rc")
                 elseif is_plat("wasm") then
                     add_ldflags("-sMAX_WEBGL_VERSION=2")
+                    set_extension(".wasm")
                 end
                 add_includedirs(includedir)
                 add_deps("sokol_wrapper", "shader")
