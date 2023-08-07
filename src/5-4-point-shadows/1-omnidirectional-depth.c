@@ -178,7 +178,7 @@ void draw_room_cube(bool invert) {
     vs_params_t vs_params = {
         .model = scale 
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -187,28 +187,28 @@ void draw_cubes() {
     hmm_mat4 translate = HMM_Translate(HMM_Vec3(4.f, -3.5f, 0.f));
     hmm_mat4 scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(2.f, 3.f, 1.f));
     scale = HMM_Scale(HMM_Vec3(.75f, .75f, .75f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-3.f, -1.f, 0.f));
     scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-1.5f, 1.f, 1.5f));
     scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-1.5f, 2.f, -3.f));
     hmm_mat4 rotate = HMM_Rotate(60.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_Vec3(.75f, .75f, .75f));
     vs_params.model = HMM_MultiplyMat4(HMM_MultiplyMat4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -252,14 +252,14 @@ void frame(void) {
             .light_space_matrix = light_space_transforms[i]
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_depth, &vs_params_depth, sizeof(vs_params_depth));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_depth, &SG_RANGE(vs_params_depth));
 
         fs_params_depth_t fs_params_depth = {
             .light_pos = state.light_pos,
             .far_plane = far_plane
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_depth, &fs_params_depth, sizeof(fs_params_depth));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_depth, &SG_RANGE(fs_params_depth));
 
         draw_cubes();
         // don't inver the room cube for computing the depth map
@@ -280,18 +280,18 @@ void frame(void) {
         .view = view,
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &vs_params_shadows, sizeof(vs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     fs_params_shadows_t fs_params_shadows = {
         .light_pos = state.light_pos,
         .far_plane = far_plane
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &fs_params_shadows, sizeof(fs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &SG_RANGE(fs_params_shadows));
 
     draw_cubes();
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &vs_params_shadows, sizeof(vs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     // invert the room cube so we can inside the cube
     draw_room_cube(true);
@@ -319,7 +319,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Omnidirectional Depth (LearnOpenGL)",
     };
 }

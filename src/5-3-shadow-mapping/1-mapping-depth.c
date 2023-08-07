@@ -206,7 +206,7 @@ void frame(void) {
         .model = HMM_Mat4d(1.f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     // cubes
@@ -214,18 +214,18 @@ void frame(void) {
     hmm_mat4 translate = HMM_Translate(HMM_Vec3(0.f, 1.5f, 0.f));
     hmm_mat4 scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(2.f, 0.f, 1.f));
     scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-1.f, 0.f, 2.f));
     hmm_mat4 rotate = HMM_Rotate(60.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_Vec3(.25f, .25f, .25f));
     vs_params.model = HMM_MultiplyMat4(HMM_MultiplyMat4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_end_pass();
@@ -263,7 +263,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Mapping Depth (LearnOpenGL)",
     };
 }

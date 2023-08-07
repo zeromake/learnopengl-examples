@@ -123,34 +123,34 @@ void frame(void) {
         .projection = projection
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &vs_vp, sizeof(vs_vp));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
 
     vs_model_t vs_m = {
         .model = HMM_Translate(HMM_Vec3(-0.75f, 0.75f, 0.0f))       // move top-left
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &vs_m, sizeof(vs_m));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 
     sg_apply_pipeline(state.pip_green);
     sg_apply_bindings(&state.bind);
     // we need to re-apply the uniforms after applying a new pipeline, sort of defeats the purpose of this example...
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &vs_vp, sizeof(vs_vp));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
     vs_m.model = HMM_Translate(HMM_Vec3(0.75f, 0.75f, 0.0f));       // move top-right
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &vs_m, sizeof(vs_m));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 
     sg_apply_pipeline(state.pip_yellow);
     sg_apply_bindings(&state.bind);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &vs_vp, sizeof(vs_vp));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
     vs_m.model = HMM_Translate(HMM_Vec3(-0.75f, -0.75f, 0.0f));     // move bottom-left
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &vs_m, sizeof(vs_m));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 
     sg_apply_pipeline(state.pip_blue);
     sg_apply_bindings(&state.bind);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &vs_vp, sizeof(vs_vp));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
     vs_m.model = HMM_Translate(HMM_Vec3(0.75f, -0.75f, 0.0f));      // move bottom-right
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &vs_m, sizeof(vs_m));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 
     lopgl_render_help();
@@ -177,7 +177,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Uniform Buffers (LearnOpenGL)",
     };
 }

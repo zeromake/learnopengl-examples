@@ -6,7 +6,7 @@
 //  http://aras-p.info/blog/2009/07/30/encoding-floats-to-rgba-the-final/
 //
 
-@ctype mat4 hmm_mat4
+@ctype mat4 HMM_Mat4
 
 @vs vs_depth
 in vec3 a_pos;

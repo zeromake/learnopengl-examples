@@ -49,6 +49,13 @@ static void init(void) {
     */
     state.bind.fs.images[SLOT__ourTexture] = sg_alloc_image();
     state.bind.fs.samplers[SLOT_ourTexture_smp] = sg_alloc_sampler();
+    sg_init_sampler(state.bind.fs.samplers[SLOT_ourTexture_smp], &(sg_sampler_desc){
+        .wrap_u = SG_WRAP_REPEAT,
+        .wrap_v = SG_WRAP_REPEAT,
+        .min_filter = SG_FILTER_LINEAR,
+        .mag_filter = SG_FILTER_LINEAR,
+        .compare = SG_COMPAREFUNC_NEVER,
+    });
 
     float vertices[] = {
         // positions         // colors           // texture coords
@@ -71,7 +78,7 @@ static void init(void) {
     state.bind.index_buffer = sg_make_buffer(&(sg_buffer_desc){
         .type = SG_BUFFERTYPE_INDEXBUFFER,
         .size = sizeof(indices),
-        .data = &SAPP_RANGE(indices),
+        .data = SG_RANGE(indices),
         .label = "quad-indices"
     });
 
@@ -102,7 +109,7 @@ static void init(void) {
     sfetch_send(&(sfetch_request_t){
         .path = "container.jpg",
         .callback = fetch_callback,
-        .user_data = &SAPP_RANGE(state.file_buffer),
+        .buffer = SFETCH_RANGE(state.file_buffer),
     });
 }
 
@@ -117,8 +124,8 @@ static void fetch_callback(const sfetch_response_t* response) {
         int img_width, img_height, num_channels;
         const int desired_channels = 4;
         stbi_uc* pixels = stbi_load_from_memory(
-            response->buffer.ptr,
-            (int)response->buffer.size,
+            response->data.ptr,
+            (int)response->data.size,
             &img_width, &img_height,
             &num_channels, desired_channels);
         if (pixels) {
@@ -128,10 +135,6 @@ static void fetch_callback(const sfetch_response_t* response) {
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */
                 .pixel_format = SG_PIXELFORMAT_RGBA8,
-                // .wrap_u = SG_WRAP_REPEAT,
-                // .wrap_v = SG_WRAP_REPEAT,
-                // .min_filter = SG_FILTER_LINEAR,
-                // .mag_filter = SG_FILTER_LINEAR,
                 .data.subimage[0][0] = {
                     .ptr = pixels,
                     .size = img_width * img_height * 4,

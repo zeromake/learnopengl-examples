@@ -250,17 +250,17 @@ void frame(void) {
     sg_apply_bindings(&state.offscreen.bind_cube);
 
     vs_params.model = HMM_Translate(HMM_Vec3(-1.0f, 0.0f, -1.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     vs_params.model = HMM_Translate(HMM_Vec3(2.0f, 0.0f, 0.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_apply_bindings(&state.offscreen.bind_plane);
 
     vs_params.model = HMM_Mat4d(1.0f);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     sg_end_pass();
@@ -301,7 +301,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Render To Texture (LearnOpenGL)",
     };
 }

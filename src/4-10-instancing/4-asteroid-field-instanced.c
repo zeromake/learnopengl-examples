@@ -211,7 +211,7 @@ void frame(void) {
             .projection = projection
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_planet, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_planet, &SG_RANGE(vs_params));
 
         sg_draw(0, state.planet.face_count * 3, 1);
     }
@@ -225,7 +225,7 @@ void frame(void) {
             .projection = projection
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_rock, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_rock, &SG_RANGE(vs_params));
         sg_draw(0, state.rock.face_count * 3, ASTEROID_COUNT);
     }
 
@@ -252,7 +252,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Asteroid Field Instanced (LearnOpenGL)",
     };
 }

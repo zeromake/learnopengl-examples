@@ -178,7 +178,7 @@ void frame(void) {
         .view = view,
         .projection = projection
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 6, 1);
     sg_end_pass();
@@ -207,7 +207,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Plane - LearnOpenGL",
     };
 }

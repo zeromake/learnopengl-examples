@@ -87,7 +87,7 @@ void frame(void) {
     vs_params_t vs_params;
     memcpy(vs_params.offsets, state.translations, sizeof(vs_params.offsets));
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 6, 100);
     sg_end_pass();

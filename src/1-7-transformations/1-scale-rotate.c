@@ -5,7 +5,8 @@
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
 #include "sokol_fetch.h"
-#include "hmm/HandmadeMath.h"
+#include "sokol_helper.h"
+#include "HandmadeMath.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
 #include "transformations.glsl.h"
@@ -39,8 +40,17 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    state.bind.fs_images[SLOT_texture1] = sg_alloc_image();
-    state.bind.fs_images[SLOT_texture2] = sg_alloc_image();
+    sg_alloc_image_smp(state.bind.fs, SLOT__texture1, SLOT_texture1_smp);
+    sg_alloc_image_smp(state.bind.fs, SLOT__texture2, SLOT_texture2_smp);
+    const sg_sampler_desc desc = {
+        .wrap_u = SG_WRAP_REPEAT,
+        .wrap_v = SG_WRAP_REPEAT,
+        .min_filter = SG_FILTER_LINEAR,
+        .mag_filter = SG_FILTER_LINEAR,
+        .compare = SG_COMPAREFUNC_NEVER,
+    };
+    sg_init_sampler(state.bind.fs.samplers[SLOT_texture1_smp], &desc);
+    sg_init_sampler(state.bind.fs.samplers[SLOT_texture2_smp], &desc);
 
     /* flip images vertically after loading */
     stbi_set_flip_vertically_on_load(true);  
@@ -66,7 +76,7 @@ static void init(void) {
     state.bind.index_buffer = sg_make_buffer(&(sg_buffer_desc){
         .type = SG_BUFFERTYPE_INDEXBUFFER,
         .size = sizeof(indices),
-        .content = indices,
+        .data = SG_RANGE(indices),
         .label = "quad-indices"
     });
 
@@ -92,17 +102,15 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.2f, 0.3f, 0.3f, 1.0f} }
     };
 
-    sg_image image1 = state.bind.fs_images[SLOT_texture1];
-    sg_image image2 = state.bind.fs_images[SLOT_texture2];
+    sg_image image1 = state.bind.fs.images[SLOT__texture1];
+    sg_image image2 = state.bind.fs.images[SLOT__texture2];
 
     /* start loading the JPG file */
     sfetch_send(&(sfetch_request_t){
         .path = "container.jpg",
         .callback = fetch_callback,
-        .buffer_ptr = state.file_buffer,
-        .buffer_size = sizeof(state.file_buffer),
-        .user_data_ptr = &image1,
-        .user_data_size = sizeof(image1)
+        .buffer = SFETCH_RANGE(state.file_buffer),
+        .user_data = SFETCH_RANGE(image1),
     });
 
     /* start loading the PNG file
@@ -110,10 +118,8 @@ static void init(void) {
     sfetch_send(&(sfetch_request_t){
         .path = "awesomeface.png",
         .callback = fetch_callback,
-        .buffer_ptr = state.file_buffer,
-        .buffer_size = sizeof(state.file_buffer),
-        .user_data_ptr = &image2,
-        .user_data_size = sizeof(image2)
+        .buffer = SFETCH_RANGE(state.file_buffer),
+        .user_data = SFETCH_RANGE(image2),
     });
 }
 
@@ -128,8 +134,8 @@ static void fetch_callback(const sfetch_response_t* response) {
         int img_width, img_height, num_channels;
         const int desired_channels = 4;
         stbi_uc* pixels = stbi_load_from_memory(
-            response->buffer_ptr,
-            (int)response->fetched_size,
+            response->data.ptr,
+            (int)response->data.size,
             &img_width, &img_height,
             &num_channels, desired_channels);
         if (pixels) {
@@ -139,11 +145,7 @@ static void fetch_callback(const sfetch_response_t* response) {
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */
                 .pixel_format = SG_PIXELFORMAT_RGBA8,
-                .wrap_u = SG_WRAP_REPEAT,
-                .wrap_v = SG_WRAP_REPEAT,
-                .min_filter = SG_FILTER_LINEAR,
-                .mag_filter = SG_FILTER_LINEAR,
-                .content.subimage[0][0] = {
+                .data.subimage[0][0] = {
                     .ptr = pixels,
                     .size = img_width * img_height * 4,
                 }
@@ -154,7 +156,7 @@ static void fetch_callback(const sfetch_response_t* response) {
     else if (response->failed) {
         // if loading the file failed, set clear color to red
         state.pass_action = (sg_pass_action) {
-            .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+            .colors[0] = { .load_action = SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
         };
     }
 }
@@ -162,9 +164,9 @@ static void fetch_callback(const sfetch_response_t* response) {
 void frame(void) {
     sfetch_dowork();
 
-    hmm_mat4 rotate = HMM_Rotate(90.f, HMM_Vec3(0.0f, 0.0f, 1.0f));
-    hmm_mat4 scale = HMM_Scale(HMM_Vec3(0.5f, 0.5f, 0.5f));
-    hmm_mat4 trans = HMM_MultiplyMat4(rotate, scale);
+    HMM_Mat4 rotate = HMM_Rotate_RH(90.f, HMM_V3(0.0f, 0.0f, 1.0f));
+    HMM_Mat4 scale = HMM_Scale(HMM_V3(0.5f, 0.5f, 0.5f));
+    HMM_Mat4 trans = HMM_MulM4(rotate, scale);
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
     sg_apply_pipeline(state.pip);
@@ -173,7 +175,7 @@ void frame(void) {
     vs_params_t vs_params = {
         .transform = trans
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 6, 1);
     sg_end_pass();
@@ -202,7 +204,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Scale Rotate - LearnOpenGL",
     };
 }

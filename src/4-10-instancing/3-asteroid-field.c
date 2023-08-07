@@ -200,7 +200,7 @@ void frame(void) {
         hmm_mat4 model = HMM_Translate(HMM_Vec3(0.f, -3.f, 0.f));
         model = HMM_MultiplyMat4(model, HMM_Scale(HMM_Vec3(4.f, 4.f, 4.f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, state.planet.face_count * 3, 1);
     }
@@ -211,7 +211,7 @@ void frame(void) {
 
         for (size_t i = 0; i < ASTEROID_COUNT; ++i) {
             vs_params.model = state.rock_transforms[i];
-            sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+            sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
             sg_draw(0, state.rock.face_count * 3, 1);
         }
     }
@@ -239,7 +239,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Asteroid Field (LearnOpenGL)",
     };
 }

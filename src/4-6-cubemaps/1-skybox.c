@@ -213,7 +213,7 @@ void frame(void) {
     sg_apply_pipeline(state.pip_cube);
     sg_apply_bindings(&state.bind_cube);
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     // remove translation from view matrix
@@ -224,7 +224,7 @@ void frame(void) {
     sg_apply_pipeline(state.pip_skybox);
     sg_apply_bindings(&state.bind_skybox);
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     lopgl_render_help();
@@ -250,7 +250,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Skybox (LearnOpenGL)",
     };
 }

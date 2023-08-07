@@ -218,18 +218,18 @@ void draw_cubes() {
     hmm_mat4 translate = HMM_Translate(HMM_Vec3(0.f, 1.5f, 0.f));
     hmm_mat4 scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(2.f, 0.f, 1.f));
     scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-1.f, 0.f, 2.f));
     hmm_mat4 rotate = HMM_Rotate(60.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_Vec3(.25f, .25f, .25f));
     vs_params.model = HMM_MultiplyMat4(HMM_MultiplyMat4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -248,7 +248,7 @@ void frame(void) {
         .model = HMM_Mat4d(1.f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     /* cubes */
@@ -262,7 +262,7 @@ void frame(void) {
 
     /* plane */
     sg_apply_bindings(&state.shadows.bind_plane);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     hmm_mat4 view = lopgl_view_matrix();
     hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
@@ -272,7 +272,7 @@ void frame(void) {
         .view = view
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &vs_params_shadows, sizeof(vs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     fs_params_shadows_t fs_params_shadows = {
         .light_pos = state.light_pos,
@@ -280,7 +280,7 @@ void frame(void) {
         .shadow_map_size = HMM_Vec2(1024.f, 1024.f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &fs_params_shadows, sizeof(fs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &SG_RANGE(fs_params_shadows));
 
     sg_draw(0, 6, 1);
 
@@ -311,7 +311,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Improved Shadows (LearnOpenGL)",
     };
 }

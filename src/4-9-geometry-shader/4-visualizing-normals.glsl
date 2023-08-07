@@ -1,4 +1,4 @@
-@ctype mat4 hmm_mat4
+@ctype mat4 HMM_Mat4
 
 @block data
 float getVal(uint index, texture2D tex, sampler smp) {

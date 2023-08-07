@@ -68,7 +68,7 @@ void frame(void) {
     fs_params_t fs_params = {
         .ourColor = { 0.f, greenValue, 0.f, 1.f }
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &fs_params, sizeof(fs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
 
     sg_draw(0, 3, 1);
     sg_end_pass();
@@ -96,7 +96,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Uniforms - LearnOpenGL",
     };
 }

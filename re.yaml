@@ -1,0 +1,15 @@
+- match: uniform sampler(\w+) (\w+);
+  to: uniform texture$1 _$2;\nuniform sampler $2_smp;\n#define $2 sampler$1(_$2, $2_smp)
+  path: *.glsl
+- match: gl_InstanceID
+  to: gl_InstanceIndex
+  path: *.glsl
+- match: gl_VertexID
+  to: gl_VertexIndex
+  path: *.glsl
+- match: @ctype mat4 hmm_mat4
+  to: @ctype mat4 HMM_Mat4
+  path: *.glsl
+- match: sg_apply_uniforms\(SG_SHADERSTAGE_(\w+), (\w+), &\w+, sizeof\((\w+)\)\);
+  to: sg_apply_uniforms(SG_SHADERSTAGE_$1, $2, &SG_RANGE($3));
+  path: *.c

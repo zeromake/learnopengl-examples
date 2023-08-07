@@ -82,7 +82,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "In Out - LearnOpenGL",
     };
 }

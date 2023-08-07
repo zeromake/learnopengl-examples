@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "1-combined-lights.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -180,7 +180,7 @@ void frame(void) {
         .view_pos = lopgl_camera_position(),
         .material_shininess = 32.0f,
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &fs_params, sizeof(fs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
     
     fs_dir_light_t fs_dir_light = {
         .direction = HMM_Vec3(-0.2f, -1.0f, -0.3f),
@@ -188,7 +188,7 @@ void frame(void) {
         .diffuse = HMM_Vec3(0.4f, 0.4f, 0.4f),
         .specular = HMM_Vec3(0.5f, 0.5f, 0.5f)
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &fs_dir_light, sizeof(fs_dir_light));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &SG_RANGE(fs_dir_light));
 
     fs_point_lights_t fs_point_lights = {
         .position[0]    = state.light_positions[0],
@@ -212,7 +212,7 @@ void frame(void) {
         .specular[3]    = HMM_Vec4(1.0f, 1.0f, 1.0f, 0.0f),
         .attenuation[3] = HMM_Vec4(1.0f, 0.09f, 0.032f, 0.0f)
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &fs_point_lights, sizeof(fs_point_lights_t));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights_t));
     
     fs_spot_light_t fs_spot_light = {
         .position = lopgl_camera_position(),
@@ -225,7 +225,7 @@ void frame(void) {
         .specular = HMM_Vec3(1.0f, 1.0f, 1.0f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_spot_light, &fs_spot_light, sizeof(fs_spot_light));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_spot_light, &SG_RANGE(fs_spot_light));
 
     hmm_mat4 view = lopgl_view_matrix();
     hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
@@ -240,7 +240,7 @@ void frame(void) {
         float angle = 20.0f * i; 
         model = HMM_MultiplyMat4(model, HMM_Rotate(angle, HMM_Vec3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }
@@ -254,7 +254,7 @@ void frame(void) {
         hmm_vec3 pos = HMM_Vec3(state.light_positions[i].X, state.light_positions[i].Y, state.light_positions[i].Z);
         vs_params.model = HMM_Translate(pos);
         vs_params.model = HMM_MultiplyMat4(vs_params.model, scale);
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }
@@ -282,7 +282,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Combined Lights (LearnOpenGL)",
     };
 }

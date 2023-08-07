@@ -157,7 +157,7 @@ void frame(void) {
     // TODO: adjust camera instead of scaling model
     //vs_params.model = HMM_Mat4d(1.f);
     vs_params.model = HMM_Scale(HMM_Vec3(2.f, 2.f, 2.f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 36, 1);
 
@@ -185,7 +185,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Front Facing (LearnOpenGL)",
     };
 }

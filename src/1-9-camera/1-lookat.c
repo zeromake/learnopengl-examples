@@ -230,7 +230,7 @@ void frame(void) {
         float angle = 20.0f * i; 
         model = HMM_MultiplyMat4(model, HMM_Rotate(angle, HMM_Vec3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }
@@ -261,7 +261,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Lookat - LearnOpenGL",
     };
 }

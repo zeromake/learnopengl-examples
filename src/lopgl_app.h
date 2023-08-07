@@ -788,10 +788,10 @@ void lopgl_load_cubemap(lopgl_cubemap_request_t* request) {
 /*=== ORBITAL CAM IMPLEMENTATION ==================================================*/
 
 static void update_orbital_cam_vectors(struct orbital_cam* camera) {
-    float cos_p = cosf(HMM_ToRadians(camera->polar.X));
-    float sin_p = sinf(HMM_ToRadians(camera->polar.X));
-    float cos_h = cosf(HMM_ToRadians(camera->polar.Y));
-    float sin_h = sinf(HMM_ToRadians(camera->polar.Y));
+    float cos_p = cosf(HMM_ToRad(camera->polar.X));
+    float sin_p = sinf(HMM_ToRad(camera->polar.X));
+    float cos_h = cosf(HMM_ToRad(camera->polar.Y));
+    float sin_h = sinf(HMM_ToRad(camera->polar.Y));
     camera->position = HMM_V3(
         camera->distance * cos_p * sin_h,
         camera->distance * -sin_p,
@@ -867,8 +867,8 @@ void handle_input_orbital(struct orbital_cam* camera, const sapp_event* e, HMM_V
             const HMM_Vec2* prev_v0 = &_lopgl.last_touch[touch0->identifier];
             const HMM_Vec2* prev_v1 = &_lopgl.last_touch[touch1->identifier];
 
-            const float length0 = HMM_LengthVec2(HMM_SubtractVec2(v1, v0));
-            const float length1 = HMM_LengthVec2(HMM_SubtractVec2(*prev_v1, *prev_v0));
+            const float length0 = HMM_LenV2(HMM_SubV2(v1, v0));
+            const float length1 = HMM_LenV2(HMM_SubV2(*prev_v1, *prev_v0));
 
             float diff = length0 - length1;
             // reduce speed of touch controls
@@ -906,9 +906,9 @@ enum camera_movement {
 static void update_fp_cam_vectors(struct fp_cam* camera) {
     // Calculate the new Front vector
     HMM_Vec3 front;
-    front.X = cosf(HMM_ToRadians(camera->yaw)) * cosf(HMM_ToRadians(camera->pitch));
-    front.Y = sinf(HMM_ToRadians(camera->pitch));
-    front.Z = sinf(HMM_ToRadians(camera->yaw)) * cosf(HMM_ToRadians(camera->pitch));
+    front.X = cosf(HMM_ToRad(camera->yaw)) * cosf(HMM_ToRad(camera->pitch));
+    front.Y = sinf(HMM_ToRad(camera->pitch));
+    front.Z = sinf(HMM_ToRad(camera->yaw)) * cosf(HMM_ToRad(camera->pitch));
     camera->front = HMM_NormV3(front);
     // Also re-calculate the Right and Up vector
     // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.

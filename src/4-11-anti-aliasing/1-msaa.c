@@ -106,7 +106,7 @@ void frame(void) {
         .projection = projection
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 36, 1);
 

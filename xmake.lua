@@ -30,10 +30,14 @@ elseif is_plat("mingw") then
     add_ldflags("-static")
 end
 
+add_includedirs("libs/sokol")
+
 if is_plat("windows", "mingw") then
     add_defines("SOKOL_D3D11")
 elseif is_plat("macosx") then
     add_defines("SOKOL_METAL")
+elseif is_plat("wasm") then 
+    add_defines("SOKOL_GLES3")
 else
 	add_defines("SOKOL_GLCORE33")
 end
@@ -50,7 +54,7 @@ local function split(input, delimiter)
 end
 
 target("shader")
-    set_kind("static")
+    set_kind("object")
     for _, f in ipairs(os.files("src/**/*.glsl")) do
         add_files(f)
     end
@@ -59,7 +63,18 @@ target_end()
 target("sokol_wrapper")
     set_kind("static")
     add_packages("sokol")
-    add_files("libs/sokol/sokol.c")
+    if is_plat("macosx") then
+        add_files("libs/sokol/sokol.m")
+        add_frameworks(
+            "Appkit",
+            "QuartzCore",
+            "CoreGraphics",
+            "Metal",
+            "Metalkit"
+        )
+    else
+        add_files("libs/sokol/sokol.c")
+    end
 target_end()
 
 for _, dir in ipairs(os.filedirs("src/*")) do
@@ -72,9 +87,12 @@ for _, dir in ipairs(os.filedirs("src/*")) do
                 add_files(f)
                 if is_plat("windows", "mingw") then
 		            add_files("src/resource.rc")
+                elseif is_plat("wasm") then
+                    add_ldflags("-sMAX_WEBGL_VERSION=2")
                 end
                 add_includedirs(includedir)
                 add_deps("sokol_wrapper", "shader")
+                set_rundir("resources/textures")
             target_end()
         end
     end

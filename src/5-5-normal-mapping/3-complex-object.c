@@ -194,12 +194,12 @@ void frame(void) {
             .model = HMM_Mat4d(1.f),
             .view_pos = lopgl_camera_position()
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
         vs_dir_light_t vs_dir_light = {
             .direction = HMM_Vec3(-0.2f, -1.0f, -0.3f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_dir_light, &vs_dir_light, sizeof(vs_dir_light));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_dir_light, &SG_RANGE(vs_dir_light));
 
         vs_point_lights_t vs_point_lights = {
             .position[0]    = HMM_Vec4( 0.7f,  0.2f,  2.0f, 1.0f),
@@ -207,20 +207,20 @@ void frame(void) {
             .position[2]    = HMM_Vec4(-4.0f,  2.0f, -12.0f, 1.0f),
             .position[3]    = HMM_Vec4( 0.0f,  0.0f, -3.0f, 1.0f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_point_lights, &vs_point_lights, sizeof(vs_point_lights_t));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_point_lights, &SG_RANGE(vs_point_lights_t));
 
         fs_params_t fs_params = {
             .material_shininess = 64.0f,
             .normal_mapping = state.normal_mapping ? 1.f : 0.f
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &fs_params, sizeof(fs_params));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
 
         fs_dir_light_t fs_dir_light = {
             .ambient = HMM_Vec3(0.05f, 0.05f, 0.05f),
             .diffuse = HMM_Vec3(0.4f, 0.4f, 0.4f),
             .specular = HMM_Vec3(0.5f, 0.5f, 0.5f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &fs_dir_light, sizeof(fs_dir_light));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &SG_RANGE(fs_dir_light));
 
         fs_point_lights_t fs_point_lights = {
             .ambient[0]     = HMM_Vec4(0.05f, 0.05f, 0.05f, 0.0f),
@@ -240,7 +240,7 @@ void frame(void) {
             .specular[3]    = HMM_Vec4(1.0f, 1.0f, 1.0f, 0.0f),
             .attenuation[3] = HMM_Vec4(1.0f, 0.09f, 0.032f, 0.0f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &fs_point_lights, sizeof(fs_point_lights_t));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights_t));
 
         sg_draw(0, state.mesh.face_count * 3, 1);
     }
@@ -278,7 +278,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Complex Object (LearnOpenGL)",
     };
 }

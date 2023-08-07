@@ -1,6 +1,6 @@
 @ctype vec2 hmm_vec2
 @ctype vec3 hmm_vec3
-@ctype mat4 hmm_mat4
+@ctype mat4 HMM_Mat4
 
 @vs vs_offscreen
 in vec3 a_pos;

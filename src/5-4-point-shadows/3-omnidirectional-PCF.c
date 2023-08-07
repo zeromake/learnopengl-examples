@@ -201,7 +201,7 @@ void draw_room_cube() {
         /* invert the outer cube so just the inner faces are shown with back culling */
         .model = HMM_Scale(HMM_Vec3(-5.f, -5.f, -5.f))
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -210,28 +210,28 @@ void draw_cubes() {
     hmm_mat4 translate = HMM_Translate(HMM_Vec3(4.f, -3.5f, 0.f));
     hmm_mat4 scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(2.f, 3.f, 1.f));
     scale = HMM_Scale(HMM_Vec3(.75f, .75f, .75f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-3.f, -1.f, 0.f));
     scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-1.5f, 1.f, 1.5f));
     scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
     vs_params.model = HMM_MultiplyMat4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_Vec3(-1.5f, 2.f, -3.f));
     hmm_mat4 rotate = HMM_Rotate(60.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_Vec3(.75f, .75f, .75f));
     vs_params.model = HMM_MultiplyMat4(HMM_MultiplyMat4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -275,14 +275,14 @@ void frame(void) {
             .light_space_matrix = light_space_transforms[i]
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_depth, &vs_params_depth, sizeof(vs_params_depth));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_depth, &SG_RANGE(vs_params_depth));
 
         fs_params_depth_t fs_params_depth = {
             .light_pos = state.light_pos,
             .far_plane = far_plane
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_depth, &fs_params_depth, sizeof(fs_params_depth));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_depth, &SG_RANGE(fs_params_depth));
 
         draw_cubes();
         sg_end_pass();
@@ -302,7 +302,7 @@ void frame(void) {
         .normal_multiplier = 1.f
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &vs_params_shadows, sizeof(vs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     fs_params_shadows_t fs_params_shadows = {
         .light_pos = state.light_pos,
@@ -310,7 +310,7 @@ void frame(void) {
         .far_plane = far_plane
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &fs_params_shadows, sizeof(fs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &SG_RANGE(fs_params_shadows));
 
     fs_sampling_t fs_sampling = {
         .grid_sampling_disk[0] = HMM_Vec4( 1.f,  1.f,  1.f, 0.f),
@@ -335,13 +335,13 @@ void frame(void) {
         .grid_sampling_disk[19] = HMM_Vec4( 0.f, 1.f, -1.f, 0.f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_sampling, &fs_sampling, sizeof(fs_sampling));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_sampling, &SG_RANGE(fs_sampling));
 
     draw_cubes();
 
     /* invert the normals for the outer cube */
     vs_params_shadows.normal_multiplier = -1.f;
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &vs_params_shadows, sizeof(vs_params_shadows));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     draw_room_cube();
 
@@ -368,7 +368,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Omnidirectional PCF (LearnOpenGL)",
     };
 }

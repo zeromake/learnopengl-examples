@@ -39,7 +39,15 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    state.bind.fs_images[SLOT_ourTexture] = sg_alloc_image();
+    state.bind.fs.images[SLOT__ourTexture] = sg_alloc_image();
+    state.bind.fs.samplers[SLOT_ourTexture_smp] = sg_alloc_sampler();
+    sg_init_sampler(state.bind.fs.samplers[SLOT_ourTexture_smp], &(sg_sampler_desc){
+        .wrap_u = SG_WRAP_REPEAT,
+        .wrap_v = SG_WRAP_REPEAT,
+        .min_filter = SG_FILTER_LINEAR,
+        .mag_filter = SG_FILTER_LINEAR,
+        .compare = SG_COMPAREFUNC_NEVER,
+    });
 
     float vertices[] = {
         // positions         // colors           // texture coords
@@ -62,7 +70,7 @@ static void init(void) {
     state.bind.index_buffer = sg_make_buffer(&(sg_buffer_desc){
         .type = SG_BUFFERTYPE_INDEXBUFFER,
         .size = sizeof(indices),
-        .content = indices,
+        .data = SG_RANGE(indices),
         .label = "quad-indices"
     });
 
@@ -93,8 +101,7 @@ static void init(void) {
     sfetch_send(&(sfetch_request_t){
         .path = "container.jpg",
         .callback = fetch_callback,
-        .buffer_ptr = state.file_buffer,
-        .buffer_size = sizeof(state.file_buffer)
+        .buffer = SFETCH_RANGE(state.file_buffer),
     });
 }
 
@@ -109,22 +116,18 @@ static void fetch_callback(const sfetch_response_t* response) {
         int img_width, img_height, num_channels;
         const int desired_channels = 4;
         stbi_uc* pixels = stbi_load_from_memory(
-            response->buffer_ptr,
-            (int)response->fetched_size,
+            response->data.ptr,
+            (int)response->data.size,
             &img_width, &img_height,
             &num_channels, desired_channels);
         if (pixels) {
             /* initialize the sokol-gfx texture */
-            sg_init_image(state.bind.fs_images[SLOT_ourTexture], &(sg_image_desc){
+            sg_init_image(state.bind.fs.images[SLOT__ourTexture], &(sg_image_desc){
                 .width = img_width,
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */
                 .pixel_format = SG_PIXELFORMAT_RGBA8,
-                .wrap_u = SG_WRAP_REPEAT,
-                .wrap_v = SG_WRAP_REPEAT,
-                .min_filter = SG_FILTER_LINEAR,
-                .mag_filter = SG_FILTER_LINEAR,
-                .content.subimage[0][0] = {
+                .data.subimage[0][0] = {
                     .ptr = pixels,
                     .size = img_width * img_height * 4,
                 }
@@ -135,7 +138,7 @@ static void fetch_callback(const sfetch_response_t* response) {
     else if (response->failed) {
         // if loading the file failed, set clear color to red
         state.pass_action = (sg_pass_action) {
-            .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+            .colors[0] = { .load_action = SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
         };
     }
 }
@@ -172,7 +175,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Texture Blend - LearnOpenGL",
     };
 }

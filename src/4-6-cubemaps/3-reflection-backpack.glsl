@@ -1,5 +1,5 @@
 @ctype vec3 hmm_vec3
-@ctype mat4 hmm_mat4
+@ctype mat4 HMM_Mat4
 
 @vs vs
 in vec3 a_pos;

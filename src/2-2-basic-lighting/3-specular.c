@@ -141,7 +141,7 @@ void frame(void) {
     sg_apply_bindings(&state.bind);
 
     vs_params.model = HMM_Mat4d(1.f);;
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     fs_params_t fs_params = {
         .objectColor = state.object_color,
@@ -149,7 +149,7 @@ void frame(void) {
         .lightColor = state.light_color,
         .lightPos = state.light_pos
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &fs_params, sizeof(fs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
 
     sg_draw(0, 36, 1);
 
@@ -157,7 +157,7 @@ void frame(void) {
     sg_apply_bindings(&state.bind);
     vs_params.model = HMM_Translate(state.light_pos);
     vs_params.model = HMM_MultiplyMat4(vs_params.model, HMM_Scale(HMM_Vec3(0.2f, 0.2f, 0.2f)));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &vs_params, sizeof(vs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     lopgl_render_help();
@@ -184,7 +184,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .width = 800,
         .height = 600,
         .high_dpi = true,
-        
         .window_title = "Specular (LearnOpenGL)",
     };
 }
