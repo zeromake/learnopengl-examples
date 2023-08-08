@@ -1,4 +1,4 @@
-@ctype vec4 hmm_vec4
+@ctype vec4 HMM_Vec4
 
 @vs vs
 in vec2 aPos;

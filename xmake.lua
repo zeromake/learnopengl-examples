@@ -94,7 +94,7 @@ for _, dir in ipairs(os.filedirs("src/*")) do
                 end
                 add_includedirs(includedir)
                 add_deps("sokol_wrapper", "shader")
-                set_rundir("resources/textures")
+                set_rundir("src/data")
             target_end()
         end
     end

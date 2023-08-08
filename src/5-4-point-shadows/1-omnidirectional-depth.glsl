@@ -6,7 +6,7 @@
 //  http://aras-p.info/blog/2009/07/30/encoding-floats-to-rgba-the-final/
 //
 
-@ctype vec3 hmm_vec3
+@ctype vec3 HMM_Vec3
 @ctype mat4 HMM_Mat4
 
 @block vs_params

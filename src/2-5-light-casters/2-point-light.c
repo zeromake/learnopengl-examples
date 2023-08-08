@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "2-point-light.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -15,14 +15,14 @@ static struct {
     sg_bindings bind_object;
     sg_bindings bind_light;
     sg_pass_action pass_action;
-    hmm_vec3 light_pos;
-    hmm_vec3 cube_positions[10];
+    HMM_Vec3 light_pos;
+    HMM_Vec3 cube_positions[10];
     uint8_t file_buffer[512 * 1024];
 } state;
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -33,18 +33,18 @@ static void init(void) {
     state.bind_object.fs_images[SLOT_specular_texture] = sg_alloc_image();
 
     // set object and light configuration
-    state.light_pos = HMM_Vec3(1.2f, 1.0f, 2.0f);
+    state.light_pos = HMM_V3(1.2f, 1.0f, 2.0f);
 
-    state.cube_positions[0] = HMM_Vec3( 0.0f,  0.0f,  0.0f);
-    state.cube_positions[1] = HMM_Vec3( 2.0f,  5.0f, -15.0f);
-    state.cube_positions[2] = HMM_Vec3(-1.5f, -2.2f, -2.5f);
-    state.cube_positions[3] = HMM_Vec3(-3.8f, -2.0f, -12.3f);
-    state.cube_positions[4] = HMM_Vec3( 2.4f, -0.4f, -3.5f);
-    state.cube_positions[5] = HMM_Vec3(-1.7f,  3.0f, -7.5f);
-    state.cube_positions[6] = HMM_Vec3( 1.3f, -2.0f, -2.5f);
-    state.cube_positions[7] = HMM_Vec3( 1.5f,  2.0f, -2.5f);
-    state.cube_positions[8] = HMM_Vec3( 1.5f,  0.2f, -1.5f);
-    state.cube_positions[9] = HMM_Vec3(-1.3f,  1.0f, -1.5f);
+    state.cube_positions[0] = HMM_V3( 0.0f,  0.0f,  0.0f);
+    state.cube_positions[1] = HMM_V3( 2.0f,  5.0f, -15.0f);
+    state.cube_positions[2] = HMM_V3(-1.5f, -2.2f, -2.5f);
+    state.cube_positions[3] = HMM_V3(-3.8f, -2.0f, -12.3f);
+    state.cube_positions[4] = HMM_V3( 2.4f, -0.4f, -3.5f);
+    state.cube_positions[5] = HMM_V3(-1.7f,  3.0f, -7.5f);
+    state.cube_positions[6] = HMM_V3( 1.3f, -2.0f, -2.5f);
+    state.cube_positions[7] = HMM_V3( 1.5f,  2.0f, -2.5f);
+    state.cube_positions[8] = HMM_V3( 1.5f,  0.2f, -1.5f);
+    state.cube_positions[9] = HMM_V3(-1.3f,  1.0f, -1.5f);
 
     float vertices[] = {
         // positions          // normals           // texture coords
@@ -101,7 +101,7 @@ static void init(void) {
     state.bind_light.vertex_buffers[0] = cube_buffer;
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader phong_shd = sg_make_shader(phong_shader_desc());
+    sg_shader phong_shd = sg_make_shader(phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object */
     state.pip_object = sg_make_pipeline(&(sg_pipeline_desc){
@@ -114,15 +114,15 @@ static void init(void) {
                 [ATTR_vs_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = "object-pipeline"
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader light_cube_shd = sg_make_shader(light_cube_shader_desc());
+    sg_shader light_cube_shd = sg_make_shader(light_cube_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for light cube */
     state.pip_light = sg_make_pipeline(&(sg_pipeline_desc){
@@ -133,9 +133,9 @@ static void init(void) {
             },
             .buffers[0].stride = 32
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = "light-cube-pipeline"
     });
@@ -185,17 +185,17 @@ void frame(void) {
     
     fs_light_t fs_light = {
         .position = state.light_pos,
-        .ambient = HMM_Vec3(0.2f, 0.2f, 0.2f),
-        .diffuse = HMM_Vec3(0.5f, 0.5f, 0.5f),
-        .specular = HMM_Vec3(1.0f, 1.0f, 1.0f),
+        .ambient = HMM_V3(0.2f, 0.2f, 0.2f),
+        .diffuse = HMM_V3(0.5f, 0.5f, 0.5f),
+        .specular = HMM_V3(1.0f, 1.0f, 1.0f),
         .constant = 1.0f,
         .linear = 0.09f,
         .quadratic = 0.032f
     };
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_light, &SG_RANGE(fs_light));
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,
@@ -203,9 +203,9 @@ void frame(void) {
     };
 
     for(size_t i = 0; i < 10; i++) {
-        hmm_mat4 model = HMM_Translate(state.cube_positions[i]);
+        HMM_Mat4 model = HMM_Translate(state.cube_positions[i]);
         float angle = 20.0f * i; 
-        model = HMM_MultiplyMat4(model, HMM_Rotate(angle, HMM_Vec3(1.0f, 0.3f, 0.5f)));
+        model = HMM_MulM4(model, HMM_Rotate_RH(angle, HMM_V3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
         sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
@@ -215,7 +215,7 @@ void frame(void) {
     sg_apply_pipeline(state.pip_light);
     sg_apply_bindings(&state.bind_light);
     vs_params.model = HMM_Translate(state.light_pos);
-    vs_params.model = HMM_MultiplyMat4(vs_params.model, HMM_Scale(HMM_Vec3(0.2f, 0.2f, 0.2f)));
+    vs_params.model = HMM_MulM4(vs_params.model, HMM_Scale(HMM_V3(0.2f, 0.2f, 0.2f)));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 

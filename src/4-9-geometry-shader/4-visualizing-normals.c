@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "4-visualizing-normals.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -29,7 +29,7 @@ static struct {
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -97,14 +97,14 @@ static void init(void) {
                 [ATTR_vs_simple_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
             },
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = "diffuse-pipeline"
     });
 
-    sg_shader normals_shd = sg_make_shader(normals_shader_desc());
+    sg_shader normals_shd = sg_make_shader(normals_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for the normals */
     state.mesh.pip_normals = sg_make_pipeline(&(sg_pipeline_desc){
@@ -116,9 +116,9 @@ static void init(void) {
                 [ATTR_vs_normals_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
             },
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = "normals-pipeline"
     });
@@ -149,11 +149,11 @@ void frame(void) {
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
 
     if (state.mesh.face_count > 0) {
-        hmm_mat4 view = lopgl_view_matrix();
-        hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+        HMM_Mat4 view = lopgl_view_matrix();
+        HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
         vs_params_t vs_params = {
-            .model = HMM_Mat4d(1.f),
+            .model = HMM_M4D(1.f),
             .view = view,
             .projection = projection,
         };

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "2-rendering-shadows.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -23,14 +23,14 @@ static struct {
         sg_bindings bind_cube;
         sg_bindings bind_plane;
     } shadows;
-    hmm_vec3 light_pos;
-    hmm_mat4 light_space_matrix;
+    HMM_Vec3 light_pos;
+    HMM_Mat4 light_space_matrix;
     uint8_t file_buffer[2 * 1024 * 1024];
 } state;
 
 static void fail_callback() {
     state.shadows.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -38,12 +38,12 @@ static void init(void) {
     lopgl_setup();
 
     // compute light space matrix
-    state.light_pos = HMM_Vec3(-2.f, 4.f, -1.f);
+    state.light_pos = HMM_V3(-2.f, 4.f, -1.f);
     float near_plane = 1.f;
     float far_plane = 7.5f;
-    hmm_mat4 light_projection = HMM_Orthographic(-10.f, 10.f, -10.f, 10.f, near_plane, far_plane);
-    hmm_mat4 light_view = HMM_LookAt(state.light_pos, HMM_Vec3(0.f, 0.f, 0.f), HMM_Vec3(0.f, 1.f, 0.f));
-    state.light_space_matrix = HMM_MultiplyMat4(light_projection, light_view);
+    HMM_Mat4 light_projection = HMM_Orthographic(-10.f, 10.f, -10.f, 10.f, near_plane, far_plane);
+    HMM_Mat4 light_view = HMM_LookAt_RH(state.light_pos, HMM_V3(0.f, 0.f, 0.f), HMM_V3(0.f, 1.f, 0.f));
+    state.light_space_matrix = HMM_MulM4(light_projection, light_view);
 
      /* a render pass with one color- and one depth-attachment image */
     sg_image_desc img_desc = {
@@ -118,7 +118,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .content = cube_vertices,
+        .data = SG_RANGE(cube_vertices)
         .label = "cube-vertices"
     });
     
@@ -138,14 +138,14 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .content = plane_vertices,
+        .data = SG_RANGE(plane_vertices)
         .label = "plane-vertices"
     });
     
     state.depth.bind_plane.vertex_buffers[0] = plane_buffer;
     state.shadows.bind_plane.vertex_buffers[0] = plane_buffer;
 
-    sg_shader shd_depth = sg_make_shader(depth_shader_desc());
+    sg_shader shd_depth = sg_make_shader(depth_shader_desc(sg_query_backend()));
 
     state.depth.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .shader = shd_depth,
@@ -156,9 +156,9 @@ static void init(void) {
                 [ATTR_vs_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .blend = {
             .color_format = SG_PIXELFORMAT_RGBA8,
@@ -167,7 +167,7 @@ static void init(void) {
         .label = "depth-pipeline"
     });
 
-    sg_shader shd_shadows = sg_make_shader(shadows_shader_desc());
+    sg_shader shd_shadows = sg_make_shader(shadows_shader_desc(sg_query_backend()));
 
     state.shadows.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .shader = shd_shadows,
@@ -178,9 +178,9 @@ static void init(void) {
                 [ATTR_vs_shadows_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = "shadows-pipeline"
     });
@@ -209,23 +209,23 @@ static void init(void) {
 void draw_cubes() {
     vs_params_t vs_params = {
         .light_space_matrix = state.light_space_matrix,
-        .model = HMM_Mat4d(1.f)
+        .model = HMM_M4D(1.f)
     };
 
-    hmm_mat4 translate = HMM_Translate(HMM_Vec3(0.f, 1.5f, 0.f));
-    hmm_mat4 scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
-    vs_params.model = HMM_MultiplyMat4(translate, scale);
+    HMM_Mat4 translate = HMM_Translate(HMM_V3(0.f, 1.5f, 0.f));
+    HMM_Mat4 scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
+    vs_params.model = HMM_MulM4(translate, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
-    translate = HMM_Translate(HMM_Vec3(2.f, 0.f, 1.f));
-    scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
-    vs_params.model = HMM_MultiplyMat4(translate, scale);
+    translate = HMM_Translate(HMM_V3(2.f, 0.f, 1.f));
+    scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
+    vs_params.model = HMM_MulM4(translate, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
-    translate = HMM_Translate(HMM_Vec3(-1.f, 0.f, 2.f));
-    hmm_mat4 rotate = HMM_Rotate(60.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
-    scale = HMM_Scale(HMM_Vec3(.25f, .25f, .25f));
-    vs_params.model = HMM_MultiplyMat4(HMM_MultiplyMat4(translate, rotate), scale);
+    translate = HMM_Translate(HMM_V3(-1.f, 0.f, 2.f));
+    HMM_Mat4 rotate = HMM_Rotate_RH(60.f, HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
+    scale = HMM_Scale(HMM_V3(.25f, .25f, .25f));
+    vs_params.model = HMM_MulM4(HMM_MulM4(translate, rotate), scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
@@ -242,7 +242,7 @@ void frame(void) {
 
     vs_params_t vs_params = {
         .light_space_matrix = state.light_space_matrix,
-        .model = HMM_Mat4d(1.f)
+        .model = HMM_M4D(1.f)
     };
 
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
@@ -261,8 +261,8 @@ void frame(void) {
     sg_apply_bindings(&state.shadows.bind_plane);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_shadows_t vs_params_shadows = {
         .projection = projection,

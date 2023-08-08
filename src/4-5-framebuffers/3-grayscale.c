@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "3-grayscale.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -28,7 +28,7 @@ static struct {
 
 static void fail_callback() {
     state.display.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -135,7 +135,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .content = cube_vertices,
+        .data = SG_RANGE(cube_vertices)
         .label = "cube-vertices"
     });
 
@@ -152,7 +152,7 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .content = plane_vertices,
+        .data = SG_RANGE(plane_vertices)
         .label = "plane-vertices"
     });
 
@@ -169,7 +169,7 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .content = quad_vertices,
+        .data = SG_RANGE(quad_vertices)
         .label = "quad-vertices"
     });
     
@@ -188,9 +188,9 @@ static void init(void) {
                 [ATTR_vs_offscreen_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
         },
         .blend = {
             .color_format = SG_PIXELFORMAT_RGBA8,
@@ -236,8 +236,8 @@ static void init(void) {
 void frame(void) {
     lopgl_update();
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,
@@ -249,17 +249,17 @@ void frame(void) {
     sg_apply_pipeline(state.offscreen.pip);
     sg_apply_bindings(&state.offscreen.bind_cube);
 
-    vs_params.model = HMM_Translate(HMM_Vec3(-1.0f, 0.0f, -1.0f));
+    vs_params.model = HMM_Translate(HMM_V3(-1.0f, 0.0f, -1.0f));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
-    vs_params.model = HMM_Translate(HMM_Vec3(2.0f, 0.0f, 0.0f));
+    vs_params.model = HMM_Translate(HMM_V3(2.0f, 0.0f, 0.0f));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_apply_bindings(&state.offscreen.bind_plane);
 
-    vs_params.model = HMM_Mat4d(1.0f);
+    vs_params.model = HMM_M4D(1.0f);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 

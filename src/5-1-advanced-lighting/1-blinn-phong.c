@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "1-blinn-phong.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -13,14 +13,14 @@ static struct {
     sg_pipeline pip;
     sg_bindings bind;
     sg_pass_action pass_action;
-    hmm_vec3 light_pos;
+    HMM_Vec3 light_pos;
     bool blinn;
     uint8_t file_buffer[2 * 1024 * 1024];
 } state;
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -28,7 +28,7 @@ static void init(void) {
     lopgl_setup();
 
     // set light position
-    state.light_pos = HMM_Vec3(0.f, 0.f, 0.f);
+    state.light_pos = HMM_V3(0.f, 0.f, 0.f);
 
     // default is blinn phong shading
     state.blinn = true;
@@ -53,7 +53,7 @@ static void init(void) {
     state.bind.vertex_buffers[0] = plane_buffer;
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(blinn_phong_shader_desc());
+    sg_shader shd = sg_make_shader(blinn_phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
@@ -75,7 +75,7 @@ static void init(void) {
     };
 
     sg_image img_id_floor = sg_alloc_image();
-    state.bind.fs_images[SLOT_floor_texture] = img_id_floor;
+    state.bind.fs.images[SLOT__floor_texture] = img_id_floor;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",
@@ -105,8 +105,8 @@ void frame(void) {
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,

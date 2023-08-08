@@ -39,7 +39,7 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    state.bind.fs.images[SLOT__ourTexture] = sg_alloc_image();
+    sg_alloc_image_smp(state.bind.fs, SLOT__ourTexture, SLOT_ourTexture_smp)
     state.bind.fs.samplers[SLOT_ourTexture_smp] = sg_alloc_sampler();
     sg_init_sampler(state.bind.fs.samplers[SLOT_ourTexture_smp], &(sg_sampler_desc){
         .wrap_u = SG_WRAP_REPEAT,

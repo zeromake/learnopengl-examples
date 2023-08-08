@@ -293,7 +293,7 @@ void lopgl_setup() {
         .heading = 0.f,
         .distance = 6.f,
         .zoom_speed = .5f,
-        .rotate_speed = 1.f,
+        .rotate_speed = 0.01f,
         .min_dist = 1.f,
         .max_dist = 10.f,
         .min_pitch = -89.f,
@@ -571,10 +571,6 @@ static void image_fetch_callback(const sfetch_response_t* response) {
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */
                 .pixel_format = SG_PIXELFORMAT_RGBA8,
-                // .wrap_u = req_data.wrap_u,
-                // .wrap_v = req_data.wrap_v,
-                // .min_filter = SG_FILTER_LINEAR,
-                // .mag_filter = SG_FILTER_LINEAR,
                 .data.subimage[0][0] = {
                     .ptr = pixels,
                     .size = img_width * img_height * desired_channels,
@@ -648,7 +644,7 @@ void lopgl_load_image(const lopgl_image_request_t* request) {
     sfetch_send(&(sfetch_request_t){
         .path = request->path,
         .callback = image_fetch_callback,
-        .buffer = &(sg_range){&request->buffer_ptr, request->buffer_size},
+        .buffer = &(sg_range){request->buffer_ptr, request->buffer_size},
         .user_data = &SG_RANGE(req_data),
     });
 }
@@ -666,7 +662,7 @@ void lopgl_load_obj(const lopgl_obj_request_t* request) {
     sfetch_send(&(sfetch_request_t){
         .path = request->path,
         .callback = obj_fetch_callback,
-        .buffer = &(sg_range){&request->buffer_ptr, request->buffer_size},
+        .buffer = &(sg_range){request->buffer_ptr, request->buffer_size},
         .user_data = &SG_RANGE(req_data),
     });
 }

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "1-object-outlining.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -22,7 +22,7 @@ static struct {
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -76,7 +76,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .content = cube_vertices,
+        .data = SG_RANGE(cube_vertices)
         .label = "cube-vertices"
     });
     
@@ -96,14 +96,14 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .content = plane_vertices,
+        .data = SG_RANGE(plane_vertices)
         .label = "plane-vertices"
     });
     
     state.bind_plane.vertex_buffers[0] = plane_buffer;
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader phong_shd = sg_make_shader(phong_shader_desc());
+    sg_shader phong_shd = sg_make_shader(phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for the cubes */
     state.pip_cube = sg_make_pipeline(&(sg_pipeline_desc){
@@ -115,9 +115,9 @@ static void init(void) {
                 [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
             .stencil_front = {
                 .pass_op = SG_STENCILOP_REPLACE,
             },
@@ -141,16 +141,16 @@ static void init(void) {
                 [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
             .stencil_enabled = false
         },
         .label = "pipeline"
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader outline_shd = sg_make_shader(outline_shader_desc());
+    sg_shader outline_shd = sg_make_shader(outline_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object outlines */
     state.pip_cube_outline = sg_make_pipeline(&(sg_pipeline_desc){
@@ -164,8 +164,8 @@ static void init(void) {
                 .stride = 20
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_ALWAYS,
+        .depth = {
+            .compare =SG_COMPAREFUNC_ALWAYS,
             .stencil_front = {
                 .compare_func = SG_COMPAREFUNC_NOT_EQUAL
             },
@@ -211,8 +211,8 @@ void frame(void) {
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,
@@ -222,33 +222,33 @@ void frame(void) {
     sg_apply_pipeline(state.pip_cube);
     sg_apply_bindings(&state.bind_cube);
 
-    vs_params.model = HMM_Translate(HMM_Vec3(-1.0f, 0.0f, -1.0f));
+    vs_params.model = HMM_Translate(HMM_V3(-1.0f, 0.0f, -1.0f));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
-    vs_params.model = HMM_Translate(HMM_Vec3(2.0f, 0.0f, 0.0f));
+    vs_params.model = HMM_Translate(HMM_V3(2.0f, 0.0f, 0.0f));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_apply_pipeline(state.pip_plane);
     sg_apply_bindings(&state.bind_plane);
 
-    vs_params.model = HMM_Mat4d(1.0f);
+    vs_params.model = HMM_M4D(1.0f);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     sg_apply_pipeline(state.pip_cube_outline);
     sg_apply_bindings(&state.bind_cube_outline);
 
-    hmm_mat4 scale = HMM_Scale(HMM_Vec3(1.1f, 1.1f, 1.1f));
+    HMM_Mat4 scale = HMM_Scale(HMM_V3(1.1f, 1.1f, 1.1f));
 
-    vs_params.model = HMM_Translate(HMM_Vec3(-1.0f, 0.0f, -1.0f));
-    vs_params.model = HMM_MultiplyMat4(vs_params.model, scale);
+    vs_params.model = HMM_Translate(HMM_V3(-1.0f, 0.0f, -1.0f));
+    vs_params.model = HMM_MulM4(vs_params.model, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
-    vs_params.model = HMM_Translate(HMM_Vec3(2.0f, 0.0f, 0.0f));
-    vs_params.model = HMM_MultiplyMat4(vs_params.model, scale);
+    vs_params.model = HMM_Translate(HMM_V3(2.0f, 0.0f, 0.0f));
+    vs_params.model = HMM_MulM4(vs_params.model, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 

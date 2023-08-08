@@ -1,4 +1,4 @@
-@ctype vec2 hmm_vec2
+@ctype vec2 HMM_Vec2
 @ctype mat4 HMM_Mat4
 
 @vs vs_offscreen

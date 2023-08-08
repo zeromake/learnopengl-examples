@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "2-tangent-space.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -13,21 +13,21 @@ static struct {
     sg_pipeline pip;
     sg_bindings bind;
     sg_pass_action pass_action;
-    hmm_vec3 light_pos;
+    HMM_Vec3 light_pos;
     uint8_t file_buffer[1024 * 1024];
 } state;
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
-hmm_vec3 computeTangent(hmm_vec3 pos0, hmm_vec3 pos1, hmm_vec3 pos2, hmm_vec2 uv0, hmm_vec2 uv1, hmm_vec2 uv2) {
-    hmm_vec3 edge0 = HMM_SubtractVec3(pos1, pos0);
-    hmm_vec3 edge1 = HMM_SubtractVec3(pos2, pos0);
-    hmm_vec2 delta_uv0 = HMM_SubtractVec2(uv1, uv0);
-    hmm_vec2 delta_uv1 = HMM_SubtractVec2(uv2, uv0);
+HMM_Vec3 computeTangent(HMM_Vec3 pos0, HMM_Vec3 pos1, HMM_Vec3 pos2, HMM_Vec2 uv0, HMM_Vec2 uv1, HMM_Vec2 uv2) {
+    HMM_Vec3 edge0 = HMM_SubV3(pos1, pos0);
+    HMM_Vec3 edge1 = HMM_SubV3(pos2, pos0);
+    HMM_Vec2 delta_uv0 = HMM_SubV2(uv1, uv0);
+    HMM_Vec2 delta_uv1 = HMM_SubV2(uv2, uv0);
 
     float f = 1.f / (delta_uv0.X * delta_uv1.Y - delta_uv1.X * delta_uv0.Y);
 
@@ -35,29 +35,29 @@ hmm_vec3 computeTangent(hmm_vec3 pos0, hmm_vec3 pos1, hmm_vec3 pos2, hmm_vec2 uv
     float y = f * (delta_uv1.Y * edge0.Y - delta_uv0.Y * edge1.Y);
     float z = f * (delta_uv1.Y * edge0.Z - delta_uv0.Y * edge1.Z);
 
-    return HMM_Vec3(x, y, z);
+    return HMM_V3(x, y, z);
 }
 
 static void init(void) {
     lopgl_setup();
 
-    state.light_pos = HMM_Vec3(.5f, 1.f, .3f);
+    state.light_pos = HMM_V3(.5f, 1.f, .3f);
 
     /* positions */
-    hmm_vec3 pos0 = HMM_Vec3(-1.f,  1.f, 0.f);
-    hmm_vec3 pos1 = HMM_Vec3(-1.f, -1.f, 0.f);
-    hmm_vec3 pos2 = HMM_Vec3( 1.f, -1.f, 0.f);
-    hmm_vec3 pos3 = HMM_Vec3( 1.f,  1.f, 0.f);
+    HMM_Vec3 pos0 = HMM_V3(-1.f,  1.f, 0.f);
+    HMM_Vec3 pos1 = HMM_V3(-1.f, -1.f, 0.f);
+    HMM_Vec3 pos2 = HMM_V3( 1.f, -1.f, 0.f);
+    HMM_Vec3 pos3 = HMM_V3( 1.f,  1.f, 0.f);
     /* texture coordinates */
-    hmm_vec2 uv0 = HMM_Vec2(0.f, 1.f);
-    hmm_vec2 uv1 = HMM_Vec2(0.f, 0.f);
-    hmm_vec2 uv2 = HMM_Vec2(1.f, 0.f);  
-    hmm_vec2 uv3 = HMM_Vec2(1.f, 1.f);
+    HMM_Vec2 uv0 = HMM_V2(0.f, 1.f);
+    HMM_Vec2 uv1 = HMM_V2(0.f, 0.f);
+    HMM_Vec2 uv2 = HMM_V2(1.f, 0.f);  
+    HMM_Vec2 uv3 = HMM_V2(1.f, 1.f);
     /* normal vector */
-    hmm_vec3 nm = HMM_Vec3(0.f, 0.f, 1.f);
+    HMM_Vec3 nm = HMM_V3(0.f, 0.f, 1.f);
     /* tangents */
-    hmm_vec3 ta0 = computeTangent(pos0, pos1, pos2, uv0, uv1, uv2);
-    hmm_vec3 ta1 = computeTangent(pos0, pos2, pos3, uv0, uv2, uv3);
+    HMM_Vec3 ta0 = computeTangent(pos0, pos1, pos2, uv0, uv1, uv2);
+    HMM_Vec3 ta1 = computeTangent(pos0, pos2, pos3, uv0, uv2, uv3);
 
     /* we can compute the bitangent in the vertex shader by taking 
        the cross product of the normal and tangent */
@@ -74,14 +74,14 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .content = quad_vertices,
+        .data = SG_RANGE(quad_vertices)
         .label = "quad-vertices"
     });
     
     state.bind.vertex_buffers[0] = quad_buffer;
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(blinn_phong_shader_desc());
+    sg_shader shd = sg_make_shader(blinn_phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
@@ -104,7 +104,7 @@ static void init(void) {
     };
 
     sg_image img_id_diffuse = sg_alloc_image();
-    state.bind.fs_images[SLOT_diffuse_map] = img_id_diffuse;
+    state.bind.fs.images[SLOT__diffuse_map] = img_id_diffuse;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall.jpg",
@@ -115,7 +115,7 @@ static void init(void) {
     });
 
     sg_image img_id_normal = sg_alloc_image();
-    state.bind.fs_images[SLOT_normal_map] = img_id_normal;
+    state.bind.fs.images[SLOT__normal_map] = img_id_normal;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall_normal.jpg",
@@ -134,10 +134,10 @@ void frame(void) {
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
     /* rotate the quad to show normal mapping from multiple directions */
-    hmm_mat4 model = HMM_Rotate((float)stm_sec(stm_now()) * -10.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
+    HMM_Mat4 model = HMM_Rotate_RH((float)stm_sec(stm_now()) * -10.f, HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
 
     vs_params_t vs_params = {
         .view = view,

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "3-front-facing.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -18,7 +18,7 @@ static struct {
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -89,9 +89,9 @@ static void init(void) {
                 [ATTR_vs_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
         },
         .rasterizer = {
             .cull_mode = SG_CULLMODE_NONE,
@@ -106,7 +106,7 @@ static void init(void) {
     };
 
     sg_image img_id_front = sg_alloc_image();
-    state.bind.fs_images[SLOT_front_texture] = img_id_front;
+    state.bind.fs.images[SLOT__front_texture] = img_id_front;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "uv_grid.png",
@@ -127,7 +127,7 @@ static void init(void) {
         }
     }
 
-    state.bind.fs_images[SLOT_back_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.fs.images[SLOT__back_texture] = sg_make_image(&(sg_image_desc){
         .width = 16,
         .height = 16,
         .content.subimage[0][0] = {
@@ -143,8 +143,8 @@ void frame(void) {
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,
@@ -155,8 +155,8 @@ void frame(void) {
     sg_apply_bindings(&state.bind);
 
     // TODO: adjust camera instead of scaling model
-    //vs_params.model = HMM_Mat4d(1.f);
-    vs_params.model = HMM_Scale(HMM_Vec3(2.f, 2.f, 2.f));
+    //vs_params.model = HMM_M4D(1.f);
+    vs_params.model = HMM_Scale(HMM_V3(2.f, 2.f, 2.f));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 36, 1);

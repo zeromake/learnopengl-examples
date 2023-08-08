@@ -45,20 +45,20 @@ static void init(void) {
         .label = "quad-vertices"
     });
 
-    hmm_vec2 translations[100];
+    HMM_Vec2 translations[100];
     int index = 0;
     float offset = 0.1f;
     for(int y = -10; y < 10; y += 2) {
         for(int x = -10; x < 10; x += 2) {
             float x_pos = (float)x / 10.0f + offset;
             float y_pos = (float)y / 10.0f + offset;
-            translations[index++] = HMM_Vec2(x_pos, y_pos);
+            translations[index++] = HMM_V2(x_pos, y_pos);
         }
     }
 
     state.bind.vertex_buffers[1] = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(translations),
-        .content = translations,
+        .data = SG_RANGE(translations)
         .label = "offsets"
     });
 

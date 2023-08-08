@@ -3,7 +3,8 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
+#include "sokol_helper.h"
 #include "3-complex-object.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -11,10 +12,10 @@
 static const char* filename = "backpack.obj";
 
 typedef struct vertex {
-    hmm_vec3 pos;
-    hmm_vec3 normal;
-    hmm_vec2 tex_coords;
-    hmm_vec3 tangent;
+    HMM_Vec3 pos;
+    HMM_Vec3 normal;
+    HMM_Vec2 tex_coords;
+    HMM_Vec3 tangent;
 } vertex_t;
 
 typedef struct mesh_t {
@@ -34,22 +35,22 @@ static struct {
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
-hmm_vec3 computeTangent(vertex_t* v0, vertex_t* v1, vertex_t* v2) {
-    hmm_vec3 edge0 = HMM_SubtractVec3(v1->pos, v0->pos);
-    hmm_vec3 edge1 = HMM_SubtractVec3(v2->pos, v0->pos);
-    hmm_vec2 delta_uv0 = HMM_SubtractVec2(v1->tex_coords, v0->tex_coords);
-    hmm_vec2 delta_uv1 = HMM_SubtractVec2(v2->tex_coords, v0->tex_coords);
+HMM_Vec3 computeTangent(vertex_t* v0, vertex_t* v1, vertex_t* v2) {
+    HMM_Vec3 edge0 = HMM_SubV3(v1->pos, v0->pos);
+    HMM_Vec3 edge1 = HMM_SubV3(v2->pos, v0->pos);
+    HMM_Vec2 delta_uv0 = HMM_SubV2(v1->tex_coords, v0->tex_coords);
+    HMM_Vec2 delta_uv1 = HMM_SubV2(v2->tex_coords, v0->tex_coords);
 
     float f = 1.f / (delta_uv0.X * delta_uv1.Y - delta_uv1.X * delta_uv0.Y);
     float x = f * (delta_uv1.Y * edge0.X - delta_uv0.Y * edge1.X);
     float y = f * (delta_uv1.Y * edge0.Y - delta_uv0.Y * edge1.Y);
     float z = f * (delta_uv1.Y * edge0.Z - delta_uv0.Y * edge1.Z);
 
-    return HMM_Vec3(x, y, z);
+    return HMM_V3(x, y, z);
 }
 
 static vertex_t getVertex(unsigned int index, fastObjMesh* mesh) {
@@ -85,18 +86,18 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = mesh->face_count * 3 * 11 * sizeof(float),
-        .content = state.vertex_buffer,
+        .data = SG_RANGE(state.vertex_buffer),
         .label = "backpack-vertices"
     });
     
     state.mesh.bind.vertex_buffers[0] = cube_buffer;
-    
-    sg_image img_id_diffuse = sg_alloc_image();
-    sg_image img_id_specular = sg_alloc_image();
-    sg_image img_id_normal = sg_alloc_image();
-    state.mesh.bind.fs_images[SLOT_diffuse_map] = img_id_diffuse;
-    state.mesh.bind.fs_images[SLOT_specular_map] = img_id_specular;
-    state.mesh.bind.fs_images[SLOT_normal_map] = img_id_normal;
+
+    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__diffuse_map, SLOT_diffuse_map_smp);
+    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__specular_map, SLOT_specular_map_smp);
+    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__normal_map, SLOT_normal_map_smp);
+    sg_image img_id_diffuse = state.mesh.bind.fs.images[SLOT__diffuse_map];
+    sg_image img_id_specular = state.mesh.bind.fs.images[SLOT__specular_map];
+    sg_image img_id_normal = state.mesh.bind.fs.images[SLOT__normal_map];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -130,7 +131,7 @@ static void init(void) {
     state.normal_mapping = true;
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(blinn_phong_shader_desc());
+    sg_shader shd = sg_make_shader(blinn_phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object */
     state.mesh.pip = sg_make_pipeline(&(sg_pipeline_desc){
@@ -144,9 +145,9 @@ static void init(void) {
                 [ATTR_vs_a_tangent].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare = SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled = true,
         },
         .label = "object-pipeline"
     });
@@ -185,29 +186,29 @@ void frame(void) {
         sg_apply_pipeline(state.mesh.pip);
         sg_apply_bindings(&state.mesh.bind);
 
-        hmm_mat4 view = lopgl_view_matrix();
-        hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+        HMM_Mat4 view = lopgl_view_matrix();
+        HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
         vs_params_t vs_params = {
             .view = view,
             .projection = projection,
-            .model = HMM_Mat4d(1.f),
+            .model = HMM_M4D(1.f),
             .view_pos = lopgl_camera_position()
         };
         sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 
         vs_dir_light_t vs_dir_light = {
-            .direction = HMM_Vec3(-0.2f, -1.0f, -0.3f)
+            .direction = HMM_V3(-0.2f, -1.0f, -0.3f)
         };
         sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_dir_light, &SG_RANGE(vs_dir_light));
 
         vs_point_lights_t vs_point_lights = {
-            .position[0]    = HMM_Vec4( 0.7f,  0.2f,  2.0f, 1.0f),
-            .position[1]    = HMM_Vec4( 2.3f, -3.3f, -4.0f, 1.0f),
-            .position[2]    = HMM_Vec4(-4.0f,  2.0f, -12.0f, 1.0f),
-            .position[3]    = HMM_Vec4( 0.0f,  0.0f, -3.0f, 1.0f)
+            .position[0]    = HMM_V4( 0.7f,  0.2f,  2.0f, 1.0f),
+            .position[1]    = HMM_V4( 2.3f, -3.3f, -4.0f, 1.0f),
+            .position[2]    = HMM_V4(-4.0f,  2.0f, -12.0f, 1.0f),
+            .position[3]    = HMM_V4( 0.0f,  0.0f, -3.0f, 1.0f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_point_lights, &SG_RANGE(vs_point_lights_t));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_point_lights, &SG_RANGE(vs_point_lights));
 
         fs_params_t fs_params = {
             .material_shininess = 64.0f,
@@ -216,31 +217,31 @@ void frame(void) {
         sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
 
         fs_dir_light_t fs_dir_light = {
-            .ambient = HMM_Vec3(0.05f, 0.05f, 0.05f),
-            .diffuse = HMM_Vec3(0.4f, 0.4f, 0.4f),
-            .specular = HMM_Vec3(0.5f, 0.5f, 0.5f)
+            .ambient = HMM_V3(0.05f, 0.05f, 0.05f),
+            .diffuse = HMM_V3(0.4f, 0.4f, 0.4f),
+            .specular = HMM_V3(0.5f, 0.5f, 0.5f)
         };
         sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &SG_RANGE(fs_dir_light));
 
         fs_point_lights_t fs_point_lights = {
-            .ambient[0]     = HMM_Vec4(0.05f, 0.05f, 0.05f, 0.0f),
-            .diffuse[0]     = HMM_Vec4(0.8f, 0.8f, 0.8f, 0.0f),
-            .specular[0]    = HMM_Vec4(1.0f, 1.0f, 1.0f, 0.0f),
-            .attenuation[0] = HMM_Vec4(1.0f, 0.09f, 0.032f, 0.0f),
-            .ambient[1]     = HMM_Vec4(0.05f, 0.05f, 0.05f, 0.0f),
-            .diffuse[1]     = HMM_Vec4(0.8f, 0.8f, 0.8f, 0.0f),
-            .specular[1]    = HMM_Vec4(1.0f, 1.0f, 1.0f, 0.0f),
-            .attenuation[1] = HMM_Vec4(1.0f, 0.09f, 0.032f, 0.0f),
-            .ambient[2]     = HMM_Vec4(0.05f, 0.05f, 0.05f, 0.0f),
-            .diffuse[2]     = HMM_Vec4(0.8f, 0.8f, 0.8f, 0.0f),
-            .specular[2]    = HMM_Vec4(1.0f, 1.0f, 1.0f, 0.0f),
-            .attenuation[2] = HMM_Vec4(1.0f, 0.09f, 0.032f, 0.0f),
-            .ambient[3]     = HMM_Vec4(0.05f, 0.05f, 0.05f, 0.0f),
-            .diffuse[3]     = HMM_Vec4(0.8f, 0.8f, 0.8f, 0.0f),
-            .specular[3]    = HMM_Vec4(1.0f, 1.0f, 1.0f, 0.0f),
-            .attenuation[3] = HMM_Vec4(1.0f, 0.09f, 0.032f, 0.0f)
+            .ambient[0]     = HMM_V4(0.05f, 0.05f, 0.05f, 0.0f),
+            .diffuse[0]     = HMM_V4(0.8f, 0.8f, 0.8f, 0.0f),
+            .specular[0]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
+            .attenuation[0] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f),
+            .ambient[1]     = HMM_V4(0.05f, 0.05f, 0.05f, 0.0f),
+            .diffuse[1]     = HMM_V4(0.8f, 0.8f, 0.8f, 0.0f),
+            .specular[1]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
+            .attenuation[1] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f),
+            .ambient[2]     = HMM_V4(0.05f, 0.05f, 0.05f, 0.0f),
+            .diffuse[2]     = HMM_V4(0.8f, 0.8f, 0.8f, 0.0f),
+            .specular[2]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
+            .attenuation[2] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f),
+            .ambient[3]     = HMM_V4(0.05f, 0.05f, 0.05f, 0.0f),
+            .diffuse[3]     = HMM_V4(0.8f, 0.8f, 0.8f, 0.0f),
+            .specular[3]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
+            .attenuation[3] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights_t));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights));
 
         sg_draw(0, state.mesh.face_count * 3, 1);
     }

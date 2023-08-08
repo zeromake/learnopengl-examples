@@ -15,7 +15,7 @@ static struct {
     sg_pipeline pip;
     sg_bindings bind;
     sg_pass_action pass_action;
-    hmm_vec4 translations[100];     // using arrays vec4 to avoid alignment issues with cross shader compilation
+    HMM_Vec4 translations[100];     // using arrays vec4 to avoid alignment issues with cross shader compilation
 } state;
 
 static void init(void) {
@@ -68,7 +68,7 @@ static void init(void) {
         for(int x = -10; x < 10; x += 2) {
             float x_pos = (float)x / 10.0f + offset;
             float y_pos = (float)y / 10.0f + offset;
-            state.translations[index++] = HMM_Vec4(x_pos, y_pos, 0.0, 0.0);
+            state.translations[index++] = HMM_V4(x_pos, y_pos, 0.0, 0.0);
         }
     }  
 }

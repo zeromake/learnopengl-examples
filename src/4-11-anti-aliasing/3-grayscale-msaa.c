@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "3-grayscale-msaa.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -128,7 +128,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .content = cube_vertices,
+        .data = SG_RANGE(cube_vertices)
         .label = "cube-vertices"
     });
 
@@ -145,7 +145,7 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .content = quad_vertices,
+        .data = SG_RANGE(quad_vertices)
         .label = "quad-vertices"
     });
     
@@ -162,9 +162,9 @@ static void init(void) {
                 [ATTR_vs_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
         },
         .blend = {
             .color_format = SG_PIXELFORMAT_RGBA8,
@@ -191,8 +191,8 @@ static void init(void) {
 void frame(void) {
     lopgl_update();
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,
@@ -204,7 +204,7 @@ void frame(void) {
     sg_apply_pipeline(state.offscreen.pip);
     sg_apply_bindings(&state.offscreen.bind);
 
-    vs_params.model = HMM_Translate(HMM_Vec3(0.f, 0.f, 0.f));
+    vs_params.model = HMM_Translate(HMM_V3(0.f, 0.f, 0.f));
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 

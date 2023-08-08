@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "1-msaa.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -97,11 +97,11 @@ void frame(void) {
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
-        .model = HMM_Mat4d(1.f),
+        .model = HMM_M4D(1.f),
         .view = view,
         .projection = projection
     };

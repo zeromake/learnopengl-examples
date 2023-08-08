@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "3-asteroid-field.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -21,7 +21,7 @@ typedef struct mesh_t {
 static struct {
     mesh_t planet;
     mesh_t rock;
-    hmm_mat4 rock_transforms[ASTEROID_COUNT];
+    HMM_Mat4 rock_transforms[ASTEROID_COUNT];
     sg_pass_action pass_action;
     uint8_t file_buffer_planet[1024 * 1024];
     uint8_t file_buffer_rock[1024 * 1024];
@@ -31,7 +31,7 @@ static struct {
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -54,7 +54,7 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = mesh->face_count * 3 * 8 * sizeof(float),
-        .content = state.vertex_buffer,
+        .data = SG_RANGE(state.vertex_buffer),
         .label = "mesh-vertices"
     });
     
@@ -86,7 +86,7 @@ static void init(void) {
     lopgl_set_fp_cam(&fp_desc);
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader phong_shd = sg_make_shader(phong_shader_desc());
+    sg_shader phong_shd = sg_make_shader(phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for the planet  */
     state.planet.pip = sg_make_pipeline(&(sg_pipeline_desc){
@@ -102,9 +102,9 @@ static void init(void) {
             },
             .buffers[0].stride = 32
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = " planet-pipeline"
     });
@@ -123,9 +123,9 @@ static void init(void) {
             },
             .buffers[0].stride = 32
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .label = "rock-pipeline"
     });
@@ -165,15 +165,15 @@ static void init(void) {
         float y = displacement * 0.4f; // keep height of field smaller compared to width of x and z
         displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
         float z = HMM_CosF(angle) * radius + displacement;
-        hmm_mat4 model = HMM_Translate(HMM_Vec3(x, y, z));
+        HMM_Mat4 model = HMM_Translate(HMM_V3(x, y, z));
 
         // 2. scale: scale between 0.05 and 0.25f
         float scale = (rand() % 20) / 100.0f + 0.05;
-        model = HMM_MultiplyMat4(model, HMM_Scale(HMM_Vec3(scale, scale, scale)));
+        model = HMM_MulM4(model, HMM_Scale(HMM_V3(scale, scale, scale)));
 
         // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
         float rot_angle = (rand() % 360);
-        model = HMM_MultiplyMat4(model, HMM_Rotate(rot_angle, HMM_Vec3(0.4f, 0.6f, 0.8f)));
+        model = HMM_MulM4(model, HMM_Rotate_RH(rot_angle, HMM_V3(0.4f, 0.6f, 0.8f)));
 
         // 4. now add to list of matrices
         state.rock_transforms[i] = model;
@@ -185,8 +185,8 @@ void frame(void) {
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 1000.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 1000.0f);
 
     vs_params_t vs_params = {
         .view = view,
@@ -197,8 +197,8 @@ void frame(void) {
         sg_apply_pipeline(state.planet.pip);
         sg_apply_bindings(&state.planet.bind);
 
-        hmm_mat4 model = HMM_Translate(HMM_Vec3(0.f, -3.f, 0.f));
-        model = HMM_MultiplyMat4(model, HMM_Scale(HMM_Vec3(4.f, 4.f, 4.f)));
+        HMM_Mat4 model = HMM_Translate(HMM_V3(0.f, -3.f, 0.f));
+        model = HMM_MulM4(model, HMM_Scale(HMM_V3(4.f, 4.f, 4.f)));
         vs_params.model = model;
         sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 

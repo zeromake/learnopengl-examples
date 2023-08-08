@@ -1,4 +1,4 @@
-@ctype vec4 hmm_vec4
+@ctype vec4 HMM_Vec4
 
 @vs vs
 in float a_dummy;       // add a dummy vertex attribute otherwise sokol complains

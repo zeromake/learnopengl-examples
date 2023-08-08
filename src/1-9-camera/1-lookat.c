@@ -6,7 +6,8 @@
 #include "sokol_glue.h"
 #include "sokol_fetch.h"
 #include "sokol_time.h"
-#include "hmm/HandmadeMath.h"
+#include "sokol_helper.h"
+#include "HandmadeMath.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
 #include "shaders.glsl.h"
@@ -17,7 +18,7 @@ static struct {
     sg_bindings bind;
     sg_pass_action pass_action;
     uint8_t file_buffer[256 * 1024];
-    hmm_vec3 cube_positions[10];
+    HMM_Vec3 cube_positions[10];
 } state;
 
 static void fetch_callback(const sfetch_response_t*);
@@ -44,22 +45,22 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    state.bind.fs_images[SLOT_texture1] = sg_alloc_image();
-    state.bind.fs_images[SLOT_texture2] = sg_alloc_image();
+    sg_alloc_image_smp(state.bind.fs, SLOT__texture1, SLOT_texture1_smp);
+    sg_alloc_image_smp(state.bind.fs, SLOT__texture2, SLOT_texture2_smp);
 
     /* flip images vertically after loading */
     stbi_set_flip_vertically_on_load(true);  
 
-    state.cube_positions[0] = HMM_Vec3( 0.0f,  0.0f,  0.0f);
-    state.cube_positions[1] = HMM_Vec3( 2.0f,  5.0f, -15.0f);
-    state.cube_positions[2] = HMM_Vec3(-1.5f, -2.2f, -2.5f);
-    state.cube_positions[3] = HMM_Vec3(-3.8f, -2.0f, -12.3f);
-    state.cube_positions[4] = HMM_Vec3( 2.4f, -0.4f, -3.5f);
-    state.cube_positions[5] = HMM_Vec3(-1.7f,  3.0f, -7.5f);
-    state.cube_positions[6] = HMM_Vec3( 1.3f, -2.0f, -2.5f);
-    state.cube_positions[7] = HMM_Vec3( 1.5f,  2.0f, -2.5f);
-    state.cube_positions[8] = HMM_Vec3( 1.5f,  0.2f, -1.5f);
-    state.cube_positions[9] = HMM_Vec3(-1.3f,  1.0f, -1.5f);
+    state.cube_positions[0] = HMM_V3( 0.0f,  0.0f,  0.0f);
+    state.cube_positions[1] = HMM_V3( 2.0f,  5.0f, -15.0f);
+    state.cube_positions[2] = HMM_V3(-1.5f, -2.2f, -2.5f);
+    state.cube_positions[3] = HMM_V3(-3.8f, -2.0f, -12.3f);
+    state.cube_positions[4] = HMM_V3( 2.4f, -0.4f, -3.5f);
+    state.cube_positions[5] = HMM_V3(-1.7f,  3.0f, -7.5f);
+    state.cube_positions[6] = HMM_V3( 1.3f, -2.0f, -2.5f);
+    state.cube_positions[7] = HMM_V3( 1.5f,  2.0f, -2.5f);
+    state.cube_positions[8] = HMM_V3( 1.5f,  0.2f, -1.5f);
+    state.cube_positions[9] = HMM_V3(-1.3f,  1.0f, -1.5f);
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -124,9 +125,9 @@ static void init(void) {
                 [ATTR_vs_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare = SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled = true,
         },
         .label = "triangle-pipeline"
     });
@@ -136,17 +137,15 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.2f, 0.3f, 0.3f, 1.0f} }
     };
 
-    sg_image image1 = state.bind.fs_images[SLOT_texture1];
-    sg_image image2 = state.bind.fs_images[SLOT_texture2];
+    sg_image image1 = state.bind.fs.images[SLOT__texture1];
+    sg_image image2 = state.bind.fs.images[SLOT__texture2];
 
     /* start loading the JPG file */
     sfetch_send(&(sfetch_request_t){
         .path = "container.jpg",
         .callback = fetch_callback,
-        .buffer_ptr = state.file_buffer,
-        .buffer_size = sizeof(state.file_buffer),
-        .user_data_ptr = &image1,
-        .user_data_size = sizeof(image1)
+        .buffer = SFETCH_RANGE(state.file_buffer),
+        .user_data = SFETCH_RANGE(image1),
     });
 
     /* start loading the PNG file
@@ -154,10 +153,8 @@ static void init(void) {
     sfetch_send(&(sfetch_request_t){
         .path = "awesomeface.png",
         .callback = fetch_callback,
-        .buffer_ptr = state.file_buffer,
-        .buffer_size = sizeof(state.file_buffer),
-        .user_data_ptr = &image2,
-        .user_data_size = sizeof(image2)
+        .buffer = SFETCH_RANGE(state.file_buffer),
+        .user_data = SFETCH_RANGE(image2),
     });
 }
 
@@ -172,8 +169,8 @@ static void fetch_callback(const sfetch_response_t* response) {
         int img_width, img_height, num_channels;
         const int desired_channels = 4;
         stbi_uc* pixels = stbi_load_from_memory(
-            response->buffer_ptr,
-            (int)response->fetched_size,
+            response->data.ptr,
+            (int)response->data.size,
             &img_width, &img_height,
             &num_channels, desired_channels);
         if (pixels) {
@@ -183,11 +180,7 @@ static void fetch_callback(const sfetch_response_t* response) {
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */
                 .pixel_format = SG_PIXELFORMAT_RGBA8,
-                .wrap_u = SG_WRAP_REPEAT,
-                .wrap_v = SG_WRAP_REPEAT,
-                .min_filter = SG_FILTER_LINEAR,
-                .mag_filter = SG_FILTER_LINEAR,
-                .content.subimage[0][0] = {
+                .data.subimage[0][0] = {
                     .ptr = pixels,
                     .size = img_width * img_height * 4,
                 }
@@ -198,7 +191,7 @@ static void fetch_callback(const sfetch_response_t* response) {
     else if (response->failed) {
         // if loading the file failed, set clear color to red
         state.pass_action = (sg_pass_action) {
-            .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+            .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
         };
     }
 }
@@ -210,11 +203,11 @@ void frame(void) {
     float camX = sinf((float)stm_sec(stm_now())) * radius;
     float camZ = cosf((float)stm_sec(stm_now())) * radius;
 
-    hmm_mat4 view = HMM_LookAt( HMM_Vec3(camX, 0.0f, camZ), 
-                                HMM_Vec3(0.0f, 0.0f, 0.0f), 
-                                HMM_Vec3(0.0f, 1.0f, 0.0f));
+    HMM_Mat4 view = HMM_LookAt_RH( HMM_V3(camX, 0.0f, camZ),
+                                HMM_V3(0.0f, 0.0f, 0.0f), 
+                                HMM_V3(0.0f, 1.0f, 0.0f));
 
-    hmm_mat4 projection = HMM_Perspective(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
     sg_apply_pipeline(state.pip);
@@ -226,9 +219,9 @@ void frame(void) {
     };
 
     for(size_t i = 0; i < 10; i++) {
-        hmm_mat4 model = HMM_Translate(state.cube_positions[i]);
+        HMM_Mat4 model = HMM_Translate(state.cube_positions[i]);
         float angle = 20.0f * i; 
-        model = HMM_MultiplyMat4(model, HMM_Rotate(angle, HMM_Vec3(1.0f, 0.3f, 0.5f)));
+        model = HMM_MulM4(model, HMM_Rotate_RH(angle, HMM_V3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
         sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
 

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "1-gamma-correction.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -13,15 +13,15 @@ static struct {
     sg_pipeline pip;
     sg_bindings bind;
     sg_pass_action pass_action;
-    hmm_vec4 light_positions[4];
-    hmm_vec4 light_colors[4];
+    HMM_Vec4 light_positions[4];
+    HMM_Vec4 light_colors[4];
     bool gamma;
     uint8_t file_buffer[2 * 1024 * 1024];
 } state;
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -32,15 +32,15 @@ static void init(void) {
     state.gamma = true;
 
     // set light positions and colors
-    state.light_positions[0] = HMM_Vec4(-3.0f, 0.0f, 0.0f, 1.0f);
-    state.light_positions[1] = HMM_Vec4(-1.0f, 0.0f, 0.0f, 1.0f);
-    state.light_positions[2] = HMM_Vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    state.light_positions[3] = HMM_Vec4(3.0f, 0.0f, 0.0f, 1.0f);
+    state.light_positions[0] = HMM_V4(-3.0f, 0.0f, 0.0f, 1.0f);
+    state.light_positions[1] = HMM_V4(-1.0f, 0.0f, 0.0f, 1.0f);
+    state.light_positions[2] = HMM_V4(1.0f, 0.0f, 0.0f, 1.0f);
+    state.light_positions[3] = HMM_V4(3.0f, 0.0f, 0.0f, 1.0f);
 
-    state.light_colors[0] = HMM_Vec4(0.25f, 0.25f, 0.25f, 1.0f);
-    state.light_colors[1] = HMM_Vec4(0.5f, 0.5f, 0.5f, 1.0f);
-    state.light_colors[2] = HMM_Vec4(0.75f, 0.75f, 0.75f, 1.0f);
-    state.light_colors[3] = HMM_Vec4(1.f, 1.f, 1.f, 1.0f);
+    state.light_colors[0] = HMM_V4(0.25f, 0.25f, 0.25f, 1.0f);
+    state.light_colors[1] = HMM_V4(0.5f, 0.5f, 0.5f, 1.0f);
+    state.light_colors[2] = HMM_V4(0.75f, 0.75f, 0.75f, 1.0f);
+    state.light_colors[3] = HMM_V4(1.f, 1.f, 1.f, 1.0f);
 
     float vertices[] = {
         // positions            // normals         // texcoords
@@ -62,7 +62,7 @@ static void init(void) {
     state.bind.vertex_buffers[0] = plane_buffer;
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(blinn_phong_shader_desc());
+    sg_shader shd = sg_make_shader(blinn_phong_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
@@ -84,7 +84,7 @@ static void init(void) {
     };
 
     sg_image img_id_floor = sg_alloc_image();
-    state.bind.fs_images[SLOT_floor_texture] = img_id_floor;
+    state.bind.fs.images[SLOT__floor_texture] = img_id_floor;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",
@@ -114,8 +114,8 @@ void frame(void) {
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
         .view = view,

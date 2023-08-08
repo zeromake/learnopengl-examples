@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "3-omnidirectional-PCF.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -24,21 +24,21 @@ static struct {
         sg_pipeline pip;
         sg_bindings bind;
     } shadows;
-    hmm_vec3 light_pos;
-    hmm_mat4 light_space_matrix;
+    HMM_Vec3 light_pos;
+    HMM_Mat4 light_space_matrix;
     uint8_t file_buffer[2 * 1024 * 1024];
 } state;
 
 static void fail_callback() {
     state.shadows.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
 static void init(void) {
     lopgl_setup();
 
-    state.light_pos = HMM_Vec3(0.f, 0.f, 0.f);
+    state.light_pos = HMM_V3(0.f, 0.f, 0.f);
 
     /* create depth cubemap */
     sg_image_desc img_desc = {
@@ -120,14 +120,14 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .content = cube_vertices,
+        .data = SG_RANGE(cube_vertices)
         .label = "cube-vertices"
     });
     
     state.depth.bind.vertex_buffers[0] = cube_buffer;
     state.shadows.bind.vertex_buffers[0] = cube_buffer;
 
-    sg_shader shd_depth = sg_make_shader(depth_shader_desc());
+    sg_shader shd_depth = sg_make_shader(depth_shader_desc(sg_query_backend()));
 
     state.depth.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .shader = shd_depth,
@@ -138,9 +138,9 @@ static void init(void) {
                 [ATTR_vs_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         /* cull front faces for depth map */
         .rasterizer = {
@@ -154,7 +154,7 @@ static void init(void) {
         .label = "depth-pipeline"
     });
 
-    sg_shader shd_shadows = sg_make_shader(shadows_shader_desc());
+    sg_shader shd_shadows = sg_make_shader(shadows_shader_desc(sg_query_backend()));
 
     state.shadows.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .shader = shd_shadows,
@@ -165,9 +165,9 @@ static void init(void) {
                 [ATTR_vs_shadows_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled =true,
         },
         .rasterizer = {
             .cull_mode = SG_CULLMODE_BACK,
@@ -199,7 +199,7 @@ static void init(void) {
 void draw_room_cube() {
     vs_params_t vs_params = {
         /* invert the outer cube so just the inner faces are shown with back culling */
-        .model = HMM_Scale(HMM_Vec3(-5.f, -5.f, -5.f))
+        .model = HMM_Scale(HMM_V3(-5.f, -5.f, -5.f))
     };
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
@@ -207,30 +207,30 @@ void draw_room_cube() {
 
 void draw_cubes() {
     vs_params_t vs_params;
-    hmm_mat4 translate = HMM_Translate(HMM_Vec3(4.f, -3.5f, 0.f));
-    hmm_mat4 scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
-    vs_params.model = HMM_MultiplyMat4(translate, scale);
+    HMM_Mat4 translate = HMM_Translate(HMM_V3(4.f, -3.5f, 0.f));
+    HMM_Mat4 scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
+    vs_params.model = HMM_MulM4(translate, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
-    translate = HMM_Translate(HMM_Vec3(2.f, 3.f, 1.f));
-    scale = HMM_Scale(HMM_Vec3(.75f, .75f, .75f));
-    vs_params.model = HMM_MultiplyMat4(translate, scale);
+    translate = HMM_Translate(HMM_V3(2.f, 3.f, 1.f));
+    scale = HMM_Scale(HMM_V3(.75f, .75f, .75f));
+    vs_params.model = HMM_MulM4(translate, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
-    translate = HMM_Translate(HMM_Vec3(-3.f, -1.f, 0.f));
-    scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
-    vs_params.model = HMM_MultiplyMat4(translate, scale);
+    translate = HMM_Translate(HMM_V3(-3.f, -1.f, 0.f));
+    scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
+    vs_params.model = HMM_MulM4(translate, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
-    translate = HMM_Translate(HMM_Vec3(-1.5f, 1.f, 1.5f));
-    scale = HMM_Scale(HMM_Vec3(.5f, .5f, .5f));
-    vs_params.model = HMM_MultiplyMat4(translate, scale);
+    translate = HMM_Translate(HMM_V3(-1.5f, 1.f, 1.5f));
+    scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
+    vs_params.model = HMM_MulM4(translate, scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
-    translate = HMM_Translate(HMM_Vec3(-1.5f, 2.f, -3.f));
-    hmm_mat4 rotate = HMM_Rotate(60.f, HMM_NormalizeVec3(HMM_Vec3(1.f, 0.f, 1.f)));
-    scale = HMM_Scale(HMM_Vec3(.75f, .75f, .75f));
-    vs_params.model = HMM_MultiplyMat4(HMM_MultiplyMat4(translate, rotate), scale);
+    translate = HMM_Translate(HMM_V3(-1.5f, 2.f, -3.f));
+    HMM_Mat4 rotate = HMM_Rotate_RH(60.f, HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
+    scale = HMM_Scale(HMM_V3(.75f, .75f, .75f));
+    vs_params.model = HMM_MulM4(HMM_MulM4(translate, rotate), scale);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
@@ -242,28 +242,28 @@ void frame(void) {
     state.light_pos.Z = HMM_SinF((float)stm_sec(stm_now()) * .5f) * 3.f;
 
     /* create light space transform matrices */
-    hmm_mat4 light_space_transforms[6];
+    HMM_Mat4 light_space_transforms[6];
     float near_plane = 1.0f;
     float far_plane  = 25.0f;
-    hmm_mat4 shadow_proj = HMM_Perspective(90.0f, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
-    hmm_vec3 center = HMM_AddVec3(state.light_pos, HMM_Vec3(1.f, 0.f, 0.f));
-    hmm_mat4 lookat = HMM_LookAt(state.light_pos, center, HMM_Vec3(0.f, -1.f, 0.f));
-    light_space_transforms[SG_CUBEFACE_POS_X] = HMM_MultiplyMat4(shadow_proj, lookat);
-    center = HMM_AddVec3(state.light_pos, HMM_Vec3(-1.f, 0.f, 0.f));
-    lookat = HMM_LookAt(state.light_pos, center, HMM_Vec3(0.f, -1.f, 0.f));
-    light_space_transforms[SG_CUBEFACE_NEG_X] = HMM_MultiplyMat4(shadow_proj, lookat);
-    center = HMM_AddVec3(state.light_pos, HMM_Vec3(0.f, 1.f, 0.f));
-    lookat = HMM_LookAt(state.light_pos, center, HMM_Vec3(0.f, 0.f, 1.f));
-    light_space_transforms[SG_CUBEFACE_POS_Y] = HMM_MultiplyMat4(shadow_proj, lookat);
-    center = HMM_AddVec3(state.light_pos, HMM_Vec3(0.f, -1.f, 0.f));
-    lookat = HMM_LookAt(state.light_pos, center, HMM_Vec3(0.f, 0.f, -1.f));
-    light_space_transforms[SG_CUBEFACE_NEG_Y] = HMM_MultiplyMat4(shadow_proj, lookat);
-    center = HMM_AddVec3(state.light_pos, HMM_Vec3(0.f, 0.f, 1.f));
-    lookat = HMM_LookAt(state.light_pos, center, HMM_Vec3(0.f, -1.f,  0.f));
-    light_space_transforms[SG_CUBEFACE_POS_Z] = HMM_MultiplyMat4(shadow_proj, lookat);
-    center = HMM_AddVec3(state.light_pos, HMM_Vec3(0.f, 0.f, -1.f));
-    lookat = HMM_LookAt(state.light_pos, center, HMM_Vec3(0.f, -1.f,  0.f));
-    light_space_transforms[SG_CUBEFACE_NEG_Z] = HMM_MultiplyMat4(shadow_proj, lookat);
+    HMM_Mat4 shadow_proj = HMM_Perspective_RH_NO(90.0f, (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+    HMM_Vec3 center = HMM_AddV3(state.light_pos, HMM_V3(1.f, 0.f, 0.f));
+    HMM_Mat4 lookat = HMM_LookAt_RH(state.light_pos, center, HMM_V3(0.f, -1.f, 0.f));
+    light_space_transforms[SG_CUBEFACE_POS_X] = HMM_MulM4(shadow_proj, lookat);
+    center = HMM_AddV3(state.light_pos, HMM_V3(-1.f, 0.f, 0.f));
+    lookat = HMM_LookAt_RH(state.light_pos, center, HMM_V3(0.f, -1.f, 0.f));
+    light_space_transforms[SG_CUBEFACE_NEG_X] = HMM_MulM4(shadow_proj, lookat);
+    center = HMM_AddV3(state.light_pos, HMM_V3(0.f, 1.f, 0.f));
+    lookat = HMM_LookAt_RH(state.light_pos, center, HMM_V3(0.f, 0.f, 1.f));
+    light_space_transforms[SG_CUBEFACE_POS_Y] = HMM_MulM4(shadow_proj, lookat);
+    center = HMM_AddV3(state.light_pos, HMM_V3(0.f, -1.f, 0.f));
+    lookat = HMM_LookAt_RH(state.light_pos, center, HMM_V3(0.f, 0.f, -1.f));
+    light_space_transforms[SG_CUBEFACE_NEG_Y] = HMM_MulM4(shadow_proj, lookat);
+    center = HMM_AddV3(state.light_pos, HMM_V3(0.f, 0.f, 1.f));
+    lookat = HMM_LookAt_RH(state.light_pos, center, HMM_V3(0.f, -1.f,  0.f));
+    light_space_transforms[SG_CUBEFACE_POS_Z] = HMM_MulM4(shadow_proj, lookat);
+    center = HMM_AddV3(state.light_pos, HMM_V3(0.f, 0.f, -1.f));
+    lookat = HMM_LookAt_RH(state.light_pos, center, HMM_V3(0.f, -1.f,  0.f));
+    light_space_transforms[SG_CUBEFACE_NEG_Z] = HMM_MulM4(shadow_proj, lookat);
 
     /* render depth of scene to cubemap (from light's perspective) */
     for (size_t i = 0; i < 6; ++i) {
@@ -293,8 +293,8 @@ void frame(void) {
     sg_apply_pipeline(state.shadows.pip);
     sg_apply_bindings(&state.shadows.bind);
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_shadows_t vs_params_shadows = {
         .projection = projection,
@@ -313,26 +313,26 @@ void frame(void) {
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &SG_RANGE(fs_params_shadows));
 
     fs_sampling_t fs_sampling = {
-        .grid_sampling_disk[0] = HMM_Vec4( 1.f,  1.f,  1.f, 0.f),
-        .grid_sampling_disk[1] = HMM_Vec4( 1.f, -1.f, 1.f, 0.f), 
-        .grid_sampling_disk[2] = HMM_Vec4(-1.f, -1.f,  1.f, 0.f), 
-        .grid_sampling_disk[3] = HMM_Vec4(-1.f, 1.f,  1.f, 0.f),  
-        .grid_sampling_disk[4] = HMM_Vec4(1.f, 1.f, -1.f, 0.f),  
-        .grid_sampling_disk[5] = HMM_Vec4( 1.f, -1.f, -1.f, 0.f),  
-        .grid_sampling_disk[6] = HMM_Vec4(-1.f, -1.f, -1.f, 0.f),  
-        .grid_sampling_disk[7] = HMM_Vec4(-1.f, 1.f, -1.f, 0.f), 
-        .grid_sampling_disk[8] = HMM_Vec4(1.f, 1.f,  0.f, 0.f),  
-        .grid_sampling_disk[9] = HMM_Vec4( 1.f, -1.f,  0.f, 0.f),  
-        .grid_sampling_disk[10] = HMM_Vec4(-1.f, -1.f,  0.f, 0.f),  
-        .grid_sampling_disk[11] = HMM_Vec4(-1.f, 1.f,  0.f, 0.f), 
-        .grid_sampling_disk[12] = HMM_Vec4(1.f, 0.f,  1.f, 0.f),  
-        .grid_sampling_disk[13] = HMM_Vec4(-1.f,  0.f,  1.f, 0.f),  
-        .grid_sampling_disk[14] = HMM_Vec4( 1.f,  0.f, -1.f, 0.f),  
-        .grid_sampling_disk[15] = HMM_Vec4(-1.f, 0.f, -1.f, 0.f), 
-        .grid_sampling_disk[16] = HMM_Vec4(0.f, 1.f,  1.f, 0.f),  
-        .grid_sampling_disk[17] = HMM_Vec4( 0.f, -1.f,  1.f, 0.f),  
-        .grid_sampling_disk[18] = HMM_Vec4( 0.f, -1.f, -1.f, 0.f),  
-        .grid_sampling_disk[19] = HMM_Vec4( 0.f, 1.f, -1.f, 0.f)
+        .grid_sampling_disk[0] = HMM_V4( 1.f,  1.f,  1.f, 0.f),
+        .grid_sampling_disk[1] = HMM_V4( 1.f, -1.f, 1.f, 0.f), 
+        .grid_sampling_disk[2] = HMM_V4(-1.f, -1.f,  1.f, 0.f), 
+        .grid_sampling_disk[3] = HMM_V4(-1.f, 1.f,  1.f, 0.f),  
+        .grid_sampling_disk[4] = HMM_V4(1.f, 1.f, -1.f, 0.f),  
+        .grid_sampling_disk[5] = HMM_V4( 1.f, -1.f, -1.f, 0.f),  
+        .grid_sampling_disk[6] = HMM_V4(-1.f, -1.f, -1.f, 0.f),  
+        .grid_sampling_disk[7] = HMM_V4(-1.f, 1.f, -1.f, 0.f), 
+        .grid_sampling_disk[8] = HMM_V4(1.f, 1.f,  0.f, 0.f),  
+        .grid_sampling_disk[9] = HMM_V4( 1.f, -1.f,  0.f, 0.f),  
+        .grid_sampling_disk[10] = HMM_V4(-1.f, -1.f,  0.f, 0.f),  
+        .grid_sampling_disk[11] = HMM_V4(-1.f, 1.f,  0.f, 0.f), 
+        .grid_sampling_disk[12] = HMM_V4(1.f, 0.f,  1.f, 0.f),  
+        .grid_sampling_disk[13] = HMM_V4(-1.f,  0.f,  1.f, 0.f),  
+        .grid_sampling_disk[14] = HMM_V4( 1.f,  0.f, -1.f, 0.f),  
+        .grid_sampling_disk[15] = HMM_V4(-1.f, 0.f, -1.f, 0.f), 
+        .grid_sampling_disk[16] = HMM_V4(0.f, 1.f,  1.f, 0.f),  
+        .grid_sampling_disk[17] = HMM_V4( 0.f, -1.f,  1.f, 0.f),  
+        .grid_sampling_disk[18] = HMM_V4( 0.f, -1.f, -1.f, 0.f),  
+        .grid_sampling_disk[19] = HMM_V4( 0.f, 1.f, -1.f, 0.f)
     };
 
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_sampling, &SG_RANGE(fs_sampling));

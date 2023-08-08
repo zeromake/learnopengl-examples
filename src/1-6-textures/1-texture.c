@@ -5,6 +5,7 @@
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
 #include "sokol_fetch.h"
+#include "sokol_helper.h"
 #define STB_IMAGE_IMPLEMENTATION
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -47,15 +48,7 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    state.bind.fs.images[SLOT__ourTexture] = sg_alloc_image();
-    state.bind.fs.samplers[SLOT_ourTexture_smp] = sg_alloc_sampler();
-    sg_init_sampler(state.bind.fs.samplers[SLOT_ourTexture_smp], &(sg_sampler_desc){
-        .wrap_u = SG_WRAP_REPEAT,
-        .wrap_v = SG_WRAP_REPEAT,
-        .min_filter = SG_FILTER_LINEAR,
-        .mag_filter = SG_FILTER_LINEAR,
-        .compare = SG_COMPAREFUNC_NEVER,
-    });
+    sg_alloc_image_smp(state.bind.fs, SLOT__ourTexture, SLOT_ourTexture_smp);
 
     float vertices[] = {
         // positions         // colors           // texture coords

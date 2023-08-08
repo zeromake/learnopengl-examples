@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "4-uniform-buffers.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -72,10 +72,10 @@ static void init(void) {
     });
 
     /* create shaders from code-generated sg_shader_desc */
-    sg_shader shd_red = sg_make_shader(red_shader_desc());
-    sg_shader shd_green = sg_make_shader(green_shader_desc());
-    sg_shader shd_blue = sg_make_shader(blue_shader_desc());
-    sg_shader shd_yellow = sg_make_shader(yellow_shader_desc());
+    sg_shader shd_red = sg_make_shader(red_shader_desc(sg_query_backend()));
+    sg_shader shd_green = sg_make_shader(green_shader_desc(sg_query_backend()));
+    sg_shader shd_blue = sg_make_shader(blue_shader_desc(sg_query_backend()));
+    sg_shader shd_yellow = sg_make_shader(yellow_shader_desc(sg_query_backend()));
 
     sg_pipeline_desc pip_desc = {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
@@ -84,9 +84,9 @@ static void init(void) {
                 [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
         },
         .label = "cube-pipeline"
     };
@@ -115,8 +115,8 @@ void frame(void) {
     sg_apply_pipeline(state.pip_red);
     sg_apply_bindings(&state.bind);
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_view_projection_t vs_vp = {
         .view = view,
@@ -126,7 +126,7 @@ void frame(void) {
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
 
     vs_model_t vs_m = {
-        .model = HMM_Translate(HMM_Vec3(-0.75f, 0.75f, 0.0f))       // move top-left
+        .model = HMM_Translate(HMM_V3(-0.75f, 0.75f, 0.0f))       // move top-left
     };
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
@@ -135,21 +135,21 @@ void frame(void) {
     sg_apply_bindings(&state.bind);
     // we need to re-apply the uniforms after applying a new pipeline, sort of defeats the purpose of this example...
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
-    vs_m.model = HMM_Translate(HMM_Vec3(0.75f, 0.75f, 0.0f));       // move top-right
+    vs_m.model = HMM_Translate(HMM_V3(0.75f, 0.75f, 0.0f));       // move top-right
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 
     sg_apply_pipeline(state.pip_yellow);
     sg_apply_bindings(&state.bind);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
-    vs_m.model = HMM_Translate(HMM_Vec3(-0.75f, -0.75f, 0.0f));     // move bottom-left
+    vs_m.model = HMM_Translate(HMM_V3(-0.75f, -0.75f, 0.0f));     // move bottom-left
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 
     sg_apply_pipeline(state.pip_blue);
     sg_apply_bindings(&state.bind);
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_view_projection, &SG_RANGE(vs_vp));
-    vs_m.model = HMM_Translate(HMM_Vec3(0.75f, -0.75f, 0.0f));      // move bottom-right
+    vs_m.model = HMM_Translate(HMM_V3(0.75f, -0.75f, 0.0f));      // move bottom-right
     sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_model, &SG_RANGE(vs_m));
     sg_draw(0, 36, 1);
 

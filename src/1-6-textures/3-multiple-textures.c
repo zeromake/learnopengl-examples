@@ -52,15 +52,6 @@ static void init(void) {
     */
     sg_alloc_image_smp(state.bind.fs, SLOT__texture1, SLOT_texture1_smp);
     sg_alloc_image_smp(state.bind.fs, SLOT__texture2, SLOT_texture2_smp);
-    const sg_sampler_desc desc = {
-        .wrap_u = SG_WRAP_REPEAT,
-        .wrap_v = SG_WRAP_REPEAT,
-        .min_filter = SG_FILTER_LINEAR,
-        .mag_filter = SG_FILTER_LINEAR,
-        .compare = SG_COMPAREFUNC_NEVER,
-    };
-    sg_init_sampler(state.bind.fs.samplers[SLOT_texture1_smp], &desc);
-    sg_init_sampler(state.bind.fs.samplers[SLOT_texture2_smp], &desc);
 
     /* flip images vertically after loading */
     stbi_set_flip_vertically_on_load(true);  

@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
-#include "hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "4-refraction-cube.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -21,7 +21,7 @@ static struct {
 
 static void fail_callback() {
     state.pass_action = (sg_pass_action) {
-        .colors[0] = { .action = SG_ACTION_CLEAR, .val = { 1.0f, 0.0f, 0.0f, 1.0f } }
+        .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } }
     };
 }
 
@@ -75,7 +75,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .content = cube_vertices,
+        .data = SG_RANGE(cube_vertices)
         .label = "cube-vertices"
     });
     
@@ -128,7 +128,7 @@ static void init(void) {
 
     sg_buffer skybox_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(skybox_vertices),
-        .content = skybox_vertices,
+        .data = SG_RANGE(skybox_vertices)
         .label = "skybox-vertices"
     });
     
@@ -143,9 +143,9 @@ static void init(void) {
                 [ATTR_vs_a_normal].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS,
-            .depth_write_enabled = true,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS,
+            .write_enabled =true,
         },
         .label = "cube-pipeline"
     });
@@ -158,8 +158,8 @@ static void init(void) {
                 [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
-        .depth_stencil = {
-            .depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL,
+        .depth = {
+            .compare =SG_COMPAREFUNC_LESS_EQUAL,
         },
         .label = "skybox-pipeline"
     });
@@ -192,11 +192,11 @@ void frame(void) {
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
 
-    hmm_mat4 view = lopgl_view_matrix();
-    hmm_mat4 projection = HMM_Perspective(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
+    HMM_Mat4 view = lopgl_view_matrix();
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
 
     vs_params_t vs_params = {
-        .model = HMM_Mat4d(1.0f),
+        .model = HMM_M4D(1.0f),
         .view = view,
         .projection = projection
     };
