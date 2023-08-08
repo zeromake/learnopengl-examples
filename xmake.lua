@@ -80,7 +80,8 @@ target_end()
 for _, dir in ipairs(os.filedirs("src/*")) do
     if os.isdir(dir) and path.basename(dir) ~= "data" then
         local includedir = path.join("$(buildir)/sokol_shader", path.basename(dir))
-        local targetname = path.basename(dir)
+        local arr = split(path.basename(dir), '-')
+        local targetname = arr[1].."-"..arr[2]
         for _, f in ipairs(os.files(dir.."/*.c")) do
             target(targetname.."-"..(split(path.basename(f), '-')[1]))
                 add_packages("stb", "sokol", "handmade_math")
@@ -89,7 +90,7 @@ for _, dir in ipairs(os.filedirs("src/*")) do
 		            add_files("src/resource.rc")
                 elseif is_plat("wasm") then
                     add_ldflags("-sMAX_WEBGL_VERSION=2")
-                    set_extension(".wasm")
+                    set_extension(".js")
                 end
                 add_includedirs(includedir)
                 add_deps("sokol_wrapper", "shader")
