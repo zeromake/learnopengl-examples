@@ -4,6 +4,7 @@
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_helper.h"
+#include "sokol_log.h"
 #include "HandmadeMath.h"
 #include "1-combined-lights.glsl.h"
 #define LOPGL_APP_IMPL
@@ -284,5 +285,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .height = 600,
         .high_dpi = true,
         .window_title = "Combined Lights (LearnOpenGL)",
+        .logger.func = slog_func,
     };
 }

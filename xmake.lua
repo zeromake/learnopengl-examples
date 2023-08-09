@@ -25,6 +25,7 @@ add_rules("sokol_shader")
 add_requires("stb", "sokol", "handmade_math")
 
 if is_plat("windows") then
+    add_defines("SOKOL_WIN32_FORCE_MAIN")
     add_cxflags("/utf-8")
 elseif is_plat("mingw") then
     add_ldflags("-static")

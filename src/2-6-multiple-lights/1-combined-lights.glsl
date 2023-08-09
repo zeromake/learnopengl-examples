@@ -157,6 +157,8 @@ point_light_t get_point_light(int index) {
             );
         }
     }
+    // hlsl fix
+    return point_light_t(vec3(0), 0, 0, 0, vec3(0), vec3(0), vec3(0));
 }
 
 spot_light_t get_spot_light() {

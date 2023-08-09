@@ -1,8 +1,8 @@
 #ifndef LOPGL_APP_INCLUDED
 #define LOPGL_APP_INCLUDED
-#define SOKOL_LOG_IMPL
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_fetch.h"
 #include <sokol_log.h>
 #include "HandmadeMath.h"
 #include "../libs/fast_obj/lopgl_fast_obj.h"
@@ -70,6 +70,7 @@ typedef struct lopgl_image_request_t {
     sg_image img_id;
     sg_wrap wrap_u;
     sg_wrap wrap_v;
+    sfetch_range_t buffer;
     void* buffer_ptr;                       /* buffer pointer where data will be loaded into */
     uint32_t buffer_size;                   /* buffer size in number of bytes */
     lopgl_fail_callback_t fail_callback;    /* response callback function pointer (required) */
@@ -80,6 +81,7 @@ typedef struct lopgl_image_request_t {
 typedef struct lopgl_obj_request_t {
     uint32_t _start_canary;
     const char* path;                       /* filesystem path or HTTP URL (required) */
+    sfetch_range_t buffer;
     void* buffer_ptr;                       /* buffer pointer where data will be loaded into */
     uint32_t buffer_size;                   /* buffer size in number of bytes */
     const void* user_data_ptr;              /* pointer to a POD user-data block which will be memcpy'd(!) (optional) */
@@ -97,6 +99,7 @@ typedef struct lopgl_cubemap_request_t {
     const char* path_front;                 /* filesystem path or HTTP URL (required) */
     const char* path_back;                  /* filesystem path or HTTP URL (required) */
     sg_image img_id;
+    sfetch_range_t buffer;
     uint8_t* buffer_ptr;                       /* buffer pointer where data will be loaded into */
     uint32_t buffer_offset;                 /* buffer offset in number of bytes */
     lopgl_fail_callback_t fail_callback;    /* response callback function pointer (required) */
@@ -321,6 +324,13 @@ void lopgl_setup() {
     _lopgl.first_mouse = true;
     _lopgl.show_help = false;
     _lopgl.hide_ui = false;
+// #ifdef _WIN32
+//     AllocConsole();
+//     FILE* fp;
+//     freopen_s(&fp, "CONIN$", "r", stdin);
+//     freopen_s(&fp, "CONOUT$", "w", stdout);
+//     freopen_s(&fp, "CONOUT$", "w", stderr);
+// #endif
 }
 
 void lopgl_update() {
@@ -590,6 +600,7 @@ typedef struct {
     fastObjMesh* mesh;
     lopgl_obj_request_callback_t callback;
     lopgl_fail_callback_t fail_callback;
+    sfetch_range_t buffer;
     void* buffer_ptr;
     uint32_t buffer_size;
     void* user_data_ptr;
@@ -622,11 +633,12 @@ static void obj_fetch_callback(const sfetch_response_t* response) {
         req_data.mesh = fast_obj_read(response->data.ptr, response->data.size);
 
         for (unsigned int i = 0; i < req_data.mesh->mtllib_count; ++i) {
+            sfetch_range_t buffer = req_data.buffer_ptr != NULL ? (sfetch_range_t){req_data.buffer_ptr, req_data.buffer_size} : req_data.buffer;
             sfetch_send(&(sfetch_request_t){
                 .path = req_data.mesh->mtllibs[i],
                 .callback = mtl_fetch_callback,
-                .buffer = &(sg_range){&req_data.buffer_ptr, req_data.buffer_size},
-                .user_data = &SG_RANGE(req_data),
+                .buffer = buffer,
+                .user_data = SFETCH_RANGE(req_data),
             });
         }
     }
@@ -642,12 +654,12 @@ void lopgl_load_image(const lopgl_image_request_t* request) {
         .wrap_v = request->wrap_v,
         .fail_callback = request->fail_callback
     };
-
+    sfetch_range_t buffer = request->buffer_ptr != NULL ? (sfetch_range_t){request->buffer_ptr, request->buffer_size} : request->buffer;
     sfetch_send(&(sfetch_request_t){
         .path = request->path,
         .callback = image_fetch_callback,
-        .buffer = &(sg_range){request->buffer_ptr, request->buffer_size},
-        .user_data = &SG_RANGE(req_data),
+        .buffer = buffer,
+        .user_data = SFETCH_RANGE(req_data),
     });
 }
 
@@ -661,11 +673,12 @@ void lopgl_load_obj(const lopgl_obj_request_t* request) {
         .user_data_ptr = request->user_data_ptr
     };
 
+    sfetch_range_t buffer = request->buffer_ptr != NULL ? (sfetch_range_t){request->buffer_ptr, request->buffer_size} : request->buffer;
     sfetch_send(&(sfetch_request_t){
         .path = request->path,
         .callback = obj_fetch_callback,
-        .buffer = &(sg_range){request->buffer_ptr, request->buffer_size},
-        .user_data = &SG_RANGE(req_data),
+        .buffer = buffer,
+        .user_data = SFETCH_RANGE(req_data),
     });
 }
 
@@ -711,11 +724,6 @@ static bool load_cubemap(_cubemap_request_t* request) {
             .height = img_heights[0],
             /* set pixel_format to RGBA8 for WebGL */
             .pixel_format = SG_PIXELFORMAT_RGBA8,
-            // .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
-            // .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
-            // .wrap_w = SG_WRAP_CLAMP_TO_EDGE,
-            // .min_filter = SG_FILTER_LINEAR,
-            // .mag_filter = SG_FILTER_LINEAR,
             .data = img_content
         });
     }
@@ -777,8 +785,8 @@ void lopgl_load_cubemap(lopgl_cubemap_request_t* request) {
         sfetch_send(&(sfetch_request_t){
             .path = cubemap[i],
             .callback = cubemap_fetch_callback,
-            .buffer = &(sg_range){request->buffer_ptr + (i * request->buffer_offset), request->buffer_offset},
-            .user_data = &SG_RANGE(req_instance),
+            .buffer = (sfetch_range_t){request->buffer_ptr + (i * request->buffer_offset), request->buffer_offset},
+            .user_data = SFETCH_RANGE(req_instance),
         });
     }
 }

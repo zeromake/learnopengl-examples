@@ -4,6 +4,7 @@
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "HandmadeMath.h"
+#include "sokol_helper.h"
 #include "2-specular-map.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"

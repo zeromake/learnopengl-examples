@@ -141,11 +141,10 @@ static void init(void) {
     sg_image img_id = state.bind_object.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
-            .path = "container2.png",
-            .img_id = img_id,
-            .buffer_ptr = state.file_buffer,
-            .buffer_size = sizeof(state.file_buffer),
-            .fail_callback = fail_callback
+        .path = "container2.png",
+        .img_id = img_id,
+        .buffer = SFETCH_RANGE(state.file_buffer),
+        .fail_callback = fail_callback
     });
 }
 

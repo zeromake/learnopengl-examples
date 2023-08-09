@@ -39,15 +39,7 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    sg_alloc_image_smp(state.bind.fs, SLOT__ourTexture, SLOT_ourTexture_smp)
-    state.bind.fs.samplers[SLOT_ourTexture_smp] = sg_alloc_sampler();
-    sg_init_sampler(state.bind.fs.samplers[SLOT_ourTexture_smp], &(sg_sampler_desc){
-        .wrap_u = SG_WRAP_REPEAT,
-        .wrap_v = SG_WRAP_REPEAT,
-        .min_filter = SG_FILTER_LINEAR,
-        .mag_filter = SG_FILTER_LINEAR,
-        .compare = SG_COMPAREFUNC_NEVER,
-    });
+    sg_alloc_image_smp(state.bind.fs, SLOT__ourTexture, SLOT_ourTexture_smp);
 
     float vertices[] = {
         // positions         // colors           // texture coords
