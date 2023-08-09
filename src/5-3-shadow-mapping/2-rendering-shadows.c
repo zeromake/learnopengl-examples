@@ -68,8 +68,8 @@ static void init(void) {
 
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
-    state.shadows.bind_cube.fs_images[SLOT_shadow_map] = color_img;
-    state.shadows.bind_plane.fs_images[SLOT_shadow_map] = color_img;
+    state.shadows.bind_cube.fs.images[SLOT__shadow_map] = color_img;
+    state.shadows.bind_plane.fs.images[SLOT__shadow_map] = color_img;
 
     float cube_vertices[] = {
         // back face
@@ -118,7 +118,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
     
@@ -138,7 +138,7 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .data = SG_RANGE(plane_vertices)
+        .data = SG_RANGE(plane_vertices),
         .label = "plane-vertices"
     });
     
@@ -194,8 +194,8 @@ static void init(void) {
     };
 
     sg_image img_id_diffuse = sg_alloc_image();
-    state.shadows.bind_cube.fs_images[SLOT_diffuse_texture] = img_id_diffuse;
-    state.shadows.bind_plane.fs_images[SLOT_diffuse_texture] = img_id_diffuse;
+    state.shadows.bind_cube.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
+    state.shadows.bind_plane.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",

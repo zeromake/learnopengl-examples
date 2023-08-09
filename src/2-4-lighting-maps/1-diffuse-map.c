@@ -4,6 +4,7 @@
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "HandmadeMath.h"
+#include "sokol_helper.h"
 #include "1-diffuse-map.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -33,7 +34,7 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    state.bind_object.fs_images[SLOT_diffuse_texture] = sg_alloc_image();
+    sg_alloc_image_smp(state.bind_object.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
 
     // set object and light configuration
     state.light_pos = HMM_V3(1.2f, 1.0f, 2.0f);
@@ -137,7 +138,7 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id = state.bind_object.fs_images[SLOT_diffuse_texture];
+    sg_image img_id = state.bind_object.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "container2.png",

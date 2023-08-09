@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "2-point-light.glsl.h"
 #define LOPGL_APP_IMPL
@@ -29,8 +30,8 @@ static void fail_callback() {
 static void init(void) {
     lopgl_setup();
     
-    state.bind_object.fs_images[SLOT_diffuse_texture] = sg_alloc_image();
-    state.bind_object.fs_images[SLOT_specular_texture] = sg_alloc_image();
+    sg_alloc_image_smp(state.bind_object.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_object.fs, SLOT__specular_texture, SLOT_specular_texture_smp);
 
     // set object and light configuration
     state.light_pos = HMM_V3(1.2f, 1.0f, 2.0f);
@@ -145,8 +146,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_diffuse = state.bind_object.fs_images[SLOT_diffuse_texture];
-    sg_image img_id_specular = state.bind_object.fs_images[SLOT_specular_texture];
+    sg_image img_id_diffuse = state.bind_object.fs.images[SLOT__diffuse_texture];
+    sg_image img_id_specular = state.bind_object.fs.images[SLOT__specular_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "container2.png",

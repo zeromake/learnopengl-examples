@@ -73,7 +73,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
     
@@ -92,7 +92,7 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .data = SG_RANGE(plane_vertices)
+        .data = SG_RANGE(plane_vertices),
         .label = "plane-vertices"
     });
     
@@ -124,9 +124,9 @@ static void init(void) {
     };
 
     sg_image marble_img_id = sg_alloc_image();
-    state.bind_cube.fs_images[SLOT_diffuse_texture] = marble_img_id;
+    state.bind_cube.fs.images[SLOT__diffuse_texture] = marble_img_id;
     sg_image metal_img_id = sg_alloc_image();
-    state.bind_plane.fs_images[SLOT_diffuse_texture] = metal_img_id;
+    state.bind_plane.fs.images[SLOT__diffuse_texture] = metal_img_id;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",

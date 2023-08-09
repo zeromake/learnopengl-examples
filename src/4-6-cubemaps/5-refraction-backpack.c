@@ -106,7 +106,7 @@ static void init(void) {
 
     sg_buffer skybox_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(skybox_vertices),
-        .data = SG_RANGE(skybox_vertices)
+        .data = SG_RANGE(skybox_vertices),
         .label = "skybox-vertices"
     });
     
@@ -130,7 +130,7 @@ static void init(void) {
 
     /* create a pipeline object for the skybox */
     state.pip_skybox = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = sg_make_shader(skybox_shader_desc()),
+        .shader = sg_make_shader(skybox_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
                 [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
@@ -148,8 +148,8 @@ static void init(void) {
     };
 
     sg_image skybox_img_id = sg_alloc_image();
-    state.mesh.bind.fs_images[SLOT_skybox_texture] = skybox_img_id;
-    state.bind_skybox.fs_images[SLOT_skybox_texture] = skybox_img_id;
+    state.mesh.bind.fs.images[SLOT__skybox_texture] = skybox_img_id;
+    state.bind_skybox.fs.images[SLOT__skybox_texture] = skybox_img_id;
     
     lopgl_load_cubemap(&(lopgl_cubemap_request_t){
         .img_id = skybox_img_id,

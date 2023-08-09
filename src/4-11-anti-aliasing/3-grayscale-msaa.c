@@ -61,7 +61,7 @@ void create_offscreen_pass(int width, int height) {
     state.offscreen.pass = sg_make_pass(&state.offscreen.pass_desc);
 
     /* also need to update the fullscreen-quad texture bindings */
-    state.display.bind.fs_images[SLOT_diffuse_texture] = color_img;
+    state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
 }
 
 static void init(void) {
@@ -77,9 +77,9 @@ static void init(void) {
 
     /* a pass action for rendering the fullscreen-quad */
     state.display.pass_action = (sg_pass_action) {
-        .colors[0].action=SG_ACTION_DONTCARE,
-        .depth.action=SG_ACTION_DONTCARE,
-        .stencil.action=SG_ACTION_DONTCARE
+        .colors[0].load_action=SG_LOADACTION_DONTCARE,
+        .depth.load_action=SG_LOADACTION_DONTCARE,
+        .stencil.load_action=SG_LOADACTION_DONTCARE
     };
     
     float cube_vertices[] = {
@@ -128,7 +128,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
 
@@ -145,7 +145,7 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .data = SG_RANGE(quad_vertices)
+        .data = SG_RANGE(quad_vertices),
         .label = "quad-vertices"
     });
     
@@ -156,7 +156,7 @@ static void init(void) {
 
     /* create a pipeline object for offscreen pass */
     state.offscreen.pip = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = sg_make_shader(offscreen_shader_desc()),
+        .shader = sg_make_shader(offscreen_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
                 [ATTR_vs_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
@@ -165,13 +165,13 @@ static void init(void) {
         .depth = {
             .compare =SG_COMPAREFUNC_LESS,
             .write_enabled =true,
+            .pixel_format = SG_PIXELFORMAT_DEPTH,
         },
-        .blend = {
-            .color_format = SG_PIXELFORMAT_RGBA8,
-            .depth_format = SG_PIXELFORMAT_DEPTH
+        .colors[0] = {
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
         },
         /* we need to set the sample count in both the rendertarget and the pipeline */
-        .rasterizer.sample_count = 4,
+        .sample_count = 4,
         .label = "offscreen-pipeline"
     });
 
@@ -183,7 +183,7 @@ static void init(void) {
                 [ATTR_vs_display_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .shader = sg_make_shader(display_shader_desc()),
+        .shader = sg_make_shader(display_shader_desc(sg_query_backend())),
         .label = "display-pipeline"
     });
 }

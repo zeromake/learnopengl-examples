@@ -7,7 +7,7 @@
 #include "1-backpack-diffuse.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
-#include "fast_obj/lopgl_fast_obj.h"
+#include "../../libs/fast_obj/lopgl_fast_obj.h"
 
 static const char* filename = "backpack.obj";
 
@@ -56,7 +56,7 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     state.mesh.bind.vertex_buffers[0] = cube_buffer;
     sg_image img_id = sg_alloc_image();
-    state.mesh.bind.fs_images[SLOT_diffuse_texture] = img_id;
+    state.mesh.bind.fs.images[SLOT__diffuse_texture] = img_id;
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,

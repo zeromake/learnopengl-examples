@@ -74,7 +74,7 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .data = SG_RANGE(quad_vertices)
+        .data = SG_RANGE(quad_vertices),
         .label = "quad-vertices"
     });
     

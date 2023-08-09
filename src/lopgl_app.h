@@ -1,8 +1,9 @@
 #ifndef LOPGL_APP_INCLUDED
 #define LOPGL_APP_INCLUDED
-
+#define SOKOL_LOG_IMPL
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include <sokol_log.h>
 #include "HandmadeMath.h"
 #include "../libs/fast_obj/lopgl_fast_obj.h"
 
@@ -262,7 +263,8 @@ static lopgl_state_t _lopgl;
 
 void lopgl_setup() {
     sg_setup(&(sg_desc){
-        .context = sapp_sgcontext()
+        .context = sapp_sgcontext(),
+        .logger.func = slog_func,
     });
 
     /* initialize sokol_time */

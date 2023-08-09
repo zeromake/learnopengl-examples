@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-directional-light.glsl.h"
 #define LOPGL_APP_IMPL

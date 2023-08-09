@@ -73,7 +73,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
     
@@ -92,7 +92,7 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .data = SG_RANGE(plane_vertices)
+        .data = SG_RANGE(plane_vertices),
         .label = "plane-vertices"
     });
     

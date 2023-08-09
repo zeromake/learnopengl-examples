@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "3-spot-light.glsl.h"
 #define LOPGL_APP_IMPL
@@ -26,8 +27,8 @@ static void fail_callback() {
 static void init(void) {
     lopgl_setup();
     
-    sg_alloc_image_smp(state.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp)
-    sg_alloc_image_smp(state.bind.fs, SLOT__specular_texture, SLOT_specular_texture_smp)
+    sg_alloc_image_smp(state.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind.fs, SLOT__specular_texture, SLOT_specular_texture_smp);
 
     state.cube_positions[0] = HMM_V3( 0.0f,  0.0f,  0.0f);
     state.cube_positions[1] = HMM_V3( 2.0f,  5.0f, -15.0f);

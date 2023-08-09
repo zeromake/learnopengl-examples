@@ -4,7 +4,7 @@
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
-#include "../libs/hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "1-instancing.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"

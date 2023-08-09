@@ -7,7 +7,7 @@
 #include "3-asteroid-field.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
-#include "fast_obj/lopgl_fast_obj.h"
+#include "../../libs/fast_obj/lopgl_fast_obj.h"
 
 #define ASTEROID_COUNT 1000
 
@@ -60,7 +60,7 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     mesh->bind.vertex_buffers[0] = cube_buffer;
     sg_image img_id = sg_alloc_image();
-    mesh->bind.fs_images[SLOT_diffuse_texture] = img_id;
+    mesh->bind.fs.images[SLOT__diffuse_texture] = img_id;
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = response->mesh->materials[0].map_Kd.name,

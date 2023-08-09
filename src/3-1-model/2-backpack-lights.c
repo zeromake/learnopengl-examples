@@ -7,7 +7,7 @@
 #include "2-backpack-lights.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
-#include "fast_obj/lopgl_fast_obj.h"
+#include "../../libs/fast_obj/lopgl_fast_obj.h"
 
 static const char* filename = "backpack.obj";
 
@@ -59,8 +59,8 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     sg_image img_id_diffuse = sg_alloc_image();
     sg_image img_id_specular = sg_alloc_image();
-    state.mesh.bind.fs_images[SLOT_diffuse_texture] = img_id_diffuse;
-    state.mesh.bind.fs_images[SLOT_specular_texture] = img_id_specular;
+    state.mesh.bind.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
+    state.mesh.bind.fs.images[SLOT__specular_texture] = img_id_specular;
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -179,7 +179,7 @@ void frame(void) {
             .specular[3]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
             .attenuation[3] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights_t));
+        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights));
         
         sg_draw(0, state.mesh.face_count * 3, 1);   
     }

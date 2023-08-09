@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-cull-front.glsl.h"
 #define LOPGL_APP_IMPL
@@ -66,7 +67,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
     
@@ -83,12 +84,13 @@ static void init(void) {
     state.bind.fs.images[SLOT__diffuse_texture] = sg_make_image(&(sg_image_desc){
         .width = 4,
         .height = 4,
-        .content.subimage[0][0] = {
+        .data.subimage[0][0] = {
             .ptr = pixels,
             .size = sizeof(pixels)
         },
         .label = "cube-texture"
     });
+    state.bind.fs.samplers[SLOT_diffuse_texture_smp] = sg_make_sampler(&global_sampler_desc);
 
     /* create shader from code-generated sg_shader_desc */
     sg_shader simple_shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
@@ -107,10 +109,8 @@ static void init(void) {
             .compare =SG_COMPAREFUNC_LESS,
             .write_enabled =true,
         },
-        .rasterizer = {
-            .cull_mode = SG_CULLMODE_FRONT,
-            .face_winding = SG_FACEWINDING_CCW
-        },
+        .cull_mode = SG_CULLMODE_FRONT,
+        .face_winding = SG_FACEWINDING_CCW,
         .label = "pipeline"
     });
     

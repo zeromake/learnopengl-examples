@@ -71,7 +71,7 @@ static void init(void) {
 
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
-    state.shadows.bind.fs_images[SLOT_depth_map] = color_img;
+    state.shadows.bind.fs.images[SLOT__depth_map] = color_img;
 
     float cube_vertices[] = {
         // back face
@@ -120,7 +120,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
     
@@ -185,7 +185,7 @@ static void init(void) {
     };
 
     sg_image img_id_diffuse = sg_alloc_image();
-    state.shadows.bind.fs_images[SLOT_diffuse_texture] = img_id_diffuse;
+    state.shadows.bind.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",

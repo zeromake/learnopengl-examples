@@ -4,7 +4,7 @@
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
-#include "../libs/hmm/HandmadeMath.h"
+#include "HandmadeMath.h"
 #include "2-instanced-arrays.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
@@ -58,7 +58,7 @@ static void init(void) {
 
     state.bind.vertex_buffers[1] = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(translations),
-        .data = SG_RANGE(translations)
+        .data = SG_RANGE(translations),
         .label = "offsets"
     });
 

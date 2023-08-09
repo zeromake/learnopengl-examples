@@ -59,7 +59,7 @@ static void init(void) {
 
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
-    state.quad.bind.fs_images[SLOT_depth_map] = color_img;
+    state.quad.bind.fs.images[SLOT__depth_map] = color_img;
 
     float cube_vertices[] = {
         // back face
@@ -127,7 +127,7 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .data = SG_RANGE(plane_vertices)
+        .data = SG_RANGE(plane_vertices),
         .label = "plane-vertices"
     });
     
@@ -143,7 +143,7 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .data = SG_RANGE(quad_vertices)
+        .data = SG_RANGE(quad_vertices),
         .label = "quad-vertices"
     });
     

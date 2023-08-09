@@ -93,10 +93,8 @@ static void init(void) {
             .compare =SG_COMPAREFUNC_LESS,
             .write_enabled =true,
         },
-        .rasterizer = {
-            .cull_mode = SG_CULLMODE_NONE,
-            .face_winding = SG_FACEWINDING_CCW
-        },
+        .cull_mode = SG_CULLMODE_NONE,
+        .face_winding = SG_FACEWINDING_CCW,
         .label = "cube-pipeline"
     });
 
@@ -130,7 +128,7 @@ static void init(void) {
     state.bind.fs.images[SLOT__back_texture] = sg_make_image(&(sg_image_desc){
         .width = 16,
         .height = 16,
-        .content.subimage[0][0] = {
+        .data.subimage[0][0] = {
             .ptr = pixels,
             .size = sizeof(pixels)
         },

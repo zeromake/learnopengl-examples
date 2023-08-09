@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include <sokol_log.h>
 #include "HandmadeMath.h"
 #include "1-render-to-texture.glsl.h"
 #define LOPGL_APP_IMPL
@@ -40,19 +41,23 @@ void create_offscreen_pass(int width, int height) {
     sg_destroy_image(state.offscreen.pass_desc.depth_stencil_attachment.image);
 
     /* create offscreen rendertarget images and pass */
+    sg_sampler_desc color_smp_desc = {
+        .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
+        .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
+        .min_filter = SG_FILTER_LINEAR,
+        .mag_filter = SG_FILTER_LINEAR,
+        .compare = SG_COMPAREFUNC_NEVER,
+    };
     sg_image_desc color_img_desc = {
         .render_target = true,
         .width = width,
         .height = height,
         .pixel_format = SG_PIXELFORMAT_RGBA8,
         /* Webgl 1.0 does not support repeat for textures that are not a power of two in size */
-        .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
-        .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
-        .min_filter = SG_FILTER_LINEAR,
-        .mag_filter = SG_FILTER_LINEAR,
         .label = "color-image"
     };
     sg_image color_img = sg_make_image(&color_img_desc);
+    sg_sampler color_smp = sg_make_sampler(&color_smp_desc);
 
     sg_image_desc depth_img_desc = color_img_desc;
     depth_img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
@@ -67,7 +72,8 @@ void create_offscreen_pass(int width, int height) {
     state.offscreen.pass = sg_make_pass(&state.offscreen.pass_desc);
 
     /* also need to update the fullscreen-quad texture bindings */
-    state.display.bind.fs_images[SLOT_diffuse_texture] = color_img;
+    state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
+    state.display.bind.fs.samplers[SLOT_diffuse_texture_smp] = color_smp;
 }
 
 static void init(void) {
@@ -83,9 +89,9 @@ static void init(void) {
 
     /* a pass action for rendering the fullscreen-quad */
     state.display.pass_action = (sg_pass_action) {
-        .colors[0].action=SG_ACTION_DONTCARE,
-        .depth.action=SG_ACTION_DONTCARE,
-        .stencil.action=SG_ACTION_DONTCARE
+        .colors[0].load_action=SG_LOADACTION_DONTCARE,
+        .depth.load_action=SG_LOADACTION_DONTCARE,
+        .stencil.load_action=SG_LOADACTION_DONTCARE
     };
     
     float cube_vertices[] = {
@@ -135,7 +141,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
 
@@ -152,7 +158,7 @@ static void init(void) {
 
     sg_buffer plane_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(plane_vertices),
-        .data = SG_RANGE(plane_vertices)
+        .data = SG_RANGE(plane_vertices),
         .label = "plane-vertices"
     });
 
@@ -169,7 +175,7 @@ static void init(void) {
 
     sg_buffer quad_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(quad_vertices),
-        .data = SG_RANGE(quad_vertices)
+        .data = SG_RANGE(quad_vertices),
         .label = "quad-vertices"
     });
     
@@ -181,7 +187,7 @@ static void init(void) {
 
     /* create a pipeline object for offscreen pass */
     state.offscreen.pip = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = sg_make_shader(offscreen_shader_desc()),
+        .shader = sg_make_shader(offscreen_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
                 [ATTR_vs_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
@@ -189,13 +195,14 @@ static void init(void) {
             }
         },
         .depth = {
-            .compare =SG_COMPAREFUNC_LESS,
-            .write_enabled =true,
+            .compare = SG_COMPAREFUNC_LESS,
+            .write_enabled = true,
+            .pixel_format = SG_PIXELFORMAT_DEPTH,
         },
-        .blend = {
-            .color_format = SG_PIXELFORMAT_RGBA8,
-            .depth_format = SG_PIXELFORMAT_DEPTH
+        .colors[0] = {
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
         },
+        .color_count = 1,
         .label = "offscreen-pipeline"
     });
 
@@ -207,14 +214,14 @@ static void init(void) {
                 [ATTR_vs_display_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
-        .shader = sg_make_shader(display_shader_desc()),
+        .shader = sg_make_shader(display_shader_desc(sg_query_backend())),
         .label = "display-pipeline"
     });
 
     sg_image container_img_id = sg_alloc_image();
-    state.offscreen.bind_cube.fs_images[SLOT_diffuse_texture] = container_img_id;
+    state.offscreen.bind_cube.fs.images[SLOT__diffuse_texture] = container_img_id;
     sg_image metal_img_id = sg_alloc_image();
-    state.offscreen.bind_plane.fs_images[SLOT_diffuse_texture] = metal_img_id;
+    state.offscreen.bind_plane.fs.images[SLOT__diffuse_texture] = metal_img_id;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",

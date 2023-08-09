@@ -7,7 +7,7 @@
 #include "4-visualizing-normals.glsl.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
-#include "fast_obj/lopgl_fast_obj.h"
+#include "../../libs/fast_obj/lopgl_fast_obj.h"
 
 static const char* filename = "backpack.obj";
 
@@ -66,7 +66,7 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     state.mesh.bind_normals.vs_images[SLOT_vertex_texture] = vertex_image_id;
 
     sg_image diffuse_img_id = sg_alloc_image();
-    state.mesh.bind_diffuse.fs_images[SLOT_diffuse_texture] = diffuse_img_id;
+    state.mesh.bind_diffuse.fs.images[SLOT__diffuse_texture] = diffuse_img_id;
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,

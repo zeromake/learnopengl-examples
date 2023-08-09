@@ -67,7 +67,7 @@ void create_offscreen_pass(int width, int height) {
     state.offscreen.pass = sg_make_pass(&state.offscreen.pass_desc);
 
     /* also need to update the fullscreen-quad texture bindings */
-    state.display.bind.fs_images[SLOT_diffuse_texture] = color_img;
+    state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
 }
 
 static void init(void) {
@@ -212,9 +212,9 @@ static void init(void) {
     });
 
     sg_image container_img_id = sg_alloc_image();
-    state.offscreen.bind_cube.fs_images[SLOT_diffuse_texture] = container_img_id;
+    state.offscreen.bind_cube.fs.images[SLOT__diffuse_texture] = container_img_id;
     sg_image metal_img_id = sg_alloc_image();
-    state.offscreen.bind_plane.fs_images[SLOT_diffuse_texture] = metal_img_id;
+    state.offscreen.bind_plane.fs.images[SLOT__diffuse_texture] = metal_img_id;
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",
