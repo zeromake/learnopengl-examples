@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-skybox.glsl.h"
 #define LOPGL_APP_IMPL
@@ -169,10 +170,10 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image container_img_id = sg_alloc_image();
-    state.bind_cube.fs.images[SLOT__diffuse_texture] = container_img_id;
-    sg_image skybox_img_id = sg_alloc_image();
-    state.bind_skybox.fs.images[SLOT__skybox_texture] = skybox_img_id;
+    sg_alloc_image_smp(state.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_skybox.fs, SLOT__skybox_texture, SLOT_skybox_texture_smp);
+    sg_image container_img_id = state.bind_cube.fs.images[SLOT__diffuse_texture];
+    sg_image skybox_img_id = state.bind_skybox.fs.images[SLOT__skybox_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = "container.jpg",

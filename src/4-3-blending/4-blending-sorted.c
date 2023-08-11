@@ -237,7 +237,7 @@ void frame(void) {
             HMM_Vec3 translate0 = HMM_SubV3(state.vegetation[j], position);
             HMM_Vec3 translate1 = HMM_SubV3(state.vegetation[j + 1], position);
 
-            if (HMM_LengthSquaredVec3(translate0) < HMM_LengthSquaredVec3(translate1)) {
+            if (HMM_LenSqrV3(translate0) < HMM_LenSqrV3(translate1)) {
                 HMM_Vec3 temp = state.vegetation[j];
                 state.vegetation[j] = state.vegetation[j + 1];
                 state.vegetation[j + 1] = temp;

@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-object-outlining.glsl.h"
 #define LOPGL_APP_IMPL
@@ -189,11 +190,11 @@ static void init(void) {
     state.pass_action = (sg_pass_action) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
-
-    sg_image marble_img_id = sg_alloc_image();
-    state.bind_cube.fs.images[SLOT__diffuse_texture] = marble_img_id;
-    sg_image metal_img_id = sg_alloc_image();
-    state.bind_plane.fs.images[SLOT__diffuse_texture] = metal_img_id;
+    
+    sg_alloc_image_smp(state.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_plane.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image marble_img_id = state.bind_cube.fs.images[SLOT__diffuse_texture];
+    sg_image metal_img_id = state.bind_plane.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",

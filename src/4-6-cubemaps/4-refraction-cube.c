@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "4-refraction-cube.glsl.h"
 #define LOPGL_APP_IMPL
@@ -169,9 +170,12 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image skybox_img_id = sg_alloc_image();
+
+    sg_alloc_image_smp(state.bind_skybox.fs, SLOT__skybox_texture, SLOT_skybox_texture_smp);
+    sg_image skybox_img_id = state.bind_skybox.fs.images[SLOT__skybox_texture];
+
     state.bind_cube.fs.images[SLOT__skybox_texture] = skybox_img_id;
-    state.bind_skybox.fs.images[SLOT__skybox_texture] = skybox_img_id;
+    state.bind_cube.fs.samplers[SLOT_skybox_texture_smp] = state.bind_skybox.fs.samplers[SLOT_skybox_texture_smp];
     
     lopgl_load_cubemap(&(lopgl_cubemap_request_t){
         .img_id = skybox_img_id,

@@ -58,10 +58,10 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     state.mesh.bind.vertex_buffers[0] = cube_buffer;
     
-    sg_image img_id_diffuse = sg_alloc_image();
-    sg_image img_id_specular = sg_alloc_image();
-    state.mesh.bind.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
-    state.mesh.bind.fs.images[SLOT__specular_texture] = img_id_specular;
+    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__specular_texture, SLOT_specular_texture_smp);
+    sg_image img_id_diffuse = state.mesh.bind.fs.images[SLOT__diffuse_texture];
+    sg_image img_id_specular = state.mesh.bind.fs.images[SLOT__specular_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -104,7 +104,7 @@ static void init(void) {
             }
         },
         .depth = {
-            .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .compare = SG_COMPAREFUNC_LESS_EQUAL,
             .write_enabled =true,
         },
         .label = "object-pipeline"

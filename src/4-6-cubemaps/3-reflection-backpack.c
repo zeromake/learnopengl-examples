@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "3-reflection-backpack.glsl.h"
 #define LOPGL_APP_IMPL
@@ -47,9 +48,10 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
         memcpy(state.vertex_buffer + pos + 3, mesh->normals + n_pos, 3 * sizeof(float));
     }
 
+    int size = mesh->face_count * 3 * 6 * sizeof(float);
     sg_buffer mesh_buffer = sg_make_buffer(&(sg_buffer_desc){
-        .size = mesh->face_count * 3 * 6 * sizeof(float),
-        .data = SG_RANGE(state.vertex_buffer),
+        .size = size,
+        .data = (sg_range){&state.vertex_buffer, size},
         .label = "backpack-vertices"
     });
     
@@ -148,10 +150,13 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image skybox_img_id = sg_alloc_image();
-    state.mesh.bind.fs.images[SLOT__skybox_texture] = skybox_img_id;
-    state.bind_skybox.fs.images[SLOT__skybox_texture] = skybox_img_id;
     
+    sg_alloc_image_smp(state.bind_skybox.fs, SLOT__skybox_texture, SLOT_skybox_texture_smp);
+    sg_image skybox_img_id = state.bind_skybox.fs.images[SLOT__skybox_texture];
+
+    state.mesh.bind.fs.images[SLOT__skybox_texture] = skybox_img_id;
+    state.mesh.bind.fs.samplers[SLOT_skybox_texture_smp] = state.bind_skybox.fs.samplers[SLOT_skybox_texture_smp];
+
     lopgl_load_cubemap(&(lopgl_cubemap_request_t){
         .img_id = skybox_img_id,
         .path_right = "skybox_right.jpg",

@@ -91,7 +91,11 @@ for _, dir in ipairs(os.filedirs("src/*")) do
 		            add_files("src/resource.rc")
                 elseif is_plat("wasm") then
                     add_ldflags("-sMAX_WEBGL_VERSION=2")
-                    set_extension(".js")
+                    -- set_extension(".js")
+                    add_ldflags("-sSTACK_SIZE=512KB")
+                    add_ldflags("-sTOTAL_MEMORY="..(1024*1024*32))
+                    add_ldflags("-sALLOW_MEMORY_GROWTH=1")
+                    add_ldflags("-sMALLOC=\"emmalloc\"")
                 end
                 add_includedirs(includedir)
                 add_deps("sokol_wrapper", "shader")

@@ -142,23 +142,16 @@ dir_light_t get_directional_light() {
 }
 
 point_light_t get_point_light(int index) {
-    for (int i = 0; i < NR_POINT_LIGHTS; ++i) {
-        // workaround because gles2 only allows dynamic array indices
-        // with constant expressions or loop indices
-        if (i == index) {
-            return point_light_t(
-                point_lights.position[i].xyz,
-                point_lights.attenuation[i].x,
-                point_lights.attenuation[i].y,
-                point_lights.attenuation[i].z,
-                point_lights.ambient[i].xyz,
-                point_lights.diffuse[i].xyz,
-                point_lights.specular[i].xyz
-            );
-        }
-    }
-    // hlsl fix
-    return point_light_t(vec3(0), 0, 0, 0, vec3(0), vec3(0), vec3(0));
+    int i = index;
+    return point_light_t(
+        point_lights.position[i].xyz,
+        point_lights.attenuation[i].x,
+        point_lights.attenuation[i].y,
+        point_lights.attenuation[i].z,
+        point_lights.ambient[i].xyz,
+        point_lights.diffuse[i].xyz,
+        point_lights.specular[i].xyz
+    );
 }
 
 spot_light_t get_spot_light() {

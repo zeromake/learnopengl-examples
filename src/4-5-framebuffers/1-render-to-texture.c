@@ -4,6 +4,7 @@
 #include "sokol_app.h"
 #include "sokol_gfx.h"
 #include <sokol_log.h>
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-render-to-texture.glsl.h"
 #define LOPGL_APP_IMPL
@@ -218,10 +219,10 @@ static void init(void) {
         .label = "display-pipeline"
     });
 
-    sg_image container_img_id = sg_alloc_image();
-    state.offscreen.bind_cube.fs.images[SLOT__diffuse_texture] = container_img_id;
-    sg_image metal_img_id = sg_alloc_image();
-    state.offscreen.bind_plane.fs.images[SLOT__diffuse_texture] = metal_img_id;
+    sg_alloc_image_smp(state.offscreen.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.offscreen.bind_plane.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image container_img_id = state.offscreen.bind_cube.fs.images[SLOT__diffuse_texture];
+    sg_image metal_img_id = state.offscreen.bind_plane.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",
