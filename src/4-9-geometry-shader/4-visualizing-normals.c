@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "4-visualizing-normals.glsl.h"
 #define LOPGL_APP_IMPL
@@ -47,26 +48,33 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
         memcpy(state.vertex_buffer + pos, mesh->positions + v_pos, 3 * sizeof(float));
         memcpy(state.vertex_buffer + pos + 3, mesh->texcoords + t_pos, 2 * sizeof(float));
     }
-
-    sg_image vertex_image_id = sg_make_image(&(sg_image_desc){
-        .width = 1024,
-        .height = mesh->face_count*3*5/1024 + 1,
-        .pixel_format = SG_PIXELFORMAT_R32F,
+    sg_sampler_desc smp_desc = {
         /* set filter to nearest, webgl2 does not support filtering for float textures */
         .mag_filter = SG_FILTER_NEAREST,
         .min_filter = SG_FILTER_NEAREST,
-        .content.subimage[0][0] = {
+    };
+    int width = 1024;
+    int height = mesh->face_count*3*5/width + 1;
+    int size = width * height * 4;
+    sg_image vertex_image_id = sg_make_image(&(sg_image_desc){
+        .width = width,
+        .height = height,
+        .pixel_format = SG_PIXELFORMAT_R32F,
+        .data.subimage[0][0] = {
             .ptr = state.vertex_buffer,
-            .size = sizeof(state.vertex_buffer)
+            .size = size
         },
         .label = "color-texture"
     });
+    sg_sampler vertex_smp_id = sg_make_sampler(&smp_desc);
 
-    state.mesh.bind_diffuse.vs_images[SLOT_vertex_texture] = vertex_image_id;
-    state.mesh.bind_normals.vs_images[SLOT_vertex_texture] = vertex_image_id;
+    state.mesh.bind_diffuse.vs.images[SLOT__vertex_texture] = vertex_image_id;
+    state.mesh.bind_normals.vs.images[SLOT__vertex_texture] = vertex_image_id;
+    state.mesh.bind_diffuse.vs.samplers[SLOT_vertex_texture_smp] = vertex_smp_id;
+    state.mesh.bind_normals.vs.samplers[SLOT_vertex_texture_smp] = vertex_smp_id;
 
-    sg_image diffuse_img_id = sg_alloc_image();
-    state.mesh.bind_diffuse.fs.images[SLOT__diffuse_texture] = diffuse_img_id;
+    sg_alloc_image_smp(state.mesh.bind_diffuse.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image diffuse_img_id = state.mesh.bind_diffuse.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -80,13 +88,20 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
 static void init(void) {
     lopgl_setup();
 
-    if (sapp_gles2()) {
-        /* this demo needs GLES3/WebGL because we are using texelFetch in the shader */
-        return;
-    }
-
     /* create shader from code-generated sg_shader_desc */
     sg_shader simple_shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
+    
+    float vertices[] = {
+        0.0f,
+    };
+    state.mesh.bind_diffuse.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
+        .size = sizeof(vertices),
+        .data = SG_RANGE(vertices),
+    });
+    state.mesh.bind_normals.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
+        .size = sizeof(vertices),
+        .data = SG_RANGE(vertices),
+    });
 
     /* create a pipeline object for the diffuse shading */
     state.mesh.pip_diffuse = sg_make_pipeline(&(sg_pipeline_desc){
@@ -138,12 +153,6 @@ static void init(void) {
 }
 
 void frame(void) {
-    /* can't do anything useful on GLES2/WebGL */
-    if (sapp_gles2()) {
-        lopgl_render_gles2_fallback();
-        return;
-    }
-
     lopgl_update();
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());

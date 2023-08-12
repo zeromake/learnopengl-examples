@@ -22,7 +22,7 @@ rule_end()
 
 add_rules("sokol_shader")
 
-add_requires("stb", "sokol", "handmade_math")
+add_requires("stb", "sokol", "handmade_math", "imgui")
 
 if is_plat("windows") then
     add_defines("SOKOL_WIN32_FORCE_MAIN")
@@ -78,6 +78,11 @@ target("sokol_wrapper")
     end
 target_end()
 
+target("dbgui")
+    set_kind("static")
+    add_packages("sokol", "imgui")
+    add_files("libs/dbgui/dbgui.cc")
+
 for _, dir in ipairs(os.filedirs("src/*")) do
     if os.isdir(dir) and path.basename(dir) ~= "data" then
         local includedir = path.join("$(buildir)/sokol_shader", path.basename(dir))
@@ -98,8 +103,10 @@ for _, dir in ipairs(os.filedirs("src/*")) do
                     add_ldflags("-sMALLOC=\"emmalloc\"")
                 end
                 add_includedirs(includedir)
-                add_deps("sokol_wrapper", "shader")
+                add_includedirs("libs")
+                add_deps("sokol_wrapper", "shader", "dbgui")
                 set_rundir("src/data")
+                add_defines("USE_DBG_UI")
             target_end()
         end
     end

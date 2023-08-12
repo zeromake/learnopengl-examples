@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "3-exploding-object.glsl.h"
 #define LOPGL_APP_IMPL
@@ -46,22 +47,29 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
         memcpy(state.vertex_buffer + pos + 3, mesh->texcoords + t_pos, 2 * sizeof(float));
     }
 
-    state.mesh.bind.vs_images[SLOT_vertex_texture] = sg_make_image(&(sg_image_desc){
-        .width = 1024,
-        .height = mesh->face_count*3*5/1024 + 1,
-        .pixel_format = SG_PIXELFORMAT_R32F,
+    
+    sg_sampler_desc smp_desc = {
         /* set filter to nearest, webgl2 does not support filtering for float textures */
         .mag_filter = SG_FILTER_NEAREST,
         .min_filter = SG_FILTER_NEAREST,
-        .content.subimage[0][0] = {
+    };
+    int width = 1024;
+    int height = mesh->face_count*3*5/width + 1;
+    int size = width * height * 4;
+    state.mesh.bind.vs.images[SLOT__vertex_texture] = sg_make_image(&(sg_image_desc){
+        .width = width,
+        .height = height,
+        .pixel_format = SG_PIXELFORMAT_R32F,
+        .data.subimage[0][0] = {
             .ptr = state.vertex_buffer,
-            .size = sizeof(state.vertex_buffer)
+            .size = size,
         },
         .label = "color-texture"
     });
+    state.mesh.bind.vs.samplers[SLOT_vertex_texture_smp] = sg_make_sampler(&smp_desc);
 
-    sg_image img_id = sg_alloc_image();
-    state.mesh.bind.fs.images[SLOT__diffuse_texture] = img_id;
+    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image img_id = state.mesh.bind.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -75,14 +83,17 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
 static void init(void) {
     lopgl_setup();
 
-    if (sapp_gles2()) {
-        /* this demo needs GLES3/WebGL because we are using texelFetch in the shader */
-        return;
-    }
-
     /* create shader from code-generated sg_shader_desc */
     sg_shader phong_shd = sg_make_shader(phong_shader_desc(sg_query_backend()));
 
+
+    float vertices[] = {
+        0.0f,
+    };
+    state.mesh.bind.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
+        .size = sizeof(vertices),
+        .data = SG_RANGE(vertices),
+    });
     /* create a pipeline object for object */
     state.mesh.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .shader = phong_shd,
@@ -114,11 +125,6 @@ static void init(void) {
 }
 
 void frame(void) {
-    /* can't do anything useful on GLES2/WebGL */
-    if (sapp_gles2()) {
-        lopgl_render_gles2_fallback();
-        return;
-    }
 
     lopgl_update();
 

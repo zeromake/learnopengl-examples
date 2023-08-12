@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "3-front-facing.glsl.h"
 #define LOPGL_APP_IMPL
@@ -103,8 +104,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_front = sg_alloc_image();
-    state.bind.fs.images[SLOT__front_texture] = img_id_front;
+    sg_alloc_image_smp(state.bind.fs, SLOT__front_texture, SLOT_front_texture_smp);
+    sg_image img_id_front = state.bind.fs.images[SLOT__front_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "uv_grid.png",
@@ -134,6 +135,7 @@ static void init(void) {
         },
         .label = "back-texture"
     });
+    state.bind.fs.samplers[SLOT__back_texture] = sg_make_sampler(&global_sampler_desc);
 }
 
 void frame(void) {

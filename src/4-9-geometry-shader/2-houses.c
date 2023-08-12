@@ -19,14 +19,16 @@ static struct {
 static void init(void) {
     lopgl_setup();
 
-    if (sapp_gles2()) {
-        /* this demo needs GLES3/WebGL because we are using texelFetch in the shader */
-        return;
-    }
-
     /* create shader from code-generated sg_shader_desc */
     sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
 
+    float vertices[] = {
+        0.0f,
+    };
+    state.bind.vertex_buffers[0] = sg_make_buffer(&(sg_buffer_desc){
+        .size = sizeof(vertices),
+        .data = SG_RANGE(vertices),
+    });
     /* a pipeline state object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .shader = shd,
@@ -51,20 +53,23 @@ static void init(void) {
         0.5f,  -0.5f, // bottom-right
         -0.5f, -0.5f  // bottom-left
     };
-
-    state.bind.vs_images[SLOT_position_texture] = sg_make_image(&(sg_image_desc){
-        .width = 4,
-        .height = 1,
-        .pixel_format = SG_PIXELFORMAT_RG32F,
+    sg_sampler_desc smp_desc = {
         /* set filter to nearest, webgl2 does not support filtering for float textures */
         .mag_filter = SG_FILTER_NEAREST,
         .min_filter = SG_FILTER_NEAREST,
-        .content.subimage[0][0] = {
+    };
+
+    state.bind.vs.images[SLOT__position_texture] = sg_make_image(&(sg_image_desc){
+        .width = 4,
+        .height = 1,
+        .pixel_format = SG_PIXELFORMAT_RG32F,
+        .data.subimage[0][0] = {
             .ptr = positions,
             .size = sizeof(positions)
         },
         .label = "positions-texture"
     });
+    state.bind.vs.samplers[SLOT_position_texture_smp] = sg_make_sampler(&smp_desc);
 
     float colors[] = {
         1.0f, 0.0f, 0.0f, 1.0,  // top-left
@@ -73,28 +78,20 @@ static void init(void) {
         1.0f, 1.0f, 0.0f, 1.0   // bottom-left
     };
 
-    state.bind.vs_images[SLOT_color_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.vs.images[SLOT__color_texture] = sg_make_image(&(sg_image_desc){
         .width = 4,
         .height = 1,
         .pixel_format = SG_PIXELFORMAT_RGBA32F,
-        /* set filter to nearest, webgl2 does not support filtering for float textures */
-        .mag_filter = SG_FILTER_NEAREST,
-        .min_filter = SG_FILTER_NEAREST,
-        .content.subimage[0][0] = {
+        .data.subimage[0][0] = {
             .ptr = colors,
             .size = sizeof(colors)
         },
         .label = "color-texture"
     });
+    state.bind.vs.samplers[SLOT_color_texture_smp] = sg_make_sampler(&smp_desc);
 }
 
 void frame(void) {
-    /* can't do anything useful on GLES2/WebGL */
-    if (sapp_gles2()) {
-        lopgl_render_gles2_fallback();
-        return;
-    }
-
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);

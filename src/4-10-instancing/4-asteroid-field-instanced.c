@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "4-asteroid-field-instanced.glsl.h"
 #define LOPGL_APP_IMPL
@@ -51,16 +52,16 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
         memcpy(state.vertex_buffer + pos + 3, response->mesh->normals + n_pos, 3 * sizeof(float));
         memcpy(state.vertex_buffer + pos + 6, response->mesh->texcoords + t_pos, 2 * sizeof(float));
     }
-
+    int size = mesh->face_count * 3 * 8 * sizeof(float);
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
-        .size = mesh->face_count * 3 * 8 * sizeof(float),
-        .data = SG_RANGE(state.vertex_buffer),
+        .size = size,
+        .data = (sg_range){state.vertex_buffer, size},
         .label = "mesh-vertices"
     });
     
     mesh->bind.vertex_buffers[0] = cube_buffer;
-    sg_image img_id = sg_alloc_image();
-    mesh->bind.fs.images[SLOT__diffuse_texture] = img_id;
+    sg_alloc_image_smp(mesh->bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image img_id = mesh->bind.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = response->mesh->materials[0].map_Kd.name,

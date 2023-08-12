@@ -81,7 +81,8 @@ vec3 getNormal(vec3 p0, vec3 p1, vec3 p2) {
 }
 
 void main() {
-    uint index = gl_VertexIndex >> 1;      // divide by 2
+    uint vertexIndex = uint(gl_VertexIndex);
+    uint index = vertexIndex >> 1;      // divide by 2
     index = index * 15;
 
     vec3 p0 = getVec3(index, _vertex_texture, vertex_texture_smp);
@@ -90,7 +91,7 @@ void main() {
 
     vec3 mid = (p0 + p1 + p2) / 3.0;
     vec3 normal = getNormal(p0, p1, p2);
-    vec3 direction = (gl_VertexIndex % 2) * normal; 
+    vec3 direction = (vertexIndex % 2) * normal; 
 
     vec4 pos = vec4(mid + direction * MAGNITUDE, 1.0);
     gl_Position = projection * view * model * pos;

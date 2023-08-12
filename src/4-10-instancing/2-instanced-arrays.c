@@ -19,11 +19,6 @@ static struct {
 
 static void init(void) {
     lopgl_setup();
-    
-    if (sapp_gles2()) {
-        /* this demo needs GLES3/WebGL because we are using gl_InstanceID in the shader */
-        return;
-    }
 
     /* create shader from code-generated sg_shader_desc */
     sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
@@ -84,11 +79,6 @@ static void init(void) {
 }
 
 void frame(void) {
-    /* can't do anything useful on GLES2/WebGL */
-    if (sapp_gles2()) {
-        lopgl_render_gles2_fallback();
-        return;
-    }
 
     sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
     sg_apply_pipeline(state.pip);

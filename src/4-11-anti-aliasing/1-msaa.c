@@ -135,7 +135,6 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .height = 600,
         .high_dpi = true,
         .sample_count = 4,
-        
         .window_title = "MSAA (LearnOpenGL)",
     };
 }
