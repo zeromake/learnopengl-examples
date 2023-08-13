@@ -32,7 +32,7 @@ static void init(void) {
     HMM_Vec3 light_pos = HMM_V3(-2.f, 4.65f, -1.f);
     float near_plane = 1.f;
     float far_plane = 7.5f;
-    HMM_Mat4 light_projection = HMM_Orthographic(-10.f, 10.f, -10.f, 10.f, near_plane, far_plane);
+    HMM_Mat4 light_projection = HMM_Orthographic_RH_NO(-10.f, 10.f, -10.f, 10.f, near_plane, far_plane);
     HMM_Mat4 light_view = HMM_LookAt_RH(light_pos, HMM_V3(0.f, 0.f, 0.f), HMM_V3(0.f, 1.f, 0.f));
     state.light_space_matrix = HMM_MulM4(light_projection, light_view);
 
@@ -42,12 +42,15 @@ static void init(void) {
         .width = 1024,
         .height = 1024,
         .pixel_format = SG_PIXELFORMAT_RGBA8,
-        .min_filter = SG_FILTER_NEAREST,
-        .mag_filter = SG_FILTER_NEAREST,
         .sample_count = 1,
         .label = "shadow-map-color-image"
     };
+    sg_sampler_desc smp_desc = {
+        .min_filter = SG_FILTER_NEAREST,
+        .mag_filter = SG_FILTER_NEAREST,
+    };
     sg_image color_img = sg_make_image(&img_desc);
+    sg_sampler color_smp = sg_make_sampler(&smp_desc);
     img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
     img_desc.label = "shadow-map-depth-image";
     sg_image depth_img = sg_make_image(&img_desc);
@@ -60,6 +63,7 @@ static void init(void) {
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
     state.quad.bind.fs.images[SLOT__depth_map] = color_img;
+    state.quad.bind.fs.samplers[SLOT_depth_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -108,7 +112,7 @@ static void init(void) {
 
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
         .size = sizeof(cube_vertices),
-        .data = SG_RANGE(cube_vertices)
+        .data = SG_RANGE(cube_vertices),
         .label = "cube-vertices"
     });
     
@@ -160,12 +164,13 @@ static void init(void) {
         },
         .depth = {
             .compare =SG_COMPAREFUNC_LESS_EQUAL,
+            .pixel_format = SG_PIXELFORMAT_DEPTH,
             .write_enabled =true,
         },
-        .blend = {
-            .color_format = SG_PIXELFORMAT_RGBA8,
-            .depth_format = SG_PIXELFORMAT_DEPTH
+        .colors[0] = {
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
         },
+        .color_count = 1,
         .label = "depth-pipeline"
     });
 

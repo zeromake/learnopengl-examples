@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "2-omnidirectional-shadows.glsl.h"
 #define LOPGL_APP_IMPL
@@ -47,14 +48,17 @@ static void init(void) {
         .width = SHADOW_WIDTH,
         .height = SHADOW_HEIGHT,
         .pixel_format = SG_PIXELFORMAT_RGBA8,
+        .sample_count = 1,
+        .label = "shadow-map-color-image"
+    };
+    sg_sampler_desc smp_desc = {
         .min_filter = SG_FILTER_NEAREST,
         .mag_filter = SG_FILTER_NEAREST,
         .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
         .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
         .wrap_w = SG_WRAP_CLAMP_TO_EDGE,
-        .sample_count = 1,
-        .label = "shadow-map-color-image"
     };
+    sg_sampler color_smp = sg_make_sampler(&smp_desc);
     sg_image color_img = sg_make_image(&img_desc);
     img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
     img_desc.label = "shadow-map-depth-image";
@@ -72,6 +76,7 @@ static void init(void) {
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
     state.shadows.bind.fs.images[SLOT__depth_map] = color_img;
+    state.shadows.bind.fs.samplers[SLOT_depth_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -141,16 +146,15 @@ static void init(void) {
         .depth = {
             .compare =SG_COMPAREFUNC_LESS_EQUAL,
             .write_enabled =true,
+            .pixel_format = SG_PIXELFORMAT_DEPTH,
         },
+        .colors[0] = {
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
+        },
+        .color_count = 1,
         /* cull front faces for depth map */
-        .rasterizer = {
-            .cull_mode = SG_CULLMODE_FRONT,
-            .face_winding = SG_FACEWINDING_CCW
-        },
-        .blend = {
-            .color_format = SG_PIXELFORMAT_RGBA8,
-            .depth_format = SG_PIXELFORMAT_DEPTH
-        },
+        .cull_mode = SG_CULLMODE_FRONT,
+        .face_winding = SG_FACEWINDING_CCW,
         .label = "depth-pipeline"
     });
 
@@ -169,10 +173,8 @@ static void init(void) {
             .compare =SG_COMPAREFUNC_LESS_EQUAL,
             .write_enabled =true,
         },
-        .rasterizer = {
-            .cull_mode = SG_CULLMODE_BACK,
-            .face_winding = SG_FACEWINDING_CCW
-        },
+        .cull_mode = SG_CULLMODE_BACK,
+        .face_winding = SG_FACEWINDING_CCW,
         .label = "shadows-pipeline"
     });
 
@@ -184,8 +186,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_diffuse = sg_alloc_image();
-    state.shadows.bind.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
+    sg_alloc_image_smp(state.shadows.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image img_id_diffuse = state.shadows.bind.fs.images[SLOT__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",

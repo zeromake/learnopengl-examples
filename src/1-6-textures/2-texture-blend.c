@@ -5,6 +5,7 @@
 #include "sokol_gfx.h"
 #include "sokol_glue.h"
 #include "sokol_fetch.h"
+#include "sokol_helper.h"
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
 #include "2-texture-blend.glsl.h"

@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "2-tangent-space.glsl.h"
 #define LOPGL_APP_IMPL
@@ -103,8 +104,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_diffuse = sg_alloc_image();
-    state.bind.fs.images[SLOT__diffuse_map] = img_id_diffuse;
+    sg_alloc_image_smp(state.bind.fs, SLOT__diffuse_map, SLOT_diffuse_map_smp);
+    sg_image img_id_diffuse = state.bind.fs.images[SLOT__diffuse_map];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall.jpg",
@@ -114,8 +115,8 @@ static void init(void) {
             .fail_callback = fail_callback
     });
 
-    sg_image img_id_normal = sg_alloc_image();
-    state.bind.fs.images[SLOT__normal_map] = img_id_normal;
+    sg_alloc_image_smp(state.bind.fs, SLOT__normal_map, SLOT_normal_map_smp);
+    sg_image img_id_normal = state.bind.fs.images[SLOT__normal_map];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall_normal.jpg",
@@ -137,7 +138,7 @@ void frame(void) {
     HMM_Mat4 view = lopgl_view_matrix();
     HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
     /* rotate the quad to show normal mapping from multiple directions */
-    HMM_Mat4 model = HMM_Rotate_RH((float)stm_sec(stm_now()) * -10.f, HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
+    HMM_Mat4 model = HMM_Rotate_RH((float)stm_sec(stm_now()) * -10.f * 0.1f, HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
 
     vs_params_t vs_params = {
         .view = view,

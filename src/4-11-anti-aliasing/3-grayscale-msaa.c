@@ -8,6 +8,8 @@
 #define LOPGL_APP_IMPL
 #include "../lopgl_app.h"
 
+#define OFFSCREEN_SAMPLE_COUNT (1)
+#define DISPLAY_SAMPLE_COUNT (4)
 /* application state */
 static struct {
     struct {
@@ -32,21 +34,24 @@ void create_offscreen_pass(int width, int height) {
     sg_destroy_image(state.offscreen.pass_desc.depth_stencil_attachment.image);
 
     /* create offscreen rendertarget images and pass */
+    sg_sampler_desc color_smp_desc = {
+        /* Webgl 1.0 does not support repeat for textures that are not a power of two in size */
+        .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
+        .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
+        .min_filter = SG_FILTER_LINEAR,
+        .mag_filter = SG_FILTER_LINEAR,
+    };
     sg_image_desc color_img_desc = {
         .render_target = true,
         .width = width,
         .height = height,
         .pixel_format = SG_PIXELFORMAT_RGBA8,
         /* we need to set the sample count in both the rendertarget and the pipeline */
-        .sample_count = 4,
-        /* Webgl 1.0 does not support repeat for textures that are not a power of two in size */
-        .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
-        .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
-        .min_filter = SG_FILTER_LINEAR,
-        .mag_filter = SG_FILTER_LINEAR,
+        .sample_count = OFFSCREEN_SAMPLE_COUNT,
         .label = "color-image"
     };
     sg_image color_img = sg_make_image(&color_img_desc);
+    sg_sampler color_smp = sg_make_sampler(&color_smp_desc);
 
     sg_image_desc depth_img_desc = color_img_desc;
     depth_img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
@@ -62,6 +67,7 @@ void create_offscreen_pass(int width, int height) {
 
     /* also need to update the fullscreen-quad texture bindings */
     state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
+    state.display.bind.fs.samplers[SLOT_diffuse_texture_smp] = color_smp;
 }
 
 static void init(void) {
@@ -171,7 +177,7 @@ static void init(void) {
             .pixel_format = SG_PIXELFORMAT_RGBA8,
         },
         /* we need to set the sample count in both the rendertarget and the pipeline */
-        .sample_count = 4,
+        .sample_count = OFFSCREEN_SAMPLE_COUNT,
         .label = "offscreen-pipeline"
     });
 

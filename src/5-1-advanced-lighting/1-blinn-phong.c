@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-blinn-phong.glsl.h"
 #define LOPGL_APP_IMPL
@@ -74,15 +75,15 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_floor = sg_alloc_image();
-    state.bind.fs.images[SLOT__floor_texture] = img_id_floor;
+    sg_alloc_image_smp(state.bind.fs, SLOT__floor_texture, SLOT_floor_texture_smp);
+    sg_image img_id_floor = state.bind.fs.images[SLOT__floor_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
-            .path = "wood.png",
-            .img_id = img_id_floor,
-            .buffer_ptr = state.file_buffer,
-            .buffer_size = sizeof(state.file_buffer),
-            .fail_callback = fail_callback
+        .path = "wood.png",
+        .img_id = img_id_floor,
+        .buffer_ptr = state.file_buffer,
+        .buffer_size = sizeof(state.file_buffer),
+        .fail_callback = fail_callback
     });
 }
 

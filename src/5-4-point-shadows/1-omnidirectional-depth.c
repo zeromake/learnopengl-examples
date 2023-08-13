@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "1-omnidirectional-depth.glsl.h"
 #define LOPGL_APP_IMPL
@@ -40,15 +41,18 @@ static void init(void) {
         .width = SHADOW_WIDTH,
         .height = SHADOW_HEIGHT,
         .pixel_format = SG_PIXELFORMAT_RGBA8,
+        .sample_count = 1,
+        .label = "shadow-map-color-image"
+    };
+    sg_sampler_desc smp_desc = {
         .min_filter = SG_FILTER_NEAREST,
         .mag_filter = SG_FILTER_NEAREST,
         .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
         .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
         .wrap_w = SG_WRAP_CLAMP_TO_EDGE,
-        .sample_count = 1,
-        .label = "shadow-map-color-image"
     };
     sg_image color_img = sg_make_image(&img_desc);
+    sg_sampler color_smp = sg_make_sampler(&smp_desc);
     img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
     img_desc.label = "shadow-map-depth-image";
     sg_image depth_img = sg_make_image(&img_desc);
@@ -65,6 +69,7 @@ static void init(void) {
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
     state.shadows.bind.fs.images[SLOT__depth_map] = color_img;
+    state.shadows.bind.fs.samplers[SLOT_depth_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -134,11 +139,12 @@ static void init(void) {
         .depth = {
             .compare =SG_COMPAREFUNC_LESS_EQUAL,
             .write_enabled =true,
+            .pixel_format = SG_PIXELFORMAT_DEPTH,
         },
-        .blend = {
-            .color_format = SG_PIXELFORMAT_RGBA8,
-            .depth_format = SG_PIXELFORMAT_DEPTH
+        .colors[0] = {
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
         },
+        .color_count = 1,
         .label = "depth-pipeline"
     });
 
@@ -157,10 +163,8 @@ static void init(void) {
             .compare =SG_COMPAREFUNC_LESS_EQUAL,
             .write_enabled =true,
         },
-        .rasterizer = {
-            .cull_mode = SG_CULLMODE_BACK,
-            .face_winding = SG_FACEWINDING_CCW
-        },
+        .cull_mode = SG_CULLMODE_BACK,
+        .face_winding = SG_FACEWINDING_CCW,
         .label = "shadows-pipeline"
     });
 

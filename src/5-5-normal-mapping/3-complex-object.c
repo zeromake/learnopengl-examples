@@ -83,10 +83,10 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
         memcpy(state.vertex_buffer + pos + 1 * 11, &v1, sizeof(vertex_t));
         memcpy(state.vertex_buffer + pos + 2 * 11, &v2, sizeof(vertex_t));
     }
-
+    int size = mesh->face_count * 3 * 11 * sizeof(float);
     sg_buffer cube_buffer = sg_make_buffer(&(sg_buffer_desc){
-        .size = mesh->face_count * 3 * 11 * sizeof(float),
-        .data = SG_RANGE(state.vertex_buffer),
+        .size = size,
+        .data = (sg_range){&state.vertex_buffer, size},
         .label = "backpack-vertices"
     });
     

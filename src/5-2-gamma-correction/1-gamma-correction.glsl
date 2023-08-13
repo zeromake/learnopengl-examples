@@ -76,7 +76,7 @@ void main() {
     // if gamma correction is enabled we need to transform texture colors to linear space first
     // sokol does not support srgb as pixelformat
     if(gamma == 1.0)
-        color = pow(color, vec3(2.2));
+        color = pow(abs(color), vec3(2.2));
     
     vec3 lighting = vec3(0.0);
     for(int i = 0; i < 4; ++i)
@@ -84,7 +84,7 @@ void main() {
     color *= lighting;
     
     if(gamma == 1.0)
-        color = pow(color, vec3(1.0/2.2));
+        color = pow(abs(color), vec3(1.0/2.2));
     frag_color = vec4(color, 1.0);
 }
 @end

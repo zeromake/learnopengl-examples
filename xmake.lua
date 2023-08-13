@@ -34,6 +34,7 @@ end
 add_includedirs("libs/sokol")
 
 if is_plat("windows", "mingw") then
+	-- add_defines("SOKOL_GLCORE33")
     add_defines("SOKOL_D3D11")
 elseif is_plat("macosx") then
     add_defines("SOKOL_METAL")
@@ -96,7 +97,7 @@ for _, dir in ipairs(os.filedirs("src/*")) do
 		            add_files("src/resource.rc")
                 elseif is_plat("wasm") then
                     add_ldflags("-sMAX_WEBGL_VERSION=2")
-                    -- set_extension(".js")
+                    set_extension(".js")
                     add_ldflags("-sSTACK_SIZE=512KB")
                     add_ldflags("-sTOTAL_MEMORY="..(1024*1024*32))
                     add_ldflags("-sALLOW_MEMORY_GROWTH=1")

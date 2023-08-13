@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "sokol_app.h"
 #include "sokol_gfx.h"
+#include "sokol_helper.h"
 #include "HandmadeMath.h"
 #include "3-improved-shadows.glsl.h"
 #define LOPGL_APP_IMPL
@@ -41,7 +42,7 @@ static void init(void) {
     state.light_pos = HMM_V3(-2.f, 4.f, -1.f);
     float near_plane = 1.f;
     float far_plane = 7.5f;
-    HMM_Mat4 light_projection = HMM_Orthographic(-10.f, 10.f, -10.f, 10.f, near_plane, far_plane);
+    HMM_Mat4 light_projection = HMM_Orthographic_RH_NO(-10.f, 10.f, -10.f, 10.f, near_plane, far_plane);
     HMM_Mat4 light_view = HMM_LookAt_RH(state.light_pos, HMM_V3(0.f, 0.f, 0.f), HMM_V3(0.f, 1.f, 0.f));
     state.light_space_matrix = HMM_MulM4(light_projection, light_view);
 
@@ -51,15 +52,18 @@ static void init(void) {
         .width = 1024,
         .height = 1024,
         .pixel_format = SG_PIXELFORMAT_RGBA8,
+        .sample_count = 1,
+        .label = "shadow-map-color-image"
+    };
+    sg_sampler_desc smp_desc = {
         .min_filter = SG_FILTER_NEAREST,
         .mag_filter = SG_FILTER_NEAREST,
         .wrap_u = SG_WRAP_CLAMP_TO_BORDER,
         .wrap_v = SG_WRAP_CLAMP_TO_BORDER,
         .border_color = SG_BORDERCOLOR_OPAQUE_WHITE,
-        .sample_count = 1,
-        .label = "shadow-map-color-image"
     };
     sg_image color_img = sg_make_image(&img_desc);
+    sg_sampler color_smp = sg_make_sampler(&smp_desc);
     img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
     img_desc.label = "shadow-map-depth-image";
     sg_image depth_img = sg_make_image(&img_desc);
@@ -73,6 +77,8 @@ static void init(void) {
     // so instead we write the depth value to the color map
     state.shadows.bind_cube.fs.images[SLOT__shadow_map] = color_img;
     state.shadows.bind_plane.fs.images[SLOT__shadow_map] = color_img;
+    state.shadows.bind_cube.fs.samplers[SLOT_shadow_map_smp] = color_smp;
+    state.shadows.bind_plane.fs.samplers[SLOT_shadow_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -162,11 +168,12 @@ static void init(void) {
         .depth = {
             .compare =SG_COMPAREFUNC_LESS_EQUAL,
             .write_enabled =true,
+            .pixel_format = SG_PIXELFORMAT_DEPTH,
         },
-        .blend = {
-            .color_format = SG_PIXELFORMAT_RGBA8,
-            .depth_format = SG_PIXELFORMAT_DEPTH
+        .colors[0] = {
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
         },
+        .color_count = 1,
         .label = "depth-pipeline"
     });
 
@@ -196,9 +203,10 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_diffuse = sg_alloc_image();
-    state.shadows.bind_cube.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
+    sg_alloc_image_smp(state.shadows.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_image img_id_diffuse = state.shadows.bind_cube.fs.images[SLOT__diffuse_texture];
     state.shadows.bind_plane.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
+    state.shadows.bind_plane.fs.samplers[SLOT_diffuse_texture_smp] = state.shadows.bind_cube.fs.samplers[SLOT_diffuse_texture_smp];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",

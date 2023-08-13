@@ -100,8 +100,8 @@ static void init(void) {
             .fail_callback = fail_callback
     });
 
-    sg_image img_id_normal = sg_alloc_image();
-    state.bind.fs.images[SLOT__normal_map] = img_id_normal;
+    sg_alloc_image_smp(state.bind.fs, SLOT__normal_map, SLOT_normal_map_smp);
+    sg_image img_id_normal = state.bind.fs.images[SLOT__normal_map];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall_normal.jpg",
