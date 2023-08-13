@@ -37,6 +37,13 @@ local assets = {
     "wood.png"
 }
 
+local webpageAssets = {
+    'dummy.jpg',
+    'favicon.png',
+    'fontello.woff',
+    'fontello.woff2'
+}
+
 if not os.exists(WebpageDeployDir) then
     os.mkdir(WebpageDeployDir)
 end
@@ -115,11 +122,14 @@ for _, chapter in ipairs(items) do
     content = content..'<hr>\n'
 end
 
-indexContent = indexContent:gsub('$%{samples%}', content):gsub('$%{date%}', os.date('%Y-%m-%d %X', os.time()))
+indexContent = indexContent:gsub('$%{samples%}', content):gsub('$%{date%}', os.date('!%Y-%m-%d %X +00:00', os.time()))
 io.writefile("docs/index.html", indexContent)
 
 for _, asset in ipairs(assets) do
     os.cp(path.join("src/data", asset), "docs/")
+end
+for _, asset in ipairs(webpageAssets) do
+    os.cp(path.join("webpage", asset), "docs/")
 end
 
 os.cp("build/wasm/wasm32/release/*.js", "docs/")
