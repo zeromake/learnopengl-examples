@@ -30,6 +30,7 @@ if is_plat("windows") then
 elseif is_plat("mingw") then
     add_ldflags("-static")
 end
+add_languages("c++20")
 
 add_includedirs("libs/sokol")
 
