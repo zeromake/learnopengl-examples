@@ -122,7 +122,7 @@ for _, chapter in ipairs(items) do
     content = content..'<hr>\n'
 end
 
-indexContent = indexContent:gsub('$%{samples%}', content):gsub('$%{date%}', os.date('!%Y-%m-%d %X +00:00', os.time()))
+indexContent = indexContent:gsub('$%{samples%}', content):gsub('$%{date%}', os.date('!%Y-%m-%d %H:%M:%S +00:00', os.time()))
 io.writefile("docs/index.html", indexContent)
 
 for _, asset in ipairs(assets) do
