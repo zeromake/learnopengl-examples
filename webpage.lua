@@ -132,5 +132,5 @@ for _, asset in ipairs(webpageAssets) do
     os.cp(path.join("webpage", asset), "docs/")
 end
 
-os.cp("build/wasm/wasm32/release/*.js", "docs/")
-os.cp("build/wasm/wasm32/release/*.wasm", "docs/")
+os.cp("build/wasm/wasm64/release/*.js", "docs/")
+os.cp("build/wasm/wasm64/release/*.wasm", "docs/")

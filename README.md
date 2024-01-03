@@ -39,7 +39,10 @@
 To enable web builds you need to setup the [emscripten](https://emscripten.org/index.html) SDK
 
 ```bash
-> xmake f -c -y wasm
+> export EMSDK_PATH=../emsdk
+> $EMSDK_PATH/emsdk activate latest
+> source $EMSDK_PATH/emsdk_env.sh
+> xmake f -c -y -p wasm -a wasm64
 > xmake b
 > xmake lua webpage.lua
 > # generate to docs dir
