@@ -602,6 +602,12 @@
                         "4-11-3-grayscale-msaa",
                         "3-grayscale-msaa.c",
                         "3-grayscale-msaa.glsl"
+                    ],
+                    [
+                        "cubemaprt",
+                        "4-11-4-cubemaprt",
+                        "4-cubemaprt.c",
+                        "4-cubemaprt.glsl"
                     ]
                 ]
             ],
