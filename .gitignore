@@ -7,3 +7,4 @@
 #<fips
 build/
 .xmake/
+.DS_Store

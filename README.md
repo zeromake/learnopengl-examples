@@ -12,8 +12,6 @@
 
 ## Building 
 
-[Fips](http://floooh.github.io/fips/index.html) is used as build system to support multiple platforms.
-
 #### Requirements
 
 * a **C development environment**:
@@ -21,7 +19,6 @@
     - Linux: gcc/clang
     - Windows: Visual Studio/Mingw
 * [xmake](https://xmake.io/)
-* **Linux only:** libgl-dev libx11-dev libxi-dev libxcursor-dev
 
 #### How to Build
 
