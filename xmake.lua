@@ -24,7 +24,9 @@ add_rules("sokol_shader")
 
 add_repositories("zeromake https://github.com/zeromake/xrepo.git")
 
-add_requires("stb", "sokol", "handmade_math", "imgui =1.90")
+add_requires("stb", "sokol", "handmade_math")
+
+add_requires("imgui 1.x", {configs={backend="none"}})
 
 if is_plat("windows") then
     add_defines("SOKOL_WIN32_FORCE_MAIN")
