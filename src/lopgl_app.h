@@ -266,7 +266,7 @@ static lopgl_state_t _lopgl;
 
 void lopgl_setup() {
     sg_setup(&(sg_desc){
-        .context = sapp_sgcontext(),
+        .environment = sglue_environment(),
         .logger.func = slog_func,
     });
 
@@ -538,8 +538,8 @@ void lopgl_render_gles2_fallback(void) {
     const sg_pass_action pass_action = {
         .colors[0] = { .load_action = SG_LOADACTION_CLEAR, .clear_value = { 1.0f, 0.0f, 0.0f, 1.0f } },
     };
-    sg_begin_default_pass(&pass_action, sapp_width(), sapp_height());
-    
+    sg_begin_pass(&(sg_pass){ .action = pass_action, .swapchain = sglue_swapchain() });
+
     sdtx_canvas(sapp_width()*0.5f, sapp_height()*0.5f);
     sdtx_origin(0.25f, 0.25f);
     sdtx_home();
