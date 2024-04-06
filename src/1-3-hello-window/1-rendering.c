@@ -4,6 +4,7 @@
 #include "sokol_gfx.h"
 #include "sokol_app.h"
 #include "sokol_glue.h"
+#include "sokol_log.h"
 
 static struct {
     sg_pass_action pass_action;
@@ -11,7 +12,8 @@ static struct {
 
 void init(void) {
     sg_setup(&(sg_desc){
-        .context = sapp_sgcontext()
+        .environment = sglue_environment(),
+        .logger.func = slog_func
     });
 
     state.pass_action = (sg_pass_action) {
@@ -20,7 +22,10 @@ void init(void) {
 }
 
 void frame(void) {
-    sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
+    sg_begin_pass(&(sg_pass){
+        .action = state.pass_action,
+        .swapchain = sglue_swapchain()
+    });
     sg_end_pass();
     sg_commit();
 }
