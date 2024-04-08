@@ -23,7 +23,7 @@ static void fetch_callback(const sfetch_response_t*);
 
 static void init(void) {
     sg_setup(&(sg_desc){
-        .context = sapp_sgcontext()
+        .environment = sglue_environment()
     });
 
      /* setup sokol-fetch
@@ -159,7 +159,7 @@ void frame(void) {
     HMM_Mat4 scale = HMM_Scale(HMM_V3(0.5f, 0.5f, 0.5f));
     HMM_Mat4 trans = HMM_MulM4(rotate, scale);
 
-    sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
+    sg_begin_pass(&(sg_pass){ .action = state.pass_action, .swapchain = sglue_swapchain() });
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);
 
