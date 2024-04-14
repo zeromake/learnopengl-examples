@@ -163,7 +163,7 @@ void lopgl_load_obj(const lopgl_obj_request_t* request);
 
 
 #define HANDMADE_MATH_IMPLEMENTATION
-#define HANDMADE_MATH_NO_SSE
+#define HANDMADE_MATH_NO_SIMD
 #include "HandmadeMath.h"
 #undef HANDMADE_MATH_IMPLEMENTATION
 
