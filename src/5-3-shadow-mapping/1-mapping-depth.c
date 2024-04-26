@@ -12,7 +12,7 @@
 static struct {
     struct {
         sg_pass_action pass_action;
-        sg_pass pass;
+        sg_attachments attachment;
         sg_pipeline pip;
         sg_bindings bind_cube;
         sg_bindings bind_plane;
@@ -54,9 +54,9 @@ static void init(void) {
     img_desc.pixel_format = SG_PIXELFORMAT_DEPTH;
     img_desc.label = "shadow-map-depth-image";
     sg_image depth_img = sg_make_image(&img_desc);
-    state.depth.pass = sg_make_pass(&(sg_pass_desc){
-        .color_attachments[0].image = color_img,
-        .depth_stencil_attachment.image = depth_img,
+    state.depth.attachment = sg_make_attachments(&(sg_attachments_desc){
+        .colors[0].image = color_img,
+        .depth_stencil.image = depth_img,
         .label = "shadow-map-pass"
     });
 
@@ -200,7 +200,10 @@ static void init(void) {
 void frame(void) {
     lopgl_update();
 
-    sg_begin_pass(state.depth.pass, &state.depth.pass_action);
+    sg_begin_pass(&(sg_pass){
+        .action = state.depth.pass_action,
+        .attachments = state.depth.attachment,
+    });
 
     sg_apply_pipeline(state.depth.pip);
     sg_apply_bindings(&state.depth.bind_plane);
@@ -235,7 +238,10 @@ void frame(void) {
 
     sg_end_pass();
 
-    sg_begin_default_pass(&state.quad.pass_action, sapp_width(), sapp_height());
+    sg_begin_pass(&(sg_pass){
+        .action = state.quad.pass_action,
+        .swapchain = sglue_swapchain(),
+    });
     sg_apply_pipeline(state.quad.pip);
     sg_apply_bindings(&state.quad.bind);
 

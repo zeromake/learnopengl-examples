@@ -180,7 +180,10 @@ static void render_ui() {
 void frame(void) {
     lopgl_update();
 
-    sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
+    sg_begin_pass(&(sg_pass){
+        .action = state.pass_action,
+        .swapchain = sglue_swapchain(),
+    });
 
     if (state.mesh.face_count > 0) {
         sg_apply_pipeline(state.mesh.pip);

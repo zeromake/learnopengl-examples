@@ -14,8 +14,8 @@
 /* application state */
 static struct {
     struct {
-        sg_attachments pass;
-        sg_attachments_desc pass_desc;
+        sg_attachments attachment;
+        sg_attachments_desc attachment_desc;
         sg_pass_action pass_action;
         sg_pipeline pip;
         sg_bindings bind;
@@ -30,9 +30,9 @@ static struct {
 /* called initially and when window size changes */
 void create_offscreen_pass(int width, int height) {
     /* destroy previous resource (can be called for invalid id) */
-    sg_destroy_attachments(state.offscreen.pass);
-    sg_destroy_image(state.offscreen.pass_desc.colors[0].image);
-    sg_destroy_image(state.offscreen.pass_desc.depth_stencil.image);
+    sg_destroy_attachments(state.offscreen.attachment);
+    sg_destroy_image(state.offscreen.attachment_desc.colors[0].image);
+    sg_destroy_image(state.offscreen.attachment_desc.depth_stencil.image);
 
     /* create offscreen rendertarget images and pass */
     sg_sampler_desc color_smp_desc = {
@@ -60,12 +60,12 @@ void create_offscreen_pass(int width, int height) {
     depth_img_desc.type = SG_IMAGETYPE_2D;
     sg_image depth_img = sg_make_image(&depth_img_desc);
 
-    state.offscreen.pass_desc = (sg_attachments_desc){
+    state.offscreen.attachment_desc = (sg_attachments_desc){
         .colors[0].image = color_img,
         .depth_stencil.image = depth_img,
         .label = "offscreen-pass"
     };
-    state.offscreen.pass = sg_make_attachments(&state.offscreen.pass_desc);
+    state.offscreen.attachment = sg_make_attachments(&state.offscreen.attachment_desc);
 
     /* also need to update the fullscreen-quad texture bindings */
     state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
@@ -210,7 +210,7 @@ void frame(void) {
     };
 
     /* the offscreen pass, rendering an rotating, untextured cube into a render target image */
-    sg_begin_pass(&(sg_pass){ .action = state.offscreen.pass_action, .attachments = state.offscreen.pass });
+    sg_begin_pass(&(sg_pass){ .action = state.offscreen.pass_action, .attachments = state.offscreen.attachment });
     sg_apply_pipeline(state.offscreen.pip);
     sg_apply_bindings(&state.offscreen.bind);
 

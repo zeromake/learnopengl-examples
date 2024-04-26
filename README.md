@@ -45,3 +45,8 @@ To enable web builds you need to setup the [emscripten](https://emscripten.org/i
 > # generate to docs dir
 ```
 
+#### Todo
+
+- [ ] [4-5-4-sharpen](src/4-5-framebuffers/4-sharpen.c)
+- [ ] [4-5-5-blur](src/4-5-framebuffers/5-blur.c)
+- [ ] [4-10-1-instancing](src/4-10-instancing/1-instancing.c)

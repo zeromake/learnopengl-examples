@@ -670,7 +670,7 @@ void lopgl_load_obj(const lopgl_obj_request_t* request) {
         .fail_callback = request->fail_callback,
         .buffer_ptr = request->buffer_ptr,
         .buffer_size = request->buffer_size,
-        .user_data_ptr = request->user_data_ptr
+        .user_data_ptr = (void*)request->user_data_ptr
     };
 
     sfetch_range_t buffer = request->buffer_ptr != NULL ? (sfetch_range_t){request->buffer_ptr, request->buffer_size} : request->buffer;
