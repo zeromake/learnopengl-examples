@@ -113,7 +113,7 @@ static void init(void) {
 void frame(void) {
     lopgl_update();
 
-    sg_begin_default_pass(&state.pass_action, sapp_width(), sapp_height());
+    sg_begin_pass(&(sg_pass){ .action = state.pass_action, .swapchain = sglue_swapchain() });
 
     if (state.mesh.face_count > 0) {
         HMM_Mat4 view = lopgl_view_matrix();
