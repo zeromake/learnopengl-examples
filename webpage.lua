@@ -38,8 +38,8 @@ local assets = {
 }
 
 local webpageAssets = {
-    'dummy.jpg',
-    'favicon.png',
+    'img/dummy.jpg',
+    'img/favicon.png',
     'fontello.woff',
     'fontello.woff2'
 }
@@ -103,10 +103,10 @@ for _, chapter in ipairs(items) do
             local filename = example[2]
             local url = format("%s.html", filename)
             local img_name = filename .. '.jpg'
-            local img_path = 'webpage/' .. img_name
+            local img_path = 'webpage/img/' .. img_name
             if not os.exists(img_path) then
                 img_name = 'dummy.jpg'
-                img_path = 'webpage/dummy.jpg'
+                img_path = 'webpage/img/dummy.jpg'
             end
             os.cp(img_path, "docs/")
             content = content..'<figure class="col-15">\n'
