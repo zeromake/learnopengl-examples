@@ -8,24 +8,29 @@ add_requires("stb", "sokol", "handmade_math", "sokol-shdc")
 add_requires("imgui 1.x", {configs={backend="none"}})
 
 if is_plat("windows") then
+    add_cflags("/TC", {tools = {"clang_cl", "cl"}})
+    add_cxxflags("/EHsc", {tools = {"clang_cl", "cl"}})
+    add_defines("UNICODE", "_UNICODE")
     add_defines("SOKOL_WIN32_FORCE_MAIN")
-    add_cxflags("/utf-8")
-elseif is_plat("mingw") then
+end
+
+if is_plat("mingw") then
     add_ldflags("-static")
 end
-add_languages("c++20")
 
 add_includedirs("libs/sokol")
+set_encodings("utf-8")
+set_languages("c99")
 
 if is_plat("windows", "mingw") then
-	-- add_defines("SOKOL_GLCORE33")
-    add_defines("SOKOL_D3D11")
+	add_defines("SOKOL_GLCORE")
+    -- add_defines("SOKOL_D3D11")
 elseif is_plat("macosx") then
     add_defines("SOKOL_METAL")
 elseif is_plat("wasm") then 
     add_defines("SOKOL_GLES3")
 else
-	add_defines("SOKOL_GLCORE33")
+	add_defines("SOKOL_GLCORE")
 end
 
 local function split(input, delimiter)
