@@ -199,7 +199,7 @@ void frame(void) {
     for (int i = 0; i < NUM_SHAPES; i++) {
         app.shapes[i].angle += app.shapes[i].angular_velocity * t * 0.01;
         HMM_Mat4 scale = HMM_Scale(HMM_V3(0.25f, 0.25f, 0.25f));
-        HMM_Mat4 rot = HMM_Rotate_RH(app.shapes[i].angle, app.shapes[i].axis);
+        HMM_Mat4 rot = HMM_Rotate_RH(HMM_AngleRad(app.shapes[i].angle), app.shapes[i].axis);
         HMM_Mat4 trans = HMM_Translate(HMM_V3(0.0f, 0.0f, app.shapes[i].radius));
         app.shapes[i].model = HMM_MulM4(rot, HMM_MulM4(trans, scale));
     }
@@ -249,8 +249,8 @@ void frame(void) {
 
     // render a big cube in the middle with environment mapping
     app.rx += 0.1f * 60.0f * t * 0.1; app.ry += 0.2f * 60.0f * t * 0.1;
-    HMM_Mat4 rxm = HMM_Rotate_RH(app.rx, HMM_V3(1.0f, 0.0f, 0.0f));
-    HMM_Mat4 rym = HMM_Rotate_RH(app.ry, HMM_V3(0.0f, 1.0f, 0.0f));
+    HMM_Mat4 rxm = HMM_Rotate_RH(HMM_AngleRad(app.rx), HMM_V3(1.0f, 0.0f, 0.0f));
+    HMM_Mat4 rym = HMM_Rotate_RH(HMM_AngleRad(app.ry), HMM_V3(0.0f, 1.0f, 0.0f));
     HMM_Mat4 model = HMM_MulM4(HMM_MulM4(rxm, rym), HMM_Scale(HMM_V3(2.0f, 2.0f, 2.f)));
     sg_apply_pipeline(app.display_cube_pip);
     sg_apply_bindings(&(sg_bindings){

@@ -176,7 +176,7 @@ static void init(void) {
 
         // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
         float rot_angle = (rand() % 360);
-        model = HMM_MulM4(model, HMM_Rotate_RH(rot_angle, HMM_V3(0.4f, 0.6f, 0.8f)));
+        model = HMM_MulM4(model, HMM_Rotate_RH(HMM_AngleDeg(rot_angle), HMM_V3(0.4f, 0.6f, 0.8f)));
 
         // 4. now add to list of matrices
         state.rock_transforms[i] = model;

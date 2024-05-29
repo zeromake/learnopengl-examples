@@ -187,12 +187,12 @@ static void fetch_callback(const sfetch_response_t* response) {
 void frame(void) {
     sfetch_dowork();
 
-    HMM_Mat4 model = HMM_Rotate_RH((float) stm_sec(stm_now()), HMM_V3(0.5f, 1.0f, 0.0f));
+    HMM_Mat4 model = HMM_Rotate_RH(HMM_AngleRad((float) stm_sec(stm_now())), HMM_V3(0.5f, 1.0f, 0.0f));
 
     // note that we're translating the scene in the reverse direction of where we want to move
     HMM_Mat4 view = HMM_Translate(HMM_V3(0.0f, 0.0f, -3.0f)); 
 
-    HMM_Mat4 projection = HMM_Perspective_RH_NO(45.0f, 800.0f / 600.0f, 0.1f, 100.0f);
+    HMM_Mat4 projection = HMM_Perspective_RH_NO(45.0f, sapp_width() / sapp_height(), 0.1f, 100.0f);
 
     sg_begin_pass(&(sg_pass){ .action = state.pass_action, .swapchain = sglue_swapchain() });
     sg_apply_pipeline(state.pip);

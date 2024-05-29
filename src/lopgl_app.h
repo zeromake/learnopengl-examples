@@ -298,7 +298,7 @@ void lopgl_setup() {
         .heading = 0.f,
         .distance = 6.f,
         .zoom_speed = .5f,
-        .rotate_speed = 0.01f,
+        .rotate_speed = HMM_AngleDeg(1.f),
         .min_dist = 1.f,
         .max_dist = 10.f,
         .min_pitch = -89.f,

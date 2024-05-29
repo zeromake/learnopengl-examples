@@ -154,10 +154,9 @@ static void fetch_callback(const sfetch_response_t* response) {
 
 void frame(void) {
     sfetch_dowork();
-
-    HMM_Mat4 rotate = HMM_Rotate_RH(90.f, HMM_V3(0.0f, 0.0f, 1.0f));
+    HMM_Mat4 rotate = HMM_Rotate_RH(HMM_AngleDeg(90.0f), HMM_V3(0.0f, 0.0f, 1.0f));
     HMM_Mat4 scale = HMM_Scale(HMM_V3(0.5f, 0.5f, 0.5f));
-    HMM_Mat4 trans = HMM_MulM4(rotate, scale);
+    HMM_Mat4 trans = HMM_Mul(rotate, scale);
 
     sg_begin_pass(&(sg_pass){ .action = state.pass_action, .swapchain = sglue_swapchain() });
     sg_apply_pipeline(state.pip);

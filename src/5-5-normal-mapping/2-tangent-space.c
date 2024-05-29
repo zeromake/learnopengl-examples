@@ -138,7 +138,7 @@ void frame(void) {
     HMM_Mat4 view = lopgl_view_matrix();
     HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
     /* rotate the quad to show normal mapping from multiple directions */
-    HMM_Mat4 model = HMM_Rotate_RH((float)stm_sec(stm_now()) * -10.f * 0.1f, HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
+    HMM_Mat4 model = HMM_Rotate_RH(HMM_AngleRad((float)stm_sec(stm_now()) * -10.f * 0.1f), HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
 
     vs_params_t vs_params = {
         .view = view,
