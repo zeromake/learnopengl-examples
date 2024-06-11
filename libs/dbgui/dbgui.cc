@@ -73,9 +73,9 @@ void __dbgui_draw(void) {
             ImGui::MenuItem("Samplers", 0, &sg_imgui.sampler_window.open);
             ImGui::MenuItem("Shaders", 0, &sg_imgui.shader_window.open);
             ImGui::MenuItem("Pipelines", 0, &sg_imgui.pipeline_window.open);
-            // NOTE(pabdulin): see https://github.com/floooh/sokol/blob/7f7cd64c6d9d1d4ed08d88a3879b1d69841bf0a4/CHANGELOG.md?plain=1#L69
-            // ImGui::MenuItem("Passes", 0, &sg_imgui.passes.open);
+            ImGui::MenuItem("Frames", 0, &sg_imgui.frame_stats_window.open);
             ImGui::MenuItem("Calls", 0, &sg_imgui.capture_window.open);
+            ImGui::MenuItem("Attachs", 0, &sg_imgui.attachments_window.open);
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
