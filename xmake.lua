@@ -5,7 +5,7 @@ add_repositories("zeromake https://github.com/zeromake/xrepo.git")
 
 add_requires("stb", "sokol", "handmade_math", "sokol-shdc")
 
-add_requires("imgui 1.x", {configs={backend="none"}})
+add_requires("imgui 1.x", {configs={backend="none", freetype=true}})
 
 if is_plat("windows") then
     add_cflags("/TC", {tools = {"clang_cl", "cl"}})
@@ -23,8 +23,8 @@ set_encodings("utf-8")
 set_languages("c99")
 
 if is_plat("windows", "mingw") then
-	add_defines("SOKOL_GLCORE")
-    -- add_defines("SOKOL_D3D11")
+	-- add_defines("SOKOL_GLCORE")
+    add_defines("SOKOL_D3D11")
 elseif is_plat("macosx") then
     add_defines("SOKOL_METAL")
 elseif is_plat("wasm") then 
@@ -73,6 +73,7 @@ target_end()
 target("dbgui")
     set_kind("static")
     add_packages("sokol", "imgui")
+    set_languages("c++17")
     add_files("libs/dbgui/dbgui.cc")
 
 for _, dir in ipairs(os.filedirs("src/*")) do

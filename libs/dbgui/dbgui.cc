@@ -4,10 +4,13 @@
 //  the sokol_imgui.h utility header which implements the Dear ImGui
 //  glue code.
 //------------------------------------------------------------------------------
-#include "sokol_gfx.h"
-#include "sokol_app.h"
-#include "sokol_log.h"
-#include "imgui.h"
+#include <sokol_gfx.h>
+#include <sokol_app.h>
+#include <sokol_log.h>
+#include <math.h>
+#include <imgui/imgui.h>
+#include <imgui/misc/freetype/imgui_freetype.h>
+#include <imgui/misc/fonts/DroidSans.h>
 #define SOKOL_IMGUI_IMPL
 #include "util/sokol_imgui.h"
 #define SOKOL_GFX_IMGUI_IMPL
@@ -16,6 +19,45 @@
 extern "C" {
 
 static sgimgui_t sg_imgui;
+
+static void setupScale(float scale)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    static const ImWchar rangesBasic[] = {
+        0x0020, 0x00FF, // Basic Latin + Latin Supplement
+        0x03BC, 0x03BC, // micro
+        0x03C3, 0x03C3, // small sigma
+        0x2013, 0x2013, // en dash
+        0x2264, 0x2264, // less-than or equal to
+        0,
+    };
+    ImFontConfig configBasic;
+    configBasic.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
+    io.Fonts->Clear();
+    io.Fonts->AddFontFromMemoryCompressedTTF(
+        DroidSans_compressed_data,
+        DroidSans_compressed_size,
+        round( 15.0f * scale ),
+        &configBasic,
+        rangesBasic
+    );
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+    // No need to upscale the style on macOS, but we need to downscale the fonts.
+    io.FontGlobalScale = 1.0f / scale;
+    scale = 1.0f;
+#endif
+    auto& style = ImGui::GetStyle();
+    style = ImGuiStyle();
+    ImGui::StyleColorsDark();
+    style.WindowBorderSize = 1.f * scale;
+    style.FrameBorderSize = 1.f * scale;
+    style.FrameRounding = 5.f;
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(1, 1, 1, 0.03f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.45f);
+    style.ScaleAllSizes(scale);
+}
 
 void __dbgui_setup(int sample_count) {
     // setup debug inspection header(s)
@@ -27,6 +69,8 @@ void __dbgui_setup(int sample_count) {
     simgui_desc.sample_count = sample_count;
     simgui_desc.logger.func = slog_func;
     simgui_setup(&simgui_desc);
+    if (sapp_dpi_scale() != 1.0f)
+        setupScale(sapp_dpi_scale());
 }
 
 void __dbgui_shutdown(void) {
