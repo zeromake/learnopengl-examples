@@ -3,8 +3,8 @@
 @vs vs
 in float a_dummy;       // add a dummy vertex attribute otherwise sokol complains
 
-uniform texture2D _positions_texture;
-uniform sampler positions_texture_smp;
+layout(binding = 0) uniform texture2D _positions_texture;
+layout(binding = 0) uniform sampler positions_texture_smp;
 #define positions_texture sampler2D(_positions_texture, positions_texture_smp)
 
 void main() {
@@ -26,3 +26,4 @@ void main() {
 @end
 
 @program simple vs fs
+

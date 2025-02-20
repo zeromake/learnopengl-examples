@@ -11,7 +11,7 @@
 @vs vs_depth
 in vec3 a_pos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 light_space_matrix;
     mat4 model;
 };
@@ -53,8 +53,8 @@ void main() {
 out vec4 frag_color;
 in vec2 tex_coords;
 
-uniform texture2D _depth_map;
-uniform sampler depth_map_smp;
+layout(binding = 0) uniform texture2D _depth_map;
+layout(binding = 0) uniform sampler depth_map_smp;
 #define depth_map sampler2D(_depth_map, depth_map_smp)
 
 float decodeDepth(vec4 rgba) {
@@ -69,3 +69,4 @@ void main() {
 
 @program depth vs_depth fs_depth
 @program quad vs_quad fs_quad
+

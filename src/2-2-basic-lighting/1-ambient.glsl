@@ -4,7 +4,7 @@
 @vs vs
 in vec3 aPos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -18,7 +18,7 @@ void main() {
 @fs fs
 out vec4 FragColor;
 
-uniform fs_params {
+layout(binding = 0) uniform fs_params {
     vec3 objectColor;
     vec3 lightColor;
 };
@@ -42,3 +42,4 @@ void main() {
 
 @program ambient vs fs
 @program light_cube vs light_cube_fs
+

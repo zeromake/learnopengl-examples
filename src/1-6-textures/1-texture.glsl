@@ -19,8 +19,8 @@ out vec4 FragColor;
 in vec3 ourColor;
 in vec2 TexCoord;
 
-uniform texture2D _ourTexture;
-uniform sampler ourTexture_smp;
+layout(binding = 0) uniform texture2D _ourTexture;
+layout(binding = 0) uniform sampler ourTexture_smp;
 #define ourTexture sampler2D(_ourTexture, ourTexture_smp)
 
 void main() {
@@ -29,3 +29,4 @@ void main() {
 @end
 
 @program simple vs fs
+

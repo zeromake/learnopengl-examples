@@ -8,7 +8,7 @@ in vec3 a_normal;
 out vec3 normal;
 out vec3 position;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -30,12 +30,12 @@ in vec3 position;
 
 out vec4 frag_color;
 
-uniform fs_params {
+layout(binding = 0) uniform fs_params {
     vec3 camera_pos;
 };
 
-uniform textureCube _skybox_texture;
-uniform sampler skybox_texture_smp;
+layout(binding = 0) uniform textureCube _skybox_texture;
+layout(binding = 0) uniform sampler skybox_texture_smp;
 #define skybox_texture samplerCube(_skybox_texture, skybox_texture_smp)
 
 void main() {
@@ -50,7 +50,7 @@ in vec3 a_pos;
 
 out vec3 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -68,8 +68,8 @@ in vec3 tex_coords;
 
 out vec4 frag_color;
 
-uniform textureCube _skybox_texture;
-uniform sampler skybox_texture_smp;
+layout(binding = 0) uniform textureCube _skybox_texture;
+layout(binding = 0) uniform sampler skybox_texture_smp;
 #define skybox_texture samplerCube(_skybox_texture, skybox_texture_smp)
 
 void main() {
@@ -79,3 +79,4 @@ void main() {
 
 @program simple vs fs
 @program skybox vs_skybox fs_skybox
+

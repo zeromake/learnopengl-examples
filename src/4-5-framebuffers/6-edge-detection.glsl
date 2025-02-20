@@ -6,7 +6,7 @@ in vec3 a_pos;
 in vec2 a_tex_coords;
 out vec2 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -33,8 +33,8 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 0) uniform texture2D _diffuse_texture;
+layout(binding = 0) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
@@ -46,11 +46,11 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 0) uniform texture2D _diffuse_texture;
+layout(binding = 0) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
-uniform fs_params {
+layout(binding = 0) uniform fs_params {
     vec2 offset;
 };
 
@@ -87,3 +87,4 @@ void main() {
 
 @program offscreen vs_offscreen fs_offscreen
 @program display vs_display fs_display
+

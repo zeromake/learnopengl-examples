@@ -10,7 +10,7 @@ out vec3 FragPos;
 out vec3 Normal;
 out vec2 TexCoords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -34,15 +34,15 @@ in vec2 TexCoords;
 
 out vec4 FragColor;
 
-uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 viewPos;
 };
 
-uniform fs_material {
+layout(binding = 2) uniform fs_material {
     float shininess;
 } material;
 
-uniform fs_light {
+layout(binding = 0) uniform fs_light {
     vec3 position;  
     vec3 direction;
     float cut_off;
@@ -57,11 +57,11 @@ uniform fs_light {
     float quadratic;
 } light;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 0) uniform texture2D _diffuse_texture;
+layout(binding = 0) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
-uniform texture2D _specular_texture;
-uniform sampler specular_texture_smp;
+layout(binding = 1) uniform texture2D _specular_texture;
+layout(binding = 1) uniform sampler specular_texture_smp;
 #define specular_texture sampler2D(_specular_texture, specular_texture_smp)
 
 void main() {
@@ -102,3 +102,4 @@ void main() {
 @end
 
 @program phong vs fs
+

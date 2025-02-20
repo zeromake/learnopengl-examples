@@ -7,7 +7,7 @@ in vec2 aTexCoords;
 
 out vec2 TexCoords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -24,11 +24,11 @@ in vec2 TexCoords;
 
 out vec4 FragColor;
 
-uniform texture2D _front_texture;
-uniform sampler front_texture_smp;
+layout(binding = 0) uniform texture2D _front_texture;
+layout(binding = 0) uniform sampler front_texture_smp;
 #define front_texture sampler2D(_front_texture, front_texture_smp)
-uniform texture2D _back_texture;
-uniform sampler back_texture_smp;
+layout(binding = 1) uniform texture2D _back_texture;
+layout(binding = 1) uniform sampler back_texture_smp;
 #define back_texture sampler2D(_back_texture, back_texture_smp)
 
 void main() {
@@ -40,3 +40,4 @@ void main() {
 @end
 
 @program simple vs fs
+

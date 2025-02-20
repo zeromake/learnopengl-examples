@@ -8,7 +8,7 @@ in vec3 aNormal;
 out vec3 FragPos;
 out vec3 Normal;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -30,18 +30,18 @@ in vec3 Normal;
 
 out vec4 FragColor;
 
-uniform fs_params {
+layout(binding = 2) uniform fs_params {
     vec3 viewPos;
 };
 
-uniform fs_material {
+layout(binding = 1) uniform fs_material {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     float shininess;
 } material;
 
-uniform fs_light {
+layout(binding = 0) uniform fs_light {
     vec3 position;
     vec3 ambient;
     vec3 diffuse;
@@ -72,7 +72,7 @@ void main() {
 @vs light_cube_vs
 in vec3 aPos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -93,3 +93,4 @@ void main() {
 
 @program phong vs fs
 @program light_cube light_cube_vs light_cube_fs
+

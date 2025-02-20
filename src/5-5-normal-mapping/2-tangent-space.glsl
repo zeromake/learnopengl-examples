@@ -14,7 +14,7 @@ out INTERFACE {
     vec3 tangent_frag_pos;
 } inter;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 view;
     mat4 projection;
     mat4 model;
@@ -67,11 +67,11 @@ in INTERFACE {
 
 out vec4 frag_color;
 
-uniform texture2D _diffuse_map;
-uniform sampler diffuse_map_smp;
+layout(binding = 1) uniform texture2D _diffuse_map;
+layout(binding = 1) uniform sampler diffuse_map_smp;
 #define diffuse_map sampler2D(_diffuse_map, diffuse_map_smp)
-uniform texture2D _normal_map;
-uniform sampler normal_map_smp;
+layout(binding = 0) uniform texture2D _normal_map;
+layout(binding = 0) uniform sampler normal_map_smp;
 #define normal_map sampler2D(_normal_map, normal_map_smp)
 
 void main() {           
@@ -100,3 +100,4 @@ void main() {
 @end
 
 @program blinn_phong vs fs
+

@@ -5,7 +5,7 @@ in vec2 aPos;
 in vec3 aColor; 
 out vec3 fColor;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     // using arrays vec4 to avoid alignment issues with cross shader compilation
     vec4 offsets[100];
 };
@@ -27,3 +27,4 @@ void main() {
 @end
 
 @program simple vs fs
+
