@@ -64,9 +64,9 @@ static void init(void) {
             /* vertex buffer at slot 1 must step per instance */
             .buffers[1].step_func = SG_VERTEXSTEP_PER_INSTANCE,
             .attrs = {
-                [ATTR_vs_aPos]      = { .format=SG_VERTEXFORMAT_FLOAT2, .buffer_index=0 },
-                [ATTR_vs_aColor]    = { .format=SG_VERTEXFORMAT_FLOAT3, .buffer_index=0 },
-                [ATTR_vs_aOffset]   = { .format=SG_VERTEXFORMAT_FLOAT2, .buffer_index=1 }
+                [ATTR_simple_aPos]      = { .format = SG_VERTEXFORMAT_FLOAT2, .buffer_index = 0 },
+                [ATTR_simple_aColor]    = { .format = SG_VERTEXFORMAT_FLOAT3, .buffer_index = 0 },
+                [ATTR_simple_aOffset]   = { .format = SG_VERTEXFORMAT_FLOAT2, .buffer_index = 1 }
             }
         },
         .label = "quad-pipeline"

@@ -57,8 +57,8 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     state.mesh.bind.vertex_buffers[0] = cube_buffer;
 
-    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image img_id = state.mesh.bind.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(state.mesh.bind, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image img_id = state.mesh.bind.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -81,8 +81,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords] = {
+                [ATTR_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_tex_coords] = {
                     .format = SG_VERTEXFORMAT_FLOAT2,
                     .offset = 24
                 }
@@ -128,7 +128,7 @@ void frame(void) {
         sg_apply_pipeline(state.mesh.pip);
         sg_apply_bindings(&state.mesh.bind);
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, state.mesh.face_count * 3, 1);
     }

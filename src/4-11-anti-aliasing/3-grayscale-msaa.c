@@ -66,8 +66,8 @@ void create_offscreen_pass(int width, int height) {
     state.offscreen.attachment = sg_make_attachments(&state.offscreen.attachment_desc);
 
     /* also need to update the fullscreen-quad texture bindings */
-    state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
-    state.display.bind.fs.samplers[SLOT_diffuse_texture_smp] = color_smp;
+    state.display.bind.images[IMG__diffuse_texture] = color_img;
+    state.display.bind.samplers[SMP_diffuse_texture_smp] = color_smp;
 }
 
 static void init(void) {
@@ -165,7 +165,7 @@ static void init(void) {
         .shader = sg_make_shader(offscreen_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
-                [ATTR_vs_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
         .depth = {
@@ -185,8 +185,8 @@ static void init(void) {
     state.display.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .layout = {
             .attrs = {
-                [ATTR_vs_display_a_pos].format = SG_VERTEXFORMAT_FLOAT2,
-                [ATTR_vs_display_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_display_a_pos].format = SG_VERTEXFORMAT_FLOAT2,
+                [ATTR_display_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .shader = sg_make_shader(display_shader_desc(sg_query_backend())),
@@ -211,7 +211,7 @@ void frame(void) {
     sg_apply_bindings(&state.offscreen.bind);
 
     vs_params.model = HMM_Translate(HMM_V3(0.f, 0.f, 0.f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_end_pass();

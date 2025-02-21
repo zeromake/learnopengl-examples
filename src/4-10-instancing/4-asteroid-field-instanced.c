@@ -60,8 +60,8 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     });
     
     mesh->bind.vertex_buffers[0] = cube_buffer;
-    sg_alloc_image_smp(mesh->bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image img_id = mesh->bind.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(mesh->bind, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image img_id = mesh->bind.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = response->mesh->materials[0].map_Kd.name,
@@ -95,8 +95,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_planet_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_planet_a_tex_coords] = {.format = SG_VERTEXFORMAT_FLOAT2, .offset = 24 }
+                [ATTR_planet_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_planet_a_tex_coords] = {.format = SG_VERTEXFORMAT_FLOAT2, .offset = 24 }
             },
             .buffers[0].stride = 32
         },
@@ -115,12 +115,12 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_rock_a_pos] = {.format = SG_VERTEXFORMAT_FLOAT3, .buffer_index = 0 },
-                [ATTR_vs_rock_a_tex_coords] = {.format = SG_VERTEXFORMAT_FLOAT2, .offset = 24, .buffer_index = 0 },
-                [ATTR_vs_rock_instance_mat0] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 0, .buffer_index = 1},
-                [ATTR_vs_rock_instance_mat1] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 16, .buffer_index = 1},
-                [ATTR_vs_rock_instance_mat2] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 32, .buffer_index = 1},
-                [ATTR_vs_rock_instance_mat3] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 48, .buffer_index = 1},
+                [ATTR_rock_a_pos] = {.format = SG_VERTEXFORMAT_FLOAT3, .buffer_index = 0 },
+                [ATTR_rock_a_tex_coords] = {.format = SG_VERTEXFORMAT_FLOAT2, .offset = 24, .buffer_index = 0 },
+                [ATTR_rock_instance_mat0] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 0, .buffer_index = 1},
+                [ATTR_rock_instance_mat1] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 16, .buffer_index = 1},
+                [ATTR_rock_instance_mat2] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 32, .buffer_index = 1},
+                [ATTR_rock_instance_mat3] = {.format = SG_VERTEXFORMAT_FLOAT4, .offset = 48, .buffer_index = 1},
             },
             .buffers[0] = {.stride = 32, .step_func = SG_VERTEXSTEP_PER_VERTEX },
             /* vertex buffer at slot 1 must step per instance */
@@ -212,7 +212,7 @@ void frame(void) {
             .projection = projection
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_planet, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params_planet, &SG_RANGE(vs_params));
 
         sg_draw(0, state.planet.face_count * 3, 1);
     }
@@ -226,7 +226,7 @@ void frame(void) {
             .projection = projection
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_rock, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params_rock, &SG_RANGE(vs_params));
         sg_draw(0, state.rock.face_count * 3, ASTEROID_COUNT);
     }
 

@@ -58,10 +58,10 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     state.mesh.bind.vertex_buffers[0] = cube_buffer;
     
-    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_alloc_image_smp(state.mesh.bind.fs, SLOT__specular_texture, SLOT_specular_texture_smp);
-    sg_image img_id_diffuse = state.mesh.bind.fs.images[SLOT__diffuse_texture];
-    sg_image img_id_specular = state.mesh.bind.fs.images[SLOT__specular_texture];
+    sg_alloc_image_smp(state.mesh.bind, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_alloc_image_smp(state.mesh.bind, IMG__specular_texture, SMP_specular_texture_smp);
+    sg_image img_id_diffuse = state.mesh.bind.images[IMG__diffuse_texture];
+    sg_image img_id_specular = state.mesh.bind.images[IMG__specular_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -98,9 +98,9 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -142,13 +142,13 @@ void frame(void) {
             .projection = projection
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         fs_params_t fs_params = {
             .view_pos = lopgl_camera_position(),
             .material_shininess = 32.0f,
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+        sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
         
         fs_dir_light_t fs_dir_light = {
             .direction = HMM_V3(-0.2f, -1.0f, -0.3f),
@@ -156,7 +156,7 @@ void frame(void) {
             .diffuse = HMM_V3(0.4f, 0.4f, 0.4f),
             .specular = HMM_V3(0.5f, 0.5f, 0.5f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &SG_RANGE(fs_dir_light));
+        sg_apply_uniforms(UB_fs_dir_light, &SG_RANGE(fs_dir_light));
 
         fs_point_lights_t fs_point_lights = {
             .position[0]    = state.light_positions[0],
@@ -180,7 +180,7 @@ void frame(void) {
             .specular[3]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
             .attenuation[3] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f)
         };
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights));
+        sg_apply_uniforms(UB_fs_point_lights, &SG_RANGE(fs_point_lights));
         
         sg_draw(0, state.mesh.face_count * 3, 1);   
     }

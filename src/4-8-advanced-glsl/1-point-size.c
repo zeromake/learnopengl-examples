@@ -72,8 +72,8 @@ void frame(void) {
     sg_apply_pipeline(state.pip);
     sg_apply_bindings(&state.bind);
 
-    vs_params.model = HMM_M4D(1.f);;
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    vs_params.model = HMM_M4D(1.f);
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 7, 1);
 

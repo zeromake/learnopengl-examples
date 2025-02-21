@@ -77,7 +77,7 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aPos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
         .label = "cube-pipeline"
@@ -106,7 +106,7 @@ void frame(void) {
         .projection = projection
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 36, 1);
 

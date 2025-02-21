@@ -27,8 +27,8 @@ static void fail_callback() {
 static void init(void) {
     lopgl_setup();
 
-    sg_alloc_image_smp(state.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_alloc_image_smp(state.bind.fs, SLOT__specular_texture, SLOT_specular_texture_smp);
+    sg_alloc_image_smp(state.bind, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind, IMG__specular_texture, SMP_specular_texture_smp);
 
     state.cube_positions[0] = HMM_V3( 0.0f,  0.0f,  0.0f);
     state.cube_positions[1] = HMM_V3( 2.0f,  5.0f, -15.0f);
@@ -103,14 +103,14 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aNormal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_phong_aPos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_aNormal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
-            .compare =SG_COMPAREFUNC_LESS_EQUAL,
-            .write_enabled =true,
+            .compare = SG_COMPAREFUNC_LESS_EQUAL,
+            .write_enabled = true,
         },
         .label = "object-pipeline"
     });
@@ -120,8 +120,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_diffuse = state.bind.fs.images[SLOT__diffuse_texture];
-    sg_image img_id_specular = state.bind.fs.images[SLOT__specular_texture];
+    sg_image img_id_diffuse = state.bind.images[IMG__diffuse_texture];
+    sg_image img_id_specular = state.bind.images[IMG__specular_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "container2.png",
@@ -151,12 +151,12 @@ void frame(void) {
     fs_params_t fs_params = {
         .viewPos = lopgl_camera_position()
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
 
     fs_material_t fs_material = {
         .shininess = 32.0f,
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_material, &SG_RANGE(fs_material));
+    sg_apply_uniforms(UB_fs_material, &SG_RANGE(fs_material));
     
     fs_light_t fs_light = {
         .direction = HMM_V3(-0.2f, -1.0f, -0.3f),
@@ -164,7 +164,7 @@ void frame(void) {
         .diffuse = HMM_V3(0.5f, 0.5f, 0.5f),
         .specular = HMM_V3(1.0f, 1.0f, 1.0f)
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_light, &SG_RANGE(fs_light));
+    sg_apply_uniforms(UB_fs_light, &SG_RANGE(fs_light));
 
     HMM_Mat4 view = lopgl_view_matrix();
     HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
@@ -179,7 +179,7 @@ void frame(void) {
         float angle = 20.0f * i; 
         model = HMM_MulM4(model, HMM_Rotate_RH(HMM_AngleDeg(angle), HMM_V3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }

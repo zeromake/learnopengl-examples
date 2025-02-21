@@ -62,8 +62,8 @@ static void init(void) {
 
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
-    state.quad.bind.fs.images[SLOT__depth_map] = color_img;
-    state.quad.bind.fs.samplers[SLOT_depth_map_smp] = color_smp;
+    state.quad.bind.images[IMG__depth_map] = color_img;
+    state.quad.bind.samplers[SMP_depth_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -159,7 +159,7 @@ static void init(void) {
         .shader = shd_depth,
         .layout = {
             .attrs = {
-                [ATTR_vs_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
         .depth = {
@@ -181,8 +181,8 @@ static void init(void) {
         .primitive_type = SG_PRIMITIVETYPE_TRIANGLE_STRIP,
         .layout = {
             .attrs = {
-                [ATTR_vs_quad_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_quad_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_quad_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_quad_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .label = "quad-pipeline"
@@ -211,10 +211,10 @@ void frame(void) {
     //floor
     vs_params_t vs_params = {
         .light_space_matrix = state.light_space_matrix,
-        .model = HMM_M4D(1.f)
+        .model = HMM_M4D(1.0f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     // cubes
@@ -222,18 +222,20 @@ void frame(void) {
     HMM_Mat4 translate = HMM_Translate(HMM_V3(0.f, 1.5f, 0.f));
     HMM_Mat4 scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+
     translate = HMM_Translate(HMM_V3(2.f, 0.f, 1.f));
     scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+
     translate = HMM_Translate(HMM_V3(-1.f, 0.f, 2.f));
     HMM_Mat4 rotate = HMM_Rotate_RH(HMM_AngleDeg(60.f), HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_V3(.25f, .25f, .25f));
     vs_params.model = HMM_MulM4(HMM_MulM4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_end_pass();

@@ -50,8 +50,8 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    sg_alloc_image_smp(state.bind.fs, SLOT__texture1, SLOT_texture1_smp);
-    sg_alloc_image_smp(state.bind.fs, SLOT__texture2, SLOT_texture2_smp);
+    sg_alloc_image_smp(state.bind, IMG__texture1, SMP_texture1_smp);
+    sg_alloc_image_smp(state.bind, IMG__texture2, SMP_texture2_smp);
 
     /* flip images vertically after loading */
     stbi_set_flip_vertically_on_load(true);  
@@ -91,9 +91,9 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_position].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aColor].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aColor].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .label = "triangle-pipeline"
@@ -108,7 +108,7 @@ static void init(void) {
         .path = "container.jpg",
         .callback = fetch_callback,
         .buffer = SFETCH_RANGE(state.file_buffer),
-        .user_data = SFETCH_RANGE(state.bind.fs.images[0]),
+        .user_data = SFETCH_RANGE(state.bind.images[IMG__texture1]),
     });
 
     /* start loading the PNG file
@@ -117,7 +117,7 @@ static void init(void) {
         .path = "awesomeface.png",
         .callback = fetch_callback,
         .buffer = SFETCH_RANGE(state.file_buffer),
-        .user_data = SFETCH_RANGE(state.bind.fs.images[1]),
+        .user_data = SFETCH_RANGE(state.bind.images[IMG__texture2]),
     });
 }
 

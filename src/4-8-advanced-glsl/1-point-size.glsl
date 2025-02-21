@@ -12,7 +12,7 @@ layout(binding = 0) uniform vs_params {
 
 void main() {
     gl_Position = projection * view * model * vec4(aPos, 1.0);
-    gl_PointSize = gl_Position.z;    
+    gl_PointSize = gl_Position.z;
 }
 @end
 

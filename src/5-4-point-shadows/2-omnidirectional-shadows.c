@@ -75,8 +75,8 @@ static void init(void) {
 
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
-    state.shadows.bind.fs.images[SLOT__depth_map] = color_img;
-    state.shadows.bind.fs.samplers[SLOT_depth_map_smp] = color_smp;
+    state.shadows.bind.images[IMG__depth_map] = color_img;
+    state.shadows.bind.samplers[SMP_depth_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -140,7 +140,7 @@ static void init(void) {
             /* Buffer's normal and texture coords are skipped */
             .buffers[0].stride = 8 * sizeof(float),
             .attrs = {
-                [ATTR_vs_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
         .depth = {
@@ -164,9 +164,9 @@ static void init(void) {
         .shader = shd_shadows,
         .layout = {
             .attrs = {
-                [ATTR_vs_shadows_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_shadows_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_shadows_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_shadows_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_shadows_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_shadows_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -186,8 +186,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_alloc_image_smp(state.shadows.bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image img_id_diffuse = state.shadows.bind.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(state.shadows.bind, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image img_id_diffuse = state.shadows.bind.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",
@@ -203,7 +203,7 @@ void draw_room_cube() {
         /* invert the outer cube so just the inner faces are shown with back culling */
         .model = HMM_Scale(HMM_V3(-5.f, -5.f, -5.f))
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -212,28 +212,32 @@ void draw_cubes() {
     HMM_Mat4 translate = HMM_Translate(HMM_V3(4.f, -3.5f, 0.f));
     HMM_Mat4 scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+
     translate = HMM_Translate(HMM_V3(2.f, 3.f, 1.f));
     scale = HMM_Scale(HMM_V3(.75f, .75f, .75f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+
     translate = HMM_Translate(HMM_V3(-3.f, -1.f, 0.f));
     scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+
     translate = HMM_Translate(HMM_V3(-1.5f, 1.f, 1.5f));
     scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
+
     translate = HMM_Translate(HMM_V3(-1.5f, 2.f, -3.f));
     HMM_Mat4 rotate = HMM_Rotate_RH(HMM_AngleDeg(60.f), HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_V3(.75f, .75f, .75f));
     vs_params.model = HMM_MulM4(HMM_MulM4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -280,14 +284,14 @@ void frame(void) {
             .light_space_matrix = light_space_transforms[i]
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_depth, &SG_RANGE(vs_params_depth));
+        sg_apply_uniforms(UB_vs_params_depth, &SG_RANGE(vs_params_depth));
 
         fs_params_depth_t fs_params_depth = {
             .light_pos = state.light_pos,
             .far_plane = far_plane
         };
 
-        sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_depth, &SG_RANGE(fs_params_depth));
+        sg_apply_uniforms(UB_fs_params_depth, &SG_RANGE(fs_params_depth));
 
         draw_cubes();
         sg_end_pass();
@@ -310,7 +314,7 @@ void frame(void) {
         .normal_multiplier = 1.f
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
+    sg_apply_uniforms(UB_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     fs_params_shadows_t fs_params_shadows = {
         .light_pos = state.light_pos,
@@ -318,13 +322,13 @@ void frame(void) {
         .far_plane = far_plane
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &SG_RANGE(fs_params_shadows));
+    sg_apply_uniforms(UB_fs_params_shadows, &SG_RANGE(fs_params_shadows));
 
     draw_cubes();
 
     /* invert the normals for the outer cube */
     vs_params_shadows.normal_multiplier = -1.f;
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
+    sg_apply_uniforms(UB_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     draw_room_cube();
 

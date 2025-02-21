@@ -81,7 +81,7 @@ static void init(void) {
         0xFF444444, 0xFFBBBBBB, 0xFF444444, 0xFFBBBBBB,
     };
 
-    state.bind.fs.images[SLOT__diffuse_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.images[IMG__diffuse_texture] = sg_make_image(&(sg_image_desc){
         .width = 4,
         .height = 4,
         .data.subimage[0][0] = {
@@ -90,7 +90,7 @@ static void init(void) {
         },
         .label = "cube-texture"
     });
-    state.bind.fs.samplers[SLOT_diffuse_texture_smp] = sg_make_sampler(&global_sampler_desc);
+    state.bind.samplers[SMP_diffuse_texture_smp] = sg_make_sampler(&global_sampler_desc);
 
     /* create shader from code-generated sg_shader_desc */
     sg_shader simple_shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
@@ -101,8 +101,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_simple_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -138,7 +138,7 @@ void frame(void) {
         .projection = projection
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     lopgl_render_help();

@@ -31,8 +31,8 @@ static void fail_callback() {
 static void init(void) {
     lopgl_setup();
 
-    sg_alloc_image_smp(state.bind_object.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_alloc_image_smp(state.bind_object.fs, SLOT__specular_texture, SLOT_specular_texture_smp);
+    sg_alloc_image_smp(state.bind_object, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_object, IMG__specular_texture, SMP_specular_texture_smp);
 
     state.cube_positions[0] = HMM_V3( 0.0f,  0.0f,  0.0f);
     state.cube_positions[1] = HMM_V3( 2.0f,  5.0f, -15.0f);
@@ -114,9 +114,9 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -134,7 +134,7 @@ static void init(void) {
         .shader = light_cube_shd,
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_light_cube_a_pos].format = SG_VERTEXFORMAT_FLOAT3
             },
             .buffers[0].stride = 32
         },
@@ -150,8 +150,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id_diffuse = state.bind_object.fs.images[SLOT__diffuse_texture];
-    sg_image img_id_specular = state.bind_object.fs.images[SLOT__specular_texture];
+    sg_image img_id_diffuse = state.bind_object.images[IMG__diffuse_texture];
+    sg_image img_id_specular = state.bind_object.images[IMG__specular_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "container2.png",
@@ -182,7 +182,7 @@ void frame(void) {
         .view_pos = lopgl_camera_position(),
         .material_shininess = 32.0f,
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
     
     fs_dir_light_t fs_dir_light = {
         .direction = HMM_V3(-0.2f, -1.0f, -0.3f),
@@ -190,7 +190,7 @@ void frame(void) {
         .diffuse = HMM_V3(0.4f, 0.4f, 0.4f),
         .specular = HMM_V3(0.5f, 0.5f, 0.5f)
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_dir_light, &SG_RANGE(fs_dir_light));
+    sg_apply_uniforms(UB_fs_dir_light, &SG_RANGE(fs_dir_light));
 
     fs_point_lights_t fs_point_lights = {
         .position[0]    = state.light_positions[0],
@@ -214,7 +214,7 @@ void frame(void) {
         .specular[3]    = HMM_V4(1.0f, 1.0f, 1.0f, 0.0f),
         .attenuation[3] = HMM_V4(1.0f, 0.09f, 0.032f, 0.0f)
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_point_lights, &SG_RANGE(fs_point_lights));
+    sg_apply_uniforms(UB_fs_point_lights, &SG_RANGE(fs_point_lights));
     
     fs_spot_light_t fs_spot_light = {
         .position = lopgl_camera_position(),
@@ -227,7 +227,7 @@ void frame(void) {
         .specular = HMM_V3(1.0f, 1.0f, 1.0f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_spot_light, &SG_RANGE(fs_spot_light));
+    sg_apply_uniforms(UB_fs_spot_light, &SG_RANGE(fs_spot_light));
 
     HMM_Mat4 view = lopgl_view_matrix();
     HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
@@ -242,7 +242,7 @@ void frame(void) {
         float angle = 20.0f * i; 
         model = HMM_MulM4(model, HMM_Rotate_RH(HMM_AngleDeg(angle), HMM_V3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }
@@ -256,7 +256,7 @@ void frame(void) {
         HMM_Vec3 pos = HMM_V3(state.light_positions[i].X, state.light_positions[i].Y, state.light_positions[i].Z);
         vs_params.model = HMM_Translate(pos);
         vs_params.model = HMM_MulM4(vs_params.model, scale);
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }

@@ -107,13 +107,13 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
-            .compare =SG_COMPAREFUNC_LESS,
-            .write_enabled =true,
+            .compare = SG_COMPAREFUNC_LESS,
+            .write_enabled = true,
         },
         .label = "pipeline"
     });
@@ -141,17 +141,17 @@ void frame(void) {
     sg_apply_bindings(&state.bind_cube);
 
     vs_params.model = HMM_Translate(HMM_V3(-1.0f, 0.0f, -1.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     vs_params.model = HMM_Translate(HMM_V3(2.0f, 0.0f, 0.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_apply_bindings(&state.bind_plane);
 
     vs_params.model = HMM_M4D(1.0f);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     lopgl_render_help();

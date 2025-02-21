@@ -76,9 +76,9 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2,
+                [ATTR_blinn_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_blinn_phong_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_blinn_phong_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2,
             }
         },
         .label = "object-pipeline"
@@ -89,8 +89,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_alloc_image_smp(state.bind.fs, SLOT__diffuse_map, SLOT_diffuse_map_smp);
-    sg_image img_id_diffuse = state.bind.fs.images[SLOT__diffuse_map];
+    sg_alloc_image_smp(state.bind, IMG__diffuse_map, SMP_diffuse_map_smp);
+    sg_image img_id_diffuse = state.bind.images[IMG__diffuse_map];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall.jpg",
@@ -100,8 +100,8 @@ static void init(void) {
             .fail_callback = fail_callback
     });
 
-    sg_alloc_image_smp(state.bind.fs, SLOT__normal_map, SLOT_normal_map_smp);
-    sg_image img_id_normal = state.bind.fs.images[SLOT__normal_map];
+    sg_alloc_image_smp(state.bind, IMG__normal_map, SMP_normal_map_smp);
+    sg_image img_id_normal = state.bind.images[IMG__normal_map];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "brickwall_normal.jpg",
@@ -139,7 +139,7 @@ void frame(void) {
         .projection = projection
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     fs_params_t fs_params = {
         .view_pos = lopgl_camera_position(),
@@ -147,7 +147,7 @@ void frame(void) {
         .normal_mapping = state.normal_mapping ? 1.f : 0.f 
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
 
     sg_draw(0, 6, 1);
 
