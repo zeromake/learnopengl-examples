@@ -54,7 +54,7 @@ static void init(void) {
         .index_type = SG_INDEXTYPE_UINT16,
         .layout = {
             .attrs = {
-                [ATTR_vs_position].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "quad-pipeline"

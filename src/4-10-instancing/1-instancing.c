@@ -45,8 +45,8 @@ static void init(void) {
         .shader = shd,
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT2,
-                [ATTR_vs_aColor].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_aPos].format = SG_VERTEXFORMAT_FLOAT2,
+                [ATTR_simple_aColor].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "quad-pipeline"

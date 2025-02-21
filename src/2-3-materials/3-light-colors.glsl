@@ -30,18 +30,18 @@ in vec3 Normal;
 
 out vec4 FragColor;
 
-layout(binding = 2) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 viewPos;
 };
 
-layout(binding = 1) uniform fs_material {
+layout(binding = 2) uniform fs_material {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     float shininess;
 } material;
 
-layout(binding = 0) uniform fs_light {
+layout(binding = 3) uniform fs_light {
     vec3 position;
     vec3 ambient;
     vec3 diffuse;

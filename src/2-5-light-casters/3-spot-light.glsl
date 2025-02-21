@@ -42,7 +42,7 @@ layout(binding = 2) uniform fs_material {
     float shininess;
 } material;
 
-layout(binding = 0) uniform fs_light {
+layout(binding = 3) uniform fs_light {
     vec3 position;  
     vec3 direction;
     float cut_off;

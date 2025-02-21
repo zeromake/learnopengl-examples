@@ -90,7 +90,7 @@ layout(binding = 0) uniform texture2D _shadow_map;
 layout(binding = 0) uniform sampler shadow_map_smp;
 #define shadow_map sampler2D(_shadow_map, shadow_map_smp)
 
-layout(binding = 0) uniform fs_params_shadows {
+layout(binding = 2) uniform fs_params_shadows {
     vec3 light_pos;
     vec3 view_pos;
     vec2 shadow_map_size;

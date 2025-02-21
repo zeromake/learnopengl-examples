@@ -16,7 +16,7 @@ void main() {
 @end
 
 @fs fs
-layout(binding = 0) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     float center_x;
 };
 

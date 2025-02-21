@@ -30,7 +30,7 @@ in vec3 position;
 
 out vec4 frag_color;
 
-layout(binding = 0) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 camera_pos;
 };
 

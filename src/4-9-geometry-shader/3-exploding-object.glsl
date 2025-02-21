@@ -66,8 +66,8 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-layout(binding = 0) uniform texture2D _diffuse_texture;
-layout(binding = 0) uniform sampler diffuse_texture_smp;
+layout(binding = 1) uniform texture2D _diffuse_texture;
+layout(binding = 1) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {

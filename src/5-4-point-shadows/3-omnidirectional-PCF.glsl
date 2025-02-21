@@ -36,7 +36,7 @@ void main() {
 in vec4 frag_pos;
 out vec4 frag_color;
 
-layout(binding = 0) uniform fs_params_depth {
+layout(binding = 2) uniform fs_params_depth {
     vec3 light_pos;
     float far_plane;
 };
@@ -108,7 +108,7 @@ layout(binding = 0) uniform textureCube _depth_map;
 layout(binding = 0) uniform sampler depth_map_smp;
 #define depth_map samplerCube(_depth_map, depth_map_smp)
 
-layout(binding = 0) uniform fs_params_shadows {
+layout(binding = 2) uniform fs_params_shadows {
     vec3 light_pos;
     vec3 view_pos;
     float far_plane;
@@ -116,7 +116,7 @@ layout(binding = 0) uniform fs_params_shadows {
 
 // using arrays of vec4 to avoid alignment issues with cross shader compilation
 // using a uniform because we can't initialize an arrays at declaration time with webgl 1.0
-layout(binding = 1) uniform fs_sampling {
+layout(binding = 3) uniform fs_sampling {
     // array of offset direction for sampling
     vec4 grid_sampling_disk[20];
 };

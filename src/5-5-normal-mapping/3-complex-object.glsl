@@ -87,19 +87,19 @@ in INTERFACE {
 
 out vec4 frag_color;
 
-layout(binding = 2) uniform fs_params {
+layout(binding = 3) uniform fs_params {
     float material_shininess;
     float normal_mapping;
 };
 
-layout(binding = 0) uniform fs_dir_light {
+layout(binding = 4) uniform fs_dir_light {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
 } dir_light;
 
 // using arrays of vec4 to avoid alignment issues with cross shader compilation
-layout(binding = 1) uniform fs_point_lights {
+layout(binding = 5) uniform fs_point_lights {
     vec4 ambient[NR_POINT_LIGHTS];
     vec4 diffuse[NR_POINT_LIGHTS];
     vec4 specular[NR_POINT_LIGHTS];

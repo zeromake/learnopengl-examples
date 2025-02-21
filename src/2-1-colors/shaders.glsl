@@ -18,7 +18,7 @@ void main() {
 @fs fs
 out vec4 FragColor;
 
-layout(binding = 0) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 objectColor;
     vec3 lightColor;
 };

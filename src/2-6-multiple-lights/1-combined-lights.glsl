@@ -35,7 +35,7 @@ in vec2 tex_coords;
 
 out vec4 frag_color;
 
-layout(binding = 0) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 view_pos;
     float material_shininess;
 };
@@ -47,7 +47,7 @@ layout(binding = 1) uniform texture2D _specular_texture;
 layout(binding = 1) uniform sampler specular_texture_smp;
 #define specular_texture sampler2D(_specular_texture, specular_texture_smp)
 
-layout(binding = 1) uniform fs_dir_light {
+layout(binding = 2) uniform fs_dir_light {
     vec3 direction;
     vec3 ambient;
     vec3 diffuse;
@@ -57,7 +57,7 @@ layout(binding = 1) uniform fs_dir_light {
 #define NR_POINT_LIGHTS 4  
 
 // using arrays of vec4 to avoid alignment issues with cross shader compilation
-layout(binding = 2) uniform fs_point_lights {
+layout(binding = 3) uniform fs_point_lights {
     vec4 position[NR_POINT_LIGHTS];  
     vec4 ambient[NR_POINT_LIGHTS];
     vec4 diffuse[NR_POINT_LIGHTS];
@@ -65,7 +65,7 @@ layout(binding = 2) uniform fs_point_lights {
     vec4 attenuation[NR_POINT_LIGHTS];
 } point_lights;
 
-layout(binding = 3) uniform fs_spot_light {
+layout(binding = 4) uniform fs_spot_light {
     vec3 position;
     vec3 direction;
     float cut_off;

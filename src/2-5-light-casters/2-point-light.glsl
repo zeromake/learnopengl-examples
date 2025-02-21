@@ -49,7 +49,7 @@ layout(binding = 1) uniform texture2D _specular_texture;
 layout(binding = 1) uniform sampler specular_texture_smp;
 #define specular_texture sampler2D(_specular_texture, specular_texture_smp)
 
-layout(binding = 0) uniform fs_light {
+layout(binding = 3) uniform fs_light {
     vec3 position;  
 
     vec3 ambient;

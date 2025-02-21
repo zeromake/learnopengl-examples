@@ -34,7 +34,7 @@ void main() {
 in vec4 frag_pos;
 out vec4 frag_color;
 
-layout(binding = 0) uniform fs_params_depth {
+layout(binding = 2) uniform fs_params_depth {
     vec3 light_pos;
     float far_plane;
 };
@@ -69,7 +69,7 @@ out INTERFACE {
     vec3 frag_pos;
 } inter;
 
-layout(binding = 1) uniform vs_params_shadows {
+layout(binding = 2) uniform vs_params_shadows {
     mat4 projection;
     mat4 view;
 };
@@ -91,7 +91,7 @@ layout(binding = 0) uniform textureCube _depth_map;
 layout(binding = 0) uniform sampler depth_map_smp;
 #define depth_map samplerCube(_depth_map, depth_map_smp)
 
-layout(binding = 0) uniform fs_params_shadows {
+layout(binding = 3) uniform fs_params_shadows {
     vec3 light_pos;
     float far_plane;
 };

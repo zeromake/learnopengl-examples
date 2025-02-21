@@ -3,7 +3,7 @@ add_rules("mode.release", "mode.debug")
 
 add_repositories("zeromake https://github.com/zeromake/xrepo.git")
 
-add_requires("stb", "handmade_math", "sokol-shdc =2024.09.05-alpha", "sokol =2024.10.27-alpha")
+add_requires("stb", "handmade_math", "sokol-shdc", "sokol")
 
 add_requires("imgui 1.x", {configs={backend="none", freetype=true}})
 

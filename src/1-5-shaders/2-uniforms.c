@@ -45,7 +45,7 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_position].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "triangle-pipeline"
@@ -68,7 +68,7 @@ void frame(void) {
     fs_params_t fs_params = {
         .ourColor = { 0.f, greenValue, 0.f, 1.f }
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
 
     sg_draw(0, 3, 1);
     sg_end_pass();

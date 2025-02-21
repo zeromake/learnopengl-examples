@@ -35,7 +35,7 @@ in INTERFACE {
 
 out vec4 frag_color;
 
-layout(binding = 0) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 view_pos;
     vec3 light_pos;
     float blinn;        // the shader cross compiler does not support bool as uniform

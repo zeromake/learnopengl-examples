@@ -37,7 +37,7 @@ in INTERFACE {
 out vec4 frag_color;
 
 // using arrays of vec4 to avoid alignment issues with cross shader compilation
-layout(binding = 0) uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec4 light_pos[4];
     vec4 light_colors[4];
     vec3 view_pos;
