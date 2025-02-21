@@ -3,7 +3,7 @@
 @vs vs_offscreen
 in vec3 a_pos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -38,8 +38,8 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 0) uniform texture2D _diffuse_texture;
+layout(binding = 0) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
@@ -49,3 +49,4 @@ void main() {
 
 @program offscreen vs_offscreen fs_offscreen
 @program display vs_display fs_display
+

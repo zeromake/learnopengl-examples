@@ -35,7 +35,7 @@ static void init(void) {
         .layout = {
             .attrs = {
                 /* dummy vertex attribute, otherwise sokol complains */
-                [ATTR_vs_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
+                [ATTR_simple_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
             }
         },
         .primitive_type = SG_PRIMITIVETYPE_LINES,
@@ -58,7 +58,7 @@ static void init(void) {
         .mag_filter = SG_FILTER_NEAREST,
         .min_filter = SG_FILTER_NEAREST,
     };
-    state.bind.vs.images[SLOT__positions_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.images[IMG__positions_texture] = sg_make_image(&(sg_image_desc){
         .width = 4,
         .height = 1,
         .pixel_format = SG_PIXELFORMAT_RG32F,
@@ -68,7 +68,7 @@ static void init(void) {
         },
         .label = "positions-texture"
     });
-    state.bind.vs.samplers[SLOT_positions_texture_smp] = sg_make_sampler(&smp_desc);
+    state.bind.samplers[SMP_positions_texture_smp] = sg_make_sampler(&smp_desc);
 }
 
 void frame(void) {

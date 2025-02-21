@@ -68,13 +68,13 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     });
     sg_sampler vertex_smp_id = sg_make_sampler(&smp_desc);
 
-    state.mesh.bind_diffuse.vs.images[SLOT__vertex_texture] = vertex_image_id;
-    state.mesh.bind_normals.vs.images[SLOT__vertex_texture] = vertex_image_id;
-    state.mesh.bind_diffuse.vs.samplers[SLOT_vertex_texture_smp] = vertex_smp_id;
-    state.mesh.bind_normals.vs.samplers[SLOT_vertex_texture_smp] = vertex_smp_id;
+    state.mesh.bind_diffuse.images[IMG__vertex_texture] = vertex_image_id;
+    state.mesh.bind_normals.images[IMG__vertex_texture] = vertex_image_id;
+    state.mesh.bind_diffuse.samplers[SMP_vertex_texture_smp] = vertex_smp_id;
+    state.mesh.bind_normals.samplers[SMP_vertex_texture_smp] = vertex_smp_id;
 
-    sg_alloc_image_smp(state.mesh.bind_diffuse.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image diffuse_img_id = state.mesh.bind_diffuse.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(state.mesh.bind_diffuse, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image diffuse_img_id = state.mesh.bind_diffuse.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = mesh->materials[0].map_Kd.name,
@@ -109,7 +109,7 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_simple_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
+                [ATTR_simple_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
             },
         },
         .depth = {
@@ -128,7 +128,7 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_normals_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
+                [ATTR_normals_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
             },
         },
         .depth = {
@@ -170,14 +170,14 @@ void frame(void) {
         sg_apply_pipeline(state.mesh.pip_diffuse);
         sg_apply_bindings(&state.mesh.bind_diffuse);
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, state.mesh.face_count * 3, 1);
 
         sg_apply_pipeline(state.mesh.pip_normals);
         sg_apply_bindings(&state.mesh.bind_normals);
 
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, state.mesh.face_count * 2, 1);
     }

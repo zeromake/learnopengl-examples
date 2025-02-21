@@ -47,6 +47,8 @@ To enable web builds you need to setup the [emscripten](https://emscripten.org/i
 
 #### Todo
 
-- [ ] [4-5-4-sharpen](src/4-5-framebuffers/4-sharpen.c)
-- [ ] [4-5-5-blur](src/4-5-framebuffers/5-blur.c)
-- [ ] [4-10-1-instancing](src/4-10-instancing/1-instancing.c)
+- [ ] [4-1-4](src\4-1-depth-testing\4-linear-depth-buffer.c) 颜色偏黑了
+- [ ] [4-2-1](src\4-2-stencil-testing\1-object-outlining.c) 直接就绿色正方体了，纹理没有
+- [ ] [4-8-1](src\4-8-advanced-glsl\1-point-size.c) dx 下点比 gl 的小
+- [ ] 5-3 dx 光源不对
+- [x] 4-5 gl 与 dx 的 plane.model 坐标不相同

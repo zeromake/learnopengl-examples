@@ -11,7 +11,7 @@
 @ctype mat4 HMM_Mat4
 
 @block vs_params
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
 };
 @end
@@ -21,7 +21,7 @@ uniform vs_params {
 in vec3 a_pos;
 out vec4 frag_pos;
 
-uniform vs_params_depth {
+layout(binding = 1) uniform vs_params_depth {
     mat4 light_space_matrix;
 };
 
@@ -35,7 +35,7 @@ void main() {
 in vec4 frag_pos;
 out vec4 frag_color;
 
-uniform fs_params_depth {
+layout(binding = 2) uniform fs_params_depth {
     vec3 light_pos;
     float far_plane;
 };
@@ -72,7 +72,7 @@ out INTERFACE {
     vec2 tex_coords;
 } inter;
 
-uniform vs_params_shadows {
+layout(binding = 3) uniform vs_params_shadows {
     mat4 projection;
     mat4 view;
     float normal_multiplier;
@@ -100,14 +100,14 @@ in INTERFACE {
 
 out vec4 frag_color;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 1) uniform texture2D _diffuse_texture;
+layout(binding = 1) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
-uniform textureCube _depth_map;
-uniform sampler depth_map_smp;
+layout(binding = 0) uniform textureCube _depth_map;
+layout(binding = 0) uniform sampler depth_map_smp;
 #define depth_map samplerCube(_depth_map, depth_map_smp)
 
-uniform fs_params_shadows {
+layout(binding = 4) uniform fs_params_shadows {
     vec3 light_pos;
     vec3 view_pos;
     float far_plane;
@@ -162,3 +162,4 @@ void main() {
 
 @program depth vs_depth fs_depth
 @program shadows vs_shadows fs_shadows
+

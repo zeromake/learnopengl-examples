@@ -69,15 +69,15 @@ static void init(void) {
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
+    sg_shader simple_shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
 
     /* create a pipeline object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = shd,
+        .shader = simple_shd,
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_aPos].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "cube-pipeline"
@@ -106,13 +106,13 @@ void frame(void) {
     sg_apply_bindings(&state.bind);
 
     vs_params.model = HMM_M4D(1.f);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     fs_params_t fs_params = {
         .center_x = sapp_width() / 2.f
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
 
     sg_draw(0, 36, 1);
 

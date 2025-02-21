@@ -7,7 +7,7 @@ in vec2 a_tex_coords;
 
 out vec2 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -41,3 +41,4 @@ void main()
 @end
 
 @program phong vs fs
+

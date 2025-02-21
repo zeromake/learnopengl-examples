@@ -7,7 +7,7 @@ void main() {
 @end
 
 @fs fs
-uniform fs_params {
+layout(binding = 0) uniform fs_params {
     vec4 ourColor;
 };
 
@@ -19,3 +19,4 @@ void main() {
 @end
 
 @program simple vs fs
+

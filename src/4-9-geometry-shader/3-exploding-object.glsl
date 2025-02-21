@@ -4,15 +4,15 @@
 in float a_dummy;       // add a dummy vertex attribute otherwise sokol complains
 out vec2 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
     float time;
 };
 
-uniform texture2D _vertex_texture;
-uniform sampler vertex_texture_smp;
+layout(binding = 0) uniform texture2D _vertex_texture;
+layout(binding = 0) uniform sampler vertex_texture_smp;
 #define vertex_texture sampler2D(_vertex_texture, vertex_texture_smp)
 
 float getVal(uint index) {
@@ -66,8 +66,8 @@ void main() {
 in vec2 tex_coords;
 out vec4 frag_color;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 1) uniform texture2D _diffuse_texture;
+layout(binding = 1) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
@@ -76,3 +76,4 @@ void main() {
 @end
 
 @program phong vs fs
+

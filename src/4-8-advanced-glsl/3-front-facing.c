@@ -78,16 +78,16 @@ static void init(void) {
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
+    sg_shader simple_shd = sg_make_shader(simple_shader_desc(sg_query_backend()));
 
     /* create a pipeline object */
     state.pip = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = shd,
+        .shader = simple_shd,
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_simple_aPos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -104,8 +104,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_alloc_image_smp(state.bind.fs, SLOT__front_texture, SLOT_front_texture_smp);
-    sg_image img_id_front = state.bind.fs.images[SLOT__front_texture];
+    sg_alloc_image_smp(state.bind, IMG__front_texture, SMP_front_texture_smp);
+    sg_image img_id_front = state.bind.images[IMG__front_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "uv_grid.png",
@@ -126,7 +126,7 @@ static void init(void) {
         }
     }
 
-    state.bind.fs.images[SLOT__back_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.images[IMG__back_texture] = sg_make_image(&(sg_image_desc){
         .width = 16,
         .height = 16,
         .data.subimage[0][0] = {
@@ -135,7 +135,7 @@ static void init(void) {
         },
         .label = "back-texture"
     });
-    state.bind.fs.samplers[SLOT__back_texture] = sg_make_sampler(&global_sampler_desc);
+    state.bind.samplers[SMP_back_texture_smp] = sg_make_sampler(&global_sampler_desc);
 }
 
 void frame(void) {
@@ -157,7 +157,7 @@ void frame(void) {
     // TODO: adjust camera instead of scaling model
     //vs_params.model = HMM_M4D(1.f);
     vs_params.model = HMM_Scale(HMM_V3(2.f, 2.f, 2.f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 36, 1);
 

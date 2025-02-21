@@ -35,7 +35,7 @@ static void init(void) {
         .layout = {
             .attrs = {
                 /* dummy vertex attribute, otherwise sokol complains */
-                [ATTR_vs_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
+                [ATTR_simple_a_dummy].format = SG_VERTEXFORMAT_FLOAT,
             }
         },
         .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
@@ -59,7 +59,7 @@ static void init(void) {
         .min_filter = SG_FILTER_NEAREST,
     };
 
-    state.bind.vs.images[SLOT__position_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.images[IMG__position_texture] = sg_make_image(&(sg_image_desc){
         .width = 4,
         .height = 1,
         .pixel_format = SG_PIXELFORMAT_RG32F,
@@ -69,7 +69,7 @@ static void init(void) {
         },
         .label = "positions-texture"
     });
-    state.bind.vs.samplers[SLOT_position_texture_smp] = sg_make_sampler(&smp_desc);
+    state.bind.samplers[SMP_position_texture_smp] = sg_make_sampler(&smp_desc);
 
     float colors[] = {
         1.0f, 0.0f, 0.0f, 1.0,  // top-left
@@ -78,7 +78,7 @@ static void init(void) {
         1.0f, 1.0f, 0.0f, 1.0   // bottom-left
     };
 
-    state.bind.vs.images[SLOT__color_texture] = sg_make_image(&(sg_image_desc){
+    state.bind.images[IMG__color_texture] = sg_make_image(&(sg_image_desc){
         .width = 4,
         .height = 1,
         .pixel_format = SG_PIXELFORMAT_RGBA32F,
@@ -88,7 +88,7 @@ static void init(void) {
         },
         .label = "color-texture"
     });
-    state.bind.vs.samplers[SLOT_color_texture_smp] = sg_make_sampler(&smp_desc);
+    state.bind.samplers[SMP_color_texture_smp] = sg_make_sampler(&smp_desc);
 }
 
 void frame(void) {

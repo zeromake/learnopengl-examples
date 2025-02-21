@@ -57,8 +57,8 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    sg_alloc_image_smp(state.bind.fs, SLOT__texture1, SLOT_texture1_smp);
-    sg_alloc_image_smp(state.bind.fs, SLOT__texture2, SLOT_texture2_smp);
+    sg_alloc_image_smp(state.bind, IMG__texture1, SMP_texture1_smp);
+    sg_alloc_image_smp(state.bind, IMG__texture2, SMP_texture2_smp);
 
     /* flip images vertically after loading */
     stbi_set_flip_vertically_on_load(true);  
@@ -144,8 +144,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_simple_aPos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -160,8 +160,8 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.2f, 0.3f, 0.3f, 1.0f} }
     };
 
-    sg_image image1 = state.bind.fs.images[SLOT__texture1];
-    sg_image image2 = state.bind.fs.images[SLOT__texture2];
+    sg_image image1 = state.bind.images[IMG__texture1];
+    sg_image image2 = state.bind.images[IMG__texture2];
 
     /* start loading the JPG file */
     sfetch_send(&(sfetch_request_t){
@@ -240,7 +240,7 @@ void frame(void) {
         float angle = 20.0f * i; 
         model = HMM_MulM4(model, HMM_Rotate_RH(HMM_AngleDeg(angle), HMM_V3(1.0f, 0.3f, 0.5f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, 36, 1);
     }

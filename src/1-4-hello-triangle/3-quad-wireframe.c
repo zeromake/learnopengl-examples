@@ -54,7 +54,7 @@ static void init(void) {
         .primitive_type = SG_PRIMITIVETYPE_LINES,
         .layout = {
             .attrs = {
-                [ATTR_vs_position].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "quad-pipeline"

@@ -72,8 +72,8 @@ void create_offscreen_pass(int width, int height) {
     state.offscreen.attachment = sg_make_attachments(&state.offscreen.attachment_desc);
 
     /* also need to update the fullscreen-quad texture bindings */
-    state.display.bind.fs.images[SLOT__diffuse_texture] = color_img;
-    state.display.bind.fs.samplers[SLOT_diffuse_texture_smp] = color_smp;
+    state.display.bind.images[IMG__diffuse_texture] = color_img;
+    state.display.bind.samplers[SMP_diffuse_texture_smp] = color_smp;
 }
 
 static void init(void) {
@@ -190,8 +190,8 @@ static void init(void) {
         .shader = sg_make_shader(offscreen_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
-                [ATTR_vs_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_offscreen_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_offscreen_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_offscreen_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -210,18 +210,18 @@ static void init(void) {
     state.display.pip = sg_make_pipeline(&(sg_pipeline_desc){
         .layout = {
             .attrs = {
-                [ATTR_vs_display_a_pos].format = SG_VERTEXFORMAT_FLOAT2,
-                [ATTR_vs_display_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_display_a_pos].format = SG_VERTEXFORMAT_FLOAT2,
+                [ATTR_display_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .shader = sg_make_shader(display_shader_desc(sg_query_backend())),
         .label = "display-pipeline"
     });
 
-    sg_alloc_image_smp(state.offscreen.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_alloc_image_smp(state.offscreen.bind_plane.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image container_img_id = state.offscreen.bind_cube.fs.images[SLOT__diffuse_texture];
-    sg_image metal_img_id = state.offscreen.bind_plane.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(state.offscreen.bind_cube, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_alloc_image_smp(state.offscreen.bind_plane, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image container_img_id = state.offscreen.bind_cube.images[IMG__diffuse_texture];
+    sg_image metal_img_id = state.offscreen.bind_plane.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",
@@ -257,17 +257,22 @@ void frame(void) {
     sg_apply_bindings(&state.offscreen.bind_cube);
 
     vs_params.model = HMM_Translate(HMM_V3(-1.0f, 0.0f, -1.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     vs_params.model = HMM_Translate(HMM_V3(2.0f, 0.0f, 0.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_apply_bindings(&state.offscreen.bind_plane);
 
+#if defined(SOKOL_GLCORE) || defined(SOKOL_GLES2) || defined(SOKOL_GLES3)
     vs_params.model = HMM_M4D(1.0f);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+#else
+    vs_params.model = HMM_Translate(HMM_V3(1.0f, 1.0f, 1.0f));
+#endif
+
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     sg_end_pass();
@@ -282,7 +287,7 @@ void frame(void) {
     fs_params_t fs_params = {
         .offset = HMM_V2(2.f / sapp_width(), 2.f / sapp_height())
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
 
     sg_draw(0, 6, 1);
 

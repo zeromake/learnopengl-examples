@@ -8,7 +8,7 @@ in vec3 aNormal;
 out vec3 FragPos;
 out vec3 Normal;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -30,7 +30,7 @@ in vec3 Normal;
 
 out vec4 FragColor;
 
-uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 objectColor;
     vec3 viewPos;
     vec3 lightColor;
@@ -60,7 +60,7 @@ void main() {
 @vs light_cube_vs
 in vec3 aPos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -81,3 +81,4 @@ void main() {
 
 @program specular vs fs
 @program light_cube light_cube_vs light_cube_fs
+

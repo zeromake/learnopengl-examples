@@ -34,7 +34,7 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    sg_alloc_image_smp(state.bind_object.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_object, IMG__diffuse_texture, SMP_diffuse_texture_smp);
 
     // set object and light configuration
     state.light_pos = HMM_V3(1.2f, 1.0f, 2.0f);
@@ -102,9 +102,9 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aNormal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_phong_aPos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_aNormal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_aTexCoords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -122,7 +122,7 @@ static void init(void) {
         .shader = light_cube_shd,
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_light_cube_aPos].format = SG_VERTEXFORMAT_FLOAT3
             },
             .buffers[0].stride = 32
         },
@@ -138,7 +138,7 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_image img_id = state.bind_object.fs.images[SLOT__diffuse_texture];
+    sg_image img_id = state.bind_object.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = "container2.png",
@@ -165,18 +165,18 @@ void frame(void) {
     sg_apply_bindings(&state.bind_object);
 
     vs_params.model = HMM_M4D(1.f);;
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     fs_params_t fs_params = {
         .viewPos = lopgl_camera_position()
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
 
     fs_material_t fs_material = {
         .specular = HMM_V3(0.5f, 0.5f, 0.5f),
         .shininess = 32.0f,
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_material, &SG_RANGE(fs_material));
+    sg_apply_uniforms(UB_fs_material, &SG_RANGE(fs_material));
     
     fs_light_t fs_light = {
         .position = state.light_pos,
@@ -184,7 +184,7 @@ void frame(void) {
         .diffuse = HMM_V3(0.5f, 0.5f, 0.5f),
         .specular = HMM_V3(1.0f, 1.0f, 1.0f)
     };
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_light, &SG_RANGE(fs_light));
+    sg_apply_uniforms(UB_fs_light, &SG_RANGE(fs_light));
 
     sg_draw(0, 36, 1);
 
@@ -192,7 +192,7 @@ void frame(void) {
     sg_apply_bindings(&state.bind_light);
     vs_params.model = HMM_Translate(state.light_pos);
     vs_params.model = HMM_MulM4(vs_params.model, HMM_Scale(HMM_V3(0.2f, 0.2f, 0.2f)));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     lopgl_render_help();

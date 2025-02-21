@@ -14,7 +14,7 @@ out INTERFACE {
     vec2 tex_coords;
 } inter;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 view;
     mat4 projection;
 };
@@ -37,15 +37,15 @@ in INTERFACE {
 out vec4 frag_color;
 
 // using arrays of vec4 to avoid alignment issues with cross shader compilation
-uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec4 light_pos[4];
     vec4 light_colors[4];
     vec3 view_pos;
     float gamma;        // the shader cross compiler does not support bool as uniform
 };
 
-uniform texture2D _floor_texture;
-uniform sampler floor_texture_smp;
+layout(binding = 0) uniform texture2D _floor_texture;
+layout(binding = 0) uniform sampler floor_texture_smp;
 #define floor_texture sampler2D(_floor_texture, floor_texture_smp)
 
 vec3 blinnPhong(vec3 normal, vec3 frag_pos, vec3 light_pos, vec3 light_color) {
@@ -90,3 +90,4 @@ void main() {
 @end
 
 @program blinn_phong vs fs
+

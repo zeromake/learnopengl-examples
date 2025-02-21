@@ -4,11 +4,11 @@
 in float a_dummy;       // add a dummy vertex attribute otherwise sokol complains
 out vec4 color;
 
-uniform texture2D _position_texture;
-uniform sampler position_texture_smp;
+layout(binding = 0) uniform texture2D _position_texture;
+layout(binding = 0) uniform sampler position_texture_smp;
 #define position_texture sampler2D(_position_texture, position_texture_smp)
-uniform texture2D _color_texture;
-uniform sampler color_texture_smp;
+layout(binding = 1) uniform texture2D _color_texture;
+layout(binding = 1) uniform sampler color_texture_smp;
 #define color_texture sampler2D(_color_texture, color_texture_smp)
 
 void main() {
@@ -43,3 +43,4 @@ void main() {
 @end
 
 @program simple vs fs
+

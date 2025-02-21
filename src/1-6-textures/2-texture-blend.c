@@ -40,7 +40,7 @@ static void init(void) {
        Any draw calls containing such an "incomplete" image handle
        will be silently dropped.
     */
-    sg_alloc_image_smp(state.bind.fs, SLOT__ourTexture, SLOT_ourTexture_smp);
+    sg_alloc_image_smp(state.bind, IMG__ourTexture, SMP_ourTexture_smp);
 
     float vertices[] = {
         // positions         // colors           // texture coords
@@ -77,9 +77,9 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_position].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aColor].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aColor].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_aTexCoord].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .label = "triangle-pipeline"
@@ -115,7 +115,7 @@ static void fetch_callback(const sfetch_response_t* response) {
             &num_channels, desired_channels);
         if (pixels) {
             /* initialize the sokol-gfx texture */
-            sg_init_image(state.bind.fs.images[SLOT__ourTexture], &(sg_image_desc){
+            sg_init_image(state.bind.images[IMG__ourTexture], &(sg_image_desc){
                 .width = img_width,
                 .height = img_height,
                 /* set pixel_format to RGBA8 for WebGL */

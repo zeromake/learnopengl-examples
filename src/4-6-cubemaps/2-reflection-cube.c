@@ -140,8 +140,8 @@ static void init(void) {
         .shader = sg_make_shader(simple_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_normal].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_a_normal].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .depth = {
@@ -156,7 +156,7 @@ static void init(void) {
         .shader = sg_make_shader(skybox_shader_desc(sg_query_backend())),
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_skybox_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
         .depth = {
@@ -170,11 +170,11 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_alloc_image_smp(state.bind_skybox.fs, SLOT__skybox_texture, SLOT_skybox_texture_smp);
-    sg_image skybox_img_id = state.bind_skybox.fs.images[SLOT__skybox_texture];
+    sg_alloc_image_smp(state.bind_skybox, IMG__skybox_texture, SMP_skybox_texture_smp);
+    sg_image skybox_img_id = state.bind_skybox.images[IMG__skybox_texture];
 
-    state.bind_cube.fs.images[SLOT__skybox_texture] = skybox_img_id;
-    state.bind_cube.fs.samplers[SLOT_skybox_texture_smp] = state.bind_skybox.fs.samplers[SLOT_skybox_texture_smp];
+    state.bind_cube.images[IMG__skybox_texture] = skybox_img_id;
+    state.bind_cube.samplers[SMP_skybox_texture_smp] = state.bind_skybox.samplers[SMP_skybox_texture_smp];
     
     lopgl_load_cubemap(&(lopgl_cubemap_request_t){
         .img_id = skybox_img_id,
@@ -211,8 +211,8 @@ void frame(void) {
         .camera_pos = lopgl_camera_position()
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &SG_RANGE(fs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_fs_params, &SG_RANGE(fs_params));
     sg_draw(0, 36, 1);
 
     // remove translation from view matrix
@@ -223,7 +223,7 @@ void frame(void) {
     sg_apply_pipeline(state.pip_skybox);
     sg_apply_bindings(&state.bind_skybox);
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     lopgl_render_help();

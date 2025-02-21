@@ -136,8 +136,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_simple_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_simple_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -148,16 +148,16 @@ static void init(void) {
     });
 
     /* create shader from code-generated sg_shader_desc */
-    sg_shader transparent_shd = sg_make_shader(grass_shader_desc(sg_query_backend()));
+    sg_shader grass_shd = sg_make_shader(grass_shader_desc(sg_query_backend()));
 
     /* create a pipeline object for object */
     state.pip_transparent = sg_make_pipeline(&(sg_pipeline_desc){
-        .shader = transparent_shd,
+        .shader = grass_shd,
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_grass_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_grass_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -172,12 +172,12 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_alloc_image_smp(state.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_alloc_image_smp(state.bind_plane.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_alloc_image_smp(state.bind_transparent.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image marble_img_id = state.bind_cube.fs.images[SLOT__diffuse_texture];
-    sg_image metal_img_id = state.bind_plane.fs.images[SLOT__diffuse_texture];
-    sg_image grass_img_id = state.bind_transparent.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(state.bind_cube, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_plane, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_alloc_image_smp(state.bind_transparent, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image marble_img_id = state.bind_cube.images[IMG__diffuse_texture];
+    sg_image metal_img_id = state.bind_plane.images[IMG__diffuse_texture];
+    sg_image grass_img_id = state.bind_transparent.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "metal.png",
@@ -223,17 +223,17 @@ void frame(void) {
     sg_apply_bindings(&state.bind_cube);
 
     vs_params.model = HMM_Translate(HMM_V3(-1.0f, 0.0f, -1.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     vs_params.model = HMM_Translate(HMM_V3(2.0f, 0.0f, 0.0f));
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 
     sg_apply_bindings(&state.bind_plane);
 
     vs_params.model = HMM_M4D(1.0f);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     sg_apply_pipeline(state.pip_transparent);
@@ -241,7 +241,7 @@ void frame(void) {
 
     for(size_t i = 0; i < 5; i++) {
         vs_params.model = HMM_Translate(state.vegetation[i]);
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
         sg_draw(0, 6, 1);
     }
 

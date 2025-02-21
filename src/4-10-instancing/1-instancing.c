@@ -45,8 +45,8 @@ static void init(void) {
         .shader = shd,
         .layout = {
             .attrs = {
-                [ATTR_vs_aPos].format = SG_VERTEXFORMAT_FLOAT2,
-                [ATTR_vs_aColor].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_aPos].format = SG_VERTEXFORMAT_FLOAT2,
+                [ATTR_simple_aColor].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "quad-pipeline"
@@ -76,7 +76,7 @@ void frame(void) {
     vs_params_t vs_params;
     memcpy(vs_params.offsets, state.translations, sizeof(vs_params.offsets));
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     sg_draw(0, 6, 100);
     sg_end_pass();

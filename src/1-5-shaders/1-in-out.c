@@ -40,7 +40,7 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_position].format = SG_VERTEXFORMAT_FLOAT3
+                [ATTR_simple_position].format = SG_VERTEXFORMAT_FLOAT3
             }
         },
         .label = "triangle-pipeline"

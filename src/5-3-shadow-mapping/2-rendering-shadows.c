@@ -72,10 +72,10 @@ static void init(void) {
 
     // sokol and webgl 1 do not support using the depth map as texture map
     // so instead we write the depth value to the color map
-    state.shadows.bind_cube.fs.images[SLOT__shadow_map] = color_img;
-    state.shadows.bind_plane.fs.images[SLOT__shadow_map] = color_img;
-    state.shadows.bind_cube.fs.samplers[SLOT_shadow_map_smp] = color_smp;
-    state.shadows.bind_plane.fs.samplers[SLOT_shadow_map_smp] = color_smp;
+    state.shadows.bind_cube.images[IMG__shadow_map] = color_img;
+    state.shadows.bind_plane.images[IMG__shadow_map] = color_img;
+    state.shadows.bind_cube.samplers[SMP_shadow_map_smp] = color_smp;
+    state.shadows.bind_plane.samplers[SMP_shadow_map_smp] = color_smp;
 
     float cube_vertices[] = {
         // back face
@@ -159,7 +159,7 @@ static void init(void) {
             /* Buffer's normal and texture coords are skipped */
             .buffers[0].stride = 8 * sizeof(float),
             .attrs = {
-                [ATTR_vs_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_depth_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
             }
         },
         .depth = {
@@ -180,9 +180,9 @@ static void init(void) {
         .shader = shd_shadows,
         .layout = {
             .attrs = {
-                [ATTR_vs_shadows_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_shadows_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_shadows_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
+                [ATTR_shadows_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_shadows_a_normal].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_shadows_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
         .depth = {
@@ -200,10 +200,10 @@ static void init(void) {
         .colors[0] = { .load_action=SG_LOADACTION_CLEAR, .clear_value={0.1f, 0.1f, 0.1f, 1.0f} }
     };
 
-    sg_alloc_image_smp(state.shadows.bind_cube.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image img_id_diffuse = state.shadows.bind_cube.fs.images[SLOT__diffuse_texture];
-    state.shadows.bind_plane.fs.images[SLOT__diffuse_texture] = img_id_diffuse;
-    state.shadows.bind_plane.fs.samplers[SLOT_diffuse_texture_smp] = state.shadows.bind_cube.fs.samplers[SLOT_diffuse_texture_smp];
+    sg_alloc_image_smp(state.shadows.bind_cube, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image img_id_diffuse = state.shadows.bind_cube.images[IMG__diffuse_texture];
+    state.shadows.bind_plane.images[IMG__diffuse_texture] = img_id_diffuse;
+    state.shadows.bind_plane.samplers[SMP_diffuse_texture_smp] = state.shadows.bind_cube.samplers[SMP_diffuse_texture_smp];
 
     lopgl_load_image(&(lopgl_image_request_t){
             .path = "wood.png",
@@ -223,18 +223,18 @@ void draw_cubes() {
     HMM_Mat4 translate = HMM_Translate(HMM_V3(0.f, 1.5f, 0.f));
     HMM_Mat4 scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_V3(2.f, 0.f, 1.f));
     scale = HMM_Scale(HMM_V3(.5f, .5f, .5f));
     vs_params.model = HMM_MulM4(translate, scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
     translate = HMM_Translate(HMM_V3(-1.f, 0.f, 2.f));
     HMM_Mat4 rotate = HMM_Rotate_RH(HMM_AngleDeg(60.f), HMM_NormV3(HMM_V3(1.f, 0.f, 1.f)));
     scale = HMM_Scale(HMM_V3(.25f, .25f, .25f));
     vs_params.model = HMM_MulM4(HMM_MulM4(translate, rotate), scale);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 36, 1);
 }
 
@@ -256,7 +256,7 @@ void frame(void) {
         .model = HMM_M4D(1.f)
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
     sg_draw(0, 6, 1);
 
     /* cubes */
@@ -273,7 +273,7 @@ void frame(void) {
 
     /* plane */
     sg_apply_bindings(&state.shadows.bind_plane);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+    sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
     HMM_Mat4 view = lopgl_view_matrix();
     HMM_Mat4 projection = HMM_Perspective_RH_NO(lopgl_fov(), (float)sapp_width() / (float)sapp_height(), 0.1f, 100.0f);
@@ -283,14 +283,14 @@ void frame(void) {
         .view = view
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params_shadows, &SG_RANGE(vs_params_shadows));
+    sg_apply_uniforms(UB_vs_params_shadows, &SG_RANGE(vs_params_shadows));
 
     fs_params_shadows_t fs_params_shadows = {
         .light_pos = state.light_pos,
         .view_pos = lopgl_camera_position(),
     };
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params_shadows, &SG_RANGE(fs_params_shadows));
+    sg_apply_uniforms(UB_fs_params_shadows, &SG_RANGE(fs_params_shadows));
 
     sg_draw(0, 6, 1);
 

@@ -7,7 +7,7 @@ in vec2 a_tex_coords;
 
 out vec2 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -24,8 +24,8 @@ in vec2 tex_coords;
 
 out vec4 frag_color;
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 0) uniform texture2D _diffuse_texture;
+layout(binding = 0) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
 
 void main() {
@@ -38,7 +38,7 @@ in vec3 a_pos;
 
 out vec3 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -56,8 +56,8 @@ in vec3 tex_coords;
 
 out vec4 frag_color;
 
-uniform textureCube _skybox_texture;
-uniform sampler skybox_texture_smp;
+layout(binding = 0) uniform textureCube _skybox_texture;
+layout(binding = 0) uniform sampler skybox_texture_smp;
 #define skybox_texture samplerCube(_skybox_texture, skybox_texture_smp)
 
 void main() {
@@ -67,3 +67,4 @@ void main() {
 
 @program simple vs fs
 @program skybox vs_skybox fs_skybox
+

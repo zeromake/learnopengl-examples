@@ -4,7 +4,7 @@
 @vs vs
 in vec3 aPos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -16,7 +16,7 @@ void main() {
 @end
 
 @fs fs
-uniform fs_params {
+layout(binding = 1) uniform fs_params {
     float center_x;
 };
 
@@ -31,3 +31,4 @@ void main() {
 @end
 
 @program simple vs fs
+

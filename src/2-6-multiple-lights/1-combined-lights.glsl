@@ -11,7 +11,7 @@ out vec3 frag_pos;
 out vec3 normal;
 out vec2 tex_coords;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -35,19 +35,19 @@ in vec2 tex_coords;
 
 out vec4 frag_color;
 
-uniform fs_params {
+layout(binding = 1) uniform fs_params {
     vec3 view_pos;
     float material_shininess;
 };
 
-uniform texture2D _diffuse_texture;
-uniform sampler diffuse_texture_smp;
+layout(binding = 0) uniform texture2D _diffuse_texture;
+layout(binding = 0) uniform sampler diffuse_texture_smp;
 #define diffuse_texture sampler2D(_diffuse_texture, diffuse_texture_smp)
-uniform texture2D _specular_texture;
-uniform sampler specular_texture_smp;
+layout(binding = 1) uniform texture2D _specular_texture;
+layout(binding = 1) uniform sampler specular_texture_smp;
 #define specular_texture sampler2D(_specular_texture, specular_texture_smp)
 
-uniform fs_dir_light {
+layout(binding = 2) uniform fs_dir_light {
     vec3 direction;
     vec3 ambient;
     vec3 diffuse;
@@ -57,7 +57,7 @@ uniform fs_dir_light {
 #define NR_POINT_LIGHTS 4  
 
 // using arrays of vec4 to avoid alignment issues with cross shader compilation
-uniform fs_point_lights {
+layout(binding = 3) uniform fs_point_lights {
     vec4 position[NR_POINT_LIGHTS];  
     vec4 ambient[NR_POINT_LIGHTS];
     vec4 diffuse[NR_POINT_LIGHTS];
@@ -65,7 +65,7 @@ uniform fs_point_lights {
     vec4 attenuation[NR_POINT_LIGHTS];
 } point_lights;
 
-uniform fs_spot_light {
+layout(binding = 4) uniform fs_spot_light {
     vec3 position;
     vec3 direction;
     float cut_off;
@@ -232,7 +232,7 @@ vec3 calc_spot_light(spot_light_t light, vec3 normal, vec3 frag_pos, vec3 view_d
 @vs light_cube_vs
 in vec3 a_pos;
 
-uniform vs_params {
+layout(binding = 0) uniform vs_params {
     mat4 model;
     mat4 view;
     mat4 projection;
@@ -253,3 +253,4 @@ void main() {
 
 @program phong vs fs
 @program light_cube light_cube_vs light_cube_fs
+

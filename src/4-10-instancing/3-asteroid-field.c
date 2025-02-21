@@ -62,8 +62,8 @@ static void load_obj_callback(lopgl_obj_response_t* response) {
     
     mesh->bind.vertex_buffers[0] = cube_buffer;
 
-    sg_alloc_image_smp(mesh->bind.fs, SLOT__diffuse_texture, SLOT_diffuse_texture_smp);
-    sg_image img_id = mesh->bind.fs.images[SLOT__diffuse_texture];
+    sg_alloc_image_smp(mesh->bind, IMG__diffuse_texture, SMP_diffuse_texture_smp);
+    sg_image img_id = mesh->bind.images[IMG__diffuse_texture];
 
     lopgl_load_image(&(lopgl_image_request_t){
         .path = response->mesh->materials[0].map_Kd.name,
@@ -97,8 +97,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords] = {
+                [ATTR_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_tex_coords] = {
                     .format = SG_VERTEXFORMAT_FLOAT2,
                     .offset = 24
                 }
@@ -118,8 +118,8 @@ static void init(void) {
         /* if the vertex layout doesn't have gaps, don't need to provide strides and offsets */
         .layout = {
             .attrs = {
-                [ATTR_vs_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
-                [ATTR_vs_a_tex_coords] = {
+                [ATTR_phong_a_pos].format = SG_VERTEXFORMAT_FLOAT3,
+                [ATTR_phong_a_tex_coords] = {
                     .format = SG_VERTEXFORMAT_FLOAT2,
                     .offset = 24
                 }
@@ -203,7 +203,7 @@ void frame(void) {
         HMM_Mat4 model = HMM_Translate(HMM_V3(0.f, -3.f, 0.f));
         model = HMM_MulM4(model, HMM_Scale(HMM_V3(4.f, 4.f, 4.f)));
         vs_params.model = model;
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+        sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
 
         sg_draw(0, state.planet.face_count * 3, 1);
     }
@@ -214,7 +214,7 @@ void frame(void) {
 
         for (size_t i = 0; i < ASTEROID_COUNT; ++i) {
             vs_params.model = state.rock_transforms[i];
-            sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &SG_RANGE(vs_params));
+            sg_apply_uniforms(UB_vs_params, &SG_RANGE(vs_params));
             sg_draw(0, state.rock.face_count * 3, 1);
         }
     }
