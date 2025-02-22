@@ -116,16 +116,23 @@ static void init(void) {
                 [ATTR_phong_a_tex_coords].format = SG_VERTEXFORMAT_FLOAT2
             }
         },
+        // 等价于 opengl 的
+        // glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        // glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        // glStencilMask(0xFF);
         .stencil = {
             .front = {
+                .compare = SG_COMPAREFUNC_ALWAYS, // glStencilFunc 中的 func 参数, 不清楚，front 和 back 有什么区别
                 .pass_op = SG_STENCILOP_REPLACE,
             },
             .back = {
+                .compare = SG_COMPAREFUNC_ALWAYS,
                 .pass_op = SG_STENCILOP_REPLACE,
             },
             .enabled = true,
-            .write_mask = 0xFF,
-            .ref = 0xFF,
+            .ref = 1, // glStencilFunc 中的 ref 参数
+            .read_mask = 0xFF, // glStencilFunc 中的 mask 参数
+            .write_mask = 0xFF, // 等于 opengl 的 glStencilMask
         },
         .depth = {
             .compare = SG_COMPAREFUNC_LESS,
@@ -148,8 +155,8 @@ static void init(void) {
             .enabled = false,
         },
         .depth = {
-            .compare =SG_COMPAREFUNC_LESS,
-            .write_enabled =true,
+            .compare = SG_COMPAREFUNC_LESS,
+            .write_enabled = true,
         },
         .label = "pipeline"
     });
@@ -169,16 +176,23 @@ static void init(void) {
                 .stride = 20
             }
         },
+        // 等价于 opengl 的
+        // glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        // glStencilFunc(GL_NOT_EQUAL, 1, 0xFF);
+        // glStencilMask(0x00);
         .stencil = {
             .front = {
-                .pass_op = SG_COMPAREFUNC_NOT_EQUAL,
+                .compare = SG_COMPAREFUNC_NOT_EQUAL,
+                .pass_op = SG_STENCILOP_REPLACE,
             },
             .back = {
-                .pass_op = SG_COMPAREFUNC_NOT_EQUAL,
+                .compare = SG_COMPAREFUNC_NOT_EQUAL,
+                .pass_op = SG_STENCILOP_REPLACE,
             },
             .enabled = true,
-            .write_mask = 0xFF,
-            .ref = 0xFF,
+            .read_mask = 0xFF,
+            .write_mask = 0x00,
+            .ref = 1,
         },
         .depth = {
             .compare = SG_COMPAREFUNC_ALWAYS,

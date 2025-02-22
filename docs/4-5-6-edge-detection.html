@@ -34,8 +34,6 @@ body {
 }
 .game {
     border: 1px solid #495057;
-    margin-right: auto;
-    margin-left: auto;
     width: 800px;
     height: 600px;
     overflow: hidden;
@@ -49,6 +47,11 @@ body {
     image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor;
 }
+.container {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+}
 </style>
 </head>
 <body>
@@ -57,7 +60,9 @@ body {
       <span class="game-menu-item"><a class="game-menu-link" href="https://github.com/zeromake/learnopengl-examples/tree/master/src/4-5-framebuffers/6-edge-detection.c" target="_blank">src</a></span>
       <span  class="game-menu-item"><a class="game-menu-link" href="https://github.com/zeromake/learnopengl-examples/tree/master/src/4-5-framebuffers/6-edge-detection.glsl" target="_blank">glsl</a></span>
   </div>
-  <canvas class="game" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+  <div class="container">
+    <canvas class="game" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+  </div>
   <script type="text/javascript">
     var Module = {
         preRun: [],
