@@ -219,8 +219,8 @@ void frame(void) {
     fs_spot_light_t fs_spot_light = {
         .position = lopgl_camera_position(),
         .direction = lopgl_camera_direction(),
-        .cut_off = HMM_COSF(HMM_ToRad(12.5f)),
-        .outer_cut_off = HMM_COSF(HMM_ToRad(15.0f)),
+        .cut_off = HMM_COSF(HMM_DEG_TO_RAD(12.5f)),
+        .outer_cut_off = HMM_COSF(HMM_DEG_TO_RAD(15.0f)),
         .attenuation = HMM_V3(1.0f, 0.09f, 0.032f),
         .ambient = HMM_V3(0.0f, 0.0f, 0.0f),
         .diffuse = HMM_V3(1.0f, 1.0f, 1.0f),

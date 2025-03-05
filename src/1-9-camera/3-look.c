@@ -295,7 +295,7 @@ void event(const sapp_event* e) {
         state.last_x = e->mouse_x;
         state.last_y = e->mouse_y;
 
-        float sensitivity = 0.001f;
+        float sensitivity = 0.1f;
         xoffset *= sensitivity;
         yoffset *= sensitivity;
 
@@ -310,9 +310,9 @@ void event(const sapp_event* e) {
         }
 
         HMM_Vec3 direction;
-        direction.X = cosf(HMM_ToRad(state.yaw)) * cosf(HMM_ToRad(state.pitch));
-        direction.Y = sinf(HMM_ToRad(state.pitch));
-        direction.Z = sinf(HMM_ToRad(state.yaw)) * cosf(HMM_ToRad(state.pitch));
+        direction.X = cosf(HMM_DEG_TO_RAD(state.yaw)) * cosf(HMM_DEG_TO_RAD(state.pitch));
+        direction.Y = sinf(HMM_DEG_TO_RAD(state.pitch));
+        direction.Z = sinf(HMM_DEG_TO_RAD(state.yaw)) * cosf(HMM_DEG_TO_RAD(state.pitch));
         state.camera_front = HMM_NormV3(direction);
     }
     else if (e->type == SAPP_EVENTTYPE_MOUSE_SCROLL) {

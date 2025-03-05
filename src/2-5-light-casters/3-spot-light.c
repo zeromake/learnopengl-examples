@@ -161,7 +161,7 @@ void frame(void) {
     fs_light_t fs_light = {
         .position = lopgl_camera_position(),
         .direction = lopgl_camera_direction(),
-        .cut_off = HMM_COSF(HMM_ToRad(12.5f)),
+        .cut_off = HMM_COSF(HMM_DEG_TO_RAD(12.5f)),
         .ambient = HMM_V3(0.2f, 0.2f, 0.2f),
         .diffuse = HMM_V3(0.5f, 0.5f, 0.5f),
         .specular = HMM_V3(1.0f, 1.0f, 1.0f),

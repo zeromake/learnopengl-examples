@@ -7,6 +7,9 @@
 #include "HandmadeMath.h"
 #include "../libs/fast_obj/lopgl_fast_obj.h"
 
+// 把角度转换为弧度
+#define HMM_DEG_TO_RAD(a) a * HMM_DegToRad
+
 /*
     TODO:
         - add asserts to check setup has been called
@@ -298,7 +301,7 @@ void lopgl_setup() {
         .heading = 0.f,
         .distance = 6.f,
         .zoom_speed = .5f,
-        .rotate_speed = HMM_AngleDeg(1.f),
+        .rotate_speed = 1.f,
         .min_dist = 1.f,
         .max_dist = 10.f,
         .min_pitch = -89.f,
@@ -312,7 +315,7 @@ void lopgl_setup() {
         .pitch = 0.f,
         .zoom = 45.f,
         .movement_speed = 0.005f,
-        .aim_speed = 1.f,
+        .aim_speed = 0.1f,
         .zoom_speed = .1f,
         .min_pitch = -89.f,
         .max_pitch = 89.f,
@@ -794,10 +797,10 @@ void lopgl_load_cubemap(lopgl_cubemap_request_t* request) {
 /*=== ORBITAL CAM IMPLEMENTATION ==================================================*/
 
 static void update_orbital_cam_vectors(struct orbital_cam* camera) {
-    float cos_p = cosf(HMM_ToRad(camera->polar.X));
-    float sin_p = sinf(HMM_ToRad(camera->polar.X));
-    float cos_h = cosf(HMM_ToRad(camera->polar.Y));
-    float sin_h = sinf(HMM_ToRad(camera->polar.Y));
+    float cos_p = cosf(HMM_DEG_TO_RAD(camera->polar.X));
+    float sin_p = sinf(HMM_DEG_TO_RAD(camera->polar.X));
+    float cos_h = cosf(HMM_DEG_TO_RAD(camera->polar.Y));
+    float sin_h = sinf(HMM_DEG_TO_RAD(camera->polar.Y));
     camera->position = HMM_V3(
         camera->distance * cos_p * sin_h,
         camera->distance * -sin_p,
@@ -912,9 +915,9 @@ enum camera_movement {
 static void update_fp_cam_vectors(struct fp_cam* camera) {
     // Calculate the new Front vector
     HMM_Vec3 front;
-    front.X = cosf(HMM_ToRad(camera->yaw)) * cosf(HMM_ToRad(camera->pitch));
-    front.Y = sinf(HMM_ToRad(camera->pitch));
-    front.Z = sinf(HMM_ToRad(camera->yaw)) * cosf(HMM_ToRad(camera->pitch));
+    front.X = cosf(HMM_DEG_TO_RAD(camera->yaw)) * cosf(HMM_DEG_TO_RAD(camera->pitch));
+    front.Y = sinf(HMM_DEG_TO_RAD(camera->pitch));
+    front.Z = sinf(HMM_DEG_TO_RAD(camera->yaw)) * cosf(HMM_DEG_TO_RAD(camera->pitch));
     camera->front = HMM_NormV3(front);
     // Also re-calculate the Right and Up vector
     // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
