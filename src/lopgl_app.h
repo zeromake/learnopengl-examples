@@ -439,6 +439,9 @@ HMM_Mat4 lopgl_view_matrix() {
 }
 
 float lopgl_fov() {
+    if (_lopgl.fp_enabled) {
+        return _lopgl.fp_cam.zoom;
+    }
     return 45.0f;
 }
 
